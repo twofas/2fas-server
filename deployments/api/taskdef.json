@@ -1,0 +1,76 @@
+{
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/2fas-api_ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "2fas-api",
+      "image": "<IMAGE_NAME>",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 8082,
+          "protocol": "tcp",
+          "containerPort": 8082
+        }
+      ],
+      "environmentFiles": [
+        {
+          "value": "arn:aws:s3:::2fas-production-env/api.env",
+          "type": "s3"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "MYSQL_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mysql-wi9cyz:password::"
+        },
+        {
+          "name": "MYSQL_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mysql-wi9cyz:username::"
+        },
+        {
+          "name": "MYSQL_HOST",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mysql-wi9cyz:host::"
+        },
+        {
+          "name": "MOBILE_DEBUG_AWS_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mobile-X5wmei:AWS_ACCESS_KEY_ID::"
+        },
+        {
+          "name": "MOBILE_DEBUG_AWS_SECRET_ACCESS_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mobile-X5wmei:AWS_SECRET_ACCESS_KEY::"
+        },
+        {
+          "name": "S3_USER_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:2fas_api_access_key_id::"
+        },
+        {
+          "name": "S3_USER_ACCESS_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:2fas_api_access_secret_key::"
+        },
+        {
+          "name": "ICONS_S3_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:icons_s3_access_key_id::"
+        },
+        {
+          "name": "ICONS_S3_ACCESS_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:icons_s3_access_secret_key::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group" : "/ecs/2fas-api",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "family": "2fas-api",
+  "cpu": "256",
+  "memory": "512"
+}

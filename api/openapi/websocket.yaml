@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: 2FAS Websocket API
+  version: 0.0.1
+
+servers:
+  - url: wss://ws.2fas.com/
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint.
+      tags:
+        - websocket
+      responses:
+        '200':
+          description: Application is healthy
+
+  /browser_extensions/{extensionId}:
+    get:
+      summary: Main subscription channel for browser extension.
+      tags:
+        - websocket
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Browser subscribed to channel.
+
+  /browser_extensions/{extensionId}/2fa_requests/{tokenRequestId}:
+    get:
+      summary: Subscription channel for browser extension 2fa request.
+      tags:
+        - websocket
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+        - name: tokenRequestId
+          in: path
+          required: true
+          description: The ID of browser extension 2fa request.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Browser subscribed to channel.

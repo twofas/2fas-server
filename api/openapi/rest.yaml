@@ -1,0 +1,1906 @@
+openapi: 3.0.3
+info:
+  title: 2FAS API
+  version: 0.0.1
+
+servers:
+  - url: https://api2.2fas.com/
+
+paths:
+  /browser_extensions:
+    post:
+      summary: Create browser extension.
+      tags:
+        - browser-extension
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name provided by user
+                  example: My Extension
+                browser_name:
+                  type: string
+                  description: Browser name
+                  example: Chrome
+                browser_version:
+                  type: string
+                  description: Browser name
+                  example: 89.0.1
+                public_key:
+                  type: string
+                  description: RSA Public key (base64)
+                  format: byte
+      responses:
+        '200':
+          description: A JSON array of created browser extension
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlreadyRegisteredBrowserExtension'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /browser_extensions/{extensionId}:
+    put:
+      summary: Update browser extension.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name provided by user
+                  example: My Extension
+                browser_name:
+                  type: string
+                  description: Browser name
+                  example: Chrome
+                browser_version:
+                  type: string
+                  description: Browser name
+                  example: 89.0.1
+      responses:
+        '200':
+          description: Browser extension has been updated.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /browser_extensions/{extensionId}/devices:
+    get:
+      summary: Browser extension paired devices.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtensionsPairedDevicesCollectionResponse'
+    delete:
+      summary: Remove all extension paired devices.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: All extensions paired devices has been removed.
+
+  /browser_extensions/{extensionId}/devices/{deviceId}:
+    get:
+      summary: Browser extension paired devices.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of paired device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Mobile device paired with browser extension.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserExtensionDevice'
+    delete:
+      summary: Remove paired device.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of paired device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Paired device has been removed.
+        '404':
+          description: Device could not be found.
+
+  /browser_extensions/{extensionId}/commands/request_2fa_token:
+    post:
+      summary: Request 2FA token.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain:
+                  type: string
+                  description: Webpage requesting 2FA.
+                  example: facebook.com
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtension2FaRequest'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /browser_extensions/{extensionId}/commands/store_log:
+    post:
+      summary: Store browser extension log event.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level:
+                  type: string
+                  enum:
+                    - info
+                    - warning
+                    - error
+                    - debug
+                  description: Log level.
+                message:
+                  type: string
+                  description: Log message.
+                context:
+                  type: string
+                  description: Message context json encoded.
+      responses:
+        '200':
+          description: Log has been stored.
+
+  /browser_extensions/{extensionId}/2fa_requests:
+    get:
+      summary:  Current browser extension 2fa requests.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtension2FaRequestsCollectionResponse'
+
+  /browser_extensions/{extensionId}/2fa_requests/{twoFaRequestId}:
+    get:
+      summary:  current browser extension 2fa requests.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+        - name: twoFaRequestId
+          in: path
+          required: true
+          description: The ID browser extension 2fa request.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtension2FaRequest'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /browser_extensions/{extensionId}/2fa_requests/{twoFaRequestId}/commands/close_2fa_request:
+    post:
+      summary:  Close 2fa request - 2fa token has been recevied and authentication has been proceed.
+      tags:
+        - browser-extension
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+        - name: twoFaRequestId
+          in: path
+          required: true
+          description: The ID browser extension 2fa request.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - completed
+                    - terminated
+      responses:
+        '200':
+          $ref: '#/components/schemas/BrowserExtension2FaRequest'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/web_services:
+    get:
+      summary: Get Web Services.
+      tags:
+        - mobile
+      parameters:
+        - name: issuer
+          in: query
+          required: false
+          description: Web service name.
+          schema:
+            type: string
+        - name: search
+          in: query
+          required: false
+          description: Search in name, tags, issuers.
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServicesCollectionResponse'
+
+    post:
+      summary: Create web service.
+      description: Adding service with already occupied name cause 409 response.
+      tags:
+        - mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebServicePayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServiceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /mobile/web_services/{serviceId}:
+    put:
+      summary: Update web service.
+      tags:
+        - mobile
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          description: Web service ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebServicePayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServiceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete web service.
+      tags:
+        - mobile
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          description: Web service ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    get:
+      summary: Get Web Service.
+      tags:
+        - mobile
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          description: Web service ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServiceResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/web_services/dump:
+    get:
+      summary: Get web services dump (services with icons).
+      tags:
+        - mobile
+      responses:
+        '200':
+          description: Web services dump.
+
+  /mobile/icons/collections:
+    get:
+      summary: Get icons collections.
+      tags:
+        - mobile
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsCollectionsResponse'
+
+    post:
+      summary: Create icons collection.
+      tags:
+        - mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconsCollectionPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /mobile/icons/collections/{collectionId}:
+    get:
+      summary: Get icons colletion.
+      tags:
+        - mobile
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          description: Icons collection ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsCollectionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Update icons colletion.
+      tags:
+        - mobile
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          description: Icons collection ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconsCollectionPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete icons collection.
+      tags:
+        - mobile
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          description: Web service ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/icons/requests:
+    get:
+      summary: Get icons requests.
+      tags:
+        - icon_requests
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsRequestsResponse'
+
+    post:
+      summary: Create icon request.
+      tags:
+        - icon_requests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconRequestPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/IconRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /mobile/icons/requests/{iconRequestId}:
+    get:
+      summary: Get icon request.
+      tags:
+        - icon_requests
+      parameters:
+        - name: iconRequestId
+          in: path
+          required: true
+          description: Icon request ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/IconRequestResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete icon request.
+      tags:
+        - icon_requests
+      parameters:
+        - name: iconRequestId
+          in: path
+          required: true
+          description: Icon request ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/icons/requests/{iconRequestId}/commands/update_web_service:
+    post:
+      summary: Update web service according to icon request data.
+      tags:
+        - icon_requests
+      parameters:
+        - name: iconRequestId
+          in: path
+          required: true
+          description: Icon request ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconRequestUpdateWebServicePayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServiceResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/icons/requests/{iconRequestId}/commands/transform_to_web_service:
+    post:
+      summary: Transform icon request into web service.
+      tags:
+        - icon_requests
+      parameters:
+        - name: iconRequestId
+          in: path
+          required: true
+          description: Icon request ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/WebServiceResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/icons:
+    get:
+      summary: Get icons.
+      tags:
+        - mobile
+      responses:
+        '200':
+          $ref: '#/components/responses/IconsResponse'
+
+    post:
+      summary: Create icon.
+      tags:
+        - mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/IconResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /mobile/icons/{iconId}:
+    get:
+      summary: Get icon.
+      tags:
+        - mobile
+      parameters:
+        - name: iconId
+          in: path
+          required: true
+          description: Icon ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/IconResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Update icon.
+      tags:
+        - mobile
+      parameters:
+        - name: iconId
+          in: path
+          required: true
+          description: Icon ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/IconResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete icon.
+      tags:
+        - mobile
+      parameters:
+        - name: iconId
+          in: path
+          required: true
+          description: Icon ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mobile/devices/{deviceId}/browser_extensions:
+    post:
+      summary: Pair mobile app device with browser extension.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extension_id:
+                  type: string
+                  description: ID of browser extension which has to be connected with mobile device
+                device_name:
+                  type: string
+                  description: Device name specified by user
+                device_public_key:
+                  type: string
+                  description: Device ECDH public key (base64 encoded)
+      responses:
+        '200':
+          $ref: '#/components/responses/PairingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      summary: Get all extension for mobile app.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtensionsCollectionResponse'
+
+    delete:
+      summary: Delete all mobile extensions.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Mobile extensions has been deleted.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /mobile/devices/{deviceId}/browser_extensions/{extensionId}:
+    get:
+      summary: Get extension for mobile app.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of browser extension.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A JSON array of mobile app browser extension.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserExtension'
+
+    delete:
+      summary: Delete mobile app connection with browser extension.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+
+  /mobile/devices/{deviceId}/commands/send_2fa_token:
+    post:
+      summary: Send 2FA token to Browser extension.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of mobile device.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extension_id:
+                  type: string
+                  description: ID of browser extension which has to be connected with mobile device.
+                token_request_id:
+                  type: string
+                  description: ID of token request.
+                token:
+                  type: string
+                  description: 2FA token (encrypted).
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /mobile/devices/{deviceId}/browser_extensions/2fa_requests:
+    get:
+      summary:  Pending browser extension 2fa requests.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of device.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BrowserExtension2FaRequestsCollectionResponse'
+
+  /mobile/devices:
+    post:
+      summary: Register mobile device.
+      tags:
+        - mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Device name.
+                fcm_token:
+                  type: string
+                  description: Application FCM token (push notifications).
+                platform:
+                  type: string
+                  enum:
+                    - ios
+                    - android
+                    - huawei
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileDevice'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /mobile/devices/{deviceId}:
+    put:
+      summary: Update mobile device.
+      tags:
+        - mobile
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: The ID of device.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Device name.
+                fcm_token:
+                  type: string
+                  description: Application FCM token (push notifications).
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileDevice'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /mobile/notifications:
+    post:
+      summary: Create notification for mobile devices.
+      tags:
+        - mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileNotification'
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileNotificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+    get:
+      summary: Get notifications list.
+      tags:
+        - mobile
+      parameters:
+        - name: version
+          in: query
+          required: false
+          description: Application version.
+          schema:
+            type: string
+        - name: platform
+          in: query
+          required: false
+          description: Application platform.
+          schema:
+            type: string
+        - name: published_after
+          in: query
+          required: false
+          description: Notifications published after given time.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileNotificationsCollectionResponse'
+
+  /mobile/notifications/{notificationId}:
+    get:
+      summary: Get notification.
+      tags:
+        - mobile
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          description: The ID of notification.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileNotificationResponse'
+
+    put:
+      summary: Update notification for mobile devices.
+      tags:
+        - mobile
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          description: The ID of notification.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileNotification'
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileNotificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+    delete:
+      summary: Delete notification.
+      tags:
+        - mobile
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          description: The ID of notification.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+
+  /mobile/notifications/{notificationId}/commands/publish:
+    post:
+      summary: Publish notification.
+      tags:
+        - mobile
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          description: The ID of notification.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MobileNotificationResponse'
+
+  /system/fake_error:
+    get:
+      summary: Simulate application error
+      tags:
+        - system
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /system/fake_warning:
+    get:
+      summary: Simulate warning message during runtime
+      tags:
+        - system
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+
+  /health:
+    get:
+      summary: Check if application is healthy
+      tags:
+        - system
+      responses:
+        '200':
+          description: Application is healthy
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /system/info:
+    get:
+      summary: Get system configuration (only for trusted IPs)
+      tags:
+        - system
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemInfo'
+
+  /mobile/support/debug_logs/audit/claim:
+    post:
+      summary: Create debug logs audit claim. (VPN)
+      tags:
+        - support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebugLogsAuditClaimPayload'
+      responses:
+        '200':
+          $ref: "#/components/responses/DebugLogsAuditResponse"
+
+  /mobile/support/debug_logs/audit/claim/{auditId}:
+    put:
+      summary: Update debug logs audit claim. (VPN)
+      tags:
+        - support
+      parameters:
+        - name: auditId
+          in: path
+          required: true
+          description: Audit ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebugLogsAuditClaimPayload'
+      responses:
+        '200':
+          $ref: "#/components/responses/DebugLogsAuditResponse"
+        '400':
+          $ref: "#/components/responses/BadRequestError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+
+  /mobile/support/debug_logs/audit:
+    get:
+      summary: Get debug logs audits. (VPN)
+      tags:
+        - support
+      responses:
+        '200':
+          $ref: '#/components/responses/DebugLogsAuditCollectionResponse'
+
+  /mobile/support/debug_logs/audit/{auditId}:
+    post:
+      summary: Fulfill debug logs audit claim.
+      description: Trying to add logs file for already completed claim cause 410 response same happens if claim is expired.
+      tags:
+        - support
+      parameters:
+        - name: auditId
+          in: path
+          required: true
+          description: Audit ID.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DebugLogsAuditPayload'
+      responses:
+        '200':
+          $ref: '#/components/responses/DebugLogsAuditResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '410':
+          $ref: '#/components/responses/GoneError'
+
+    delete:
+      summary: Delete debug logs audit. (VPN)
+      tags:
+        - support
+      parameters:
+        - name: auditId
+          in: path
+          required: true
+          description: Audit ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    get:
+      summary: Get audit details. (VPN)
+      tags:
+        - support
+      parameters:
+        - name: auditId
+          in: path
+          required: true
+          description: Audit ID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/DebugLogsAuditResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    Entity:
+      properties:
+        id:
+          type: string
+          format: uuid
+
+    MetaData:
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: Creation time.
+        updated_at:
+          type: string
+          format: date-time
+          description: Update time.
+
+    WebServices:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Entity'
+          - $ref: '#/components/schemas/WebService'
+
+    WebService:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        description:
+          type: string
+          description: Web service description.
+        issuers:
+          type: array
+          items:
+            format: string
+          description: Web service possible issuers.
+        tags:
+          type: array
+          items:
+            format: string
+          description: Additional web service description tags.
+        icons_collections:
+          type: array
+          items:
+            format: string
+          description: Pinned icons collections IDs.
+        match_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebServiceMatchRule'
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+        updated_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    WebServiceMatchRule:
+      properties:
+        field:
+          type: string
+          enum:
+            - issuer
+            - label
+            - account
+        text:
+          type: string
+          example: "@facebook.com"
+        matcher:
+          type: string
+          enum:
+            - contains
+            - starts_with
+            - ends_with
+            - equals
+            - regex
+        ignore_case:
+          type: boolean
+          default: true
+
+    WebServicePayload:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        description:
+          type: string
+          description: Web service description.
+        issuers:
+          type: array
+          items:
+            format: string
+          description: Web service possible issuers.
+        tags:
+          type: array
+          items:
+            format: string
+          description: Additional web service description tags.
+        icons_collections:
+          type: array
+          items:
+            format: string
+          description: Pinned icons collections IDs.
+        match_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebServiceMatchRule'
+
+    IconsCollections:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Entity'
+          - $ref: '#/components/schemas/IconsCollection'
+
+    IconsCollection:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        description:
+          type: string
+          description: Web service description.
+        icons:
+          type: array
+          items:
+            format: string
+          description: Pinned icons IDs.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+        updated_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    IconsCollectionPayload:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        description:
+          type: string
+          description: Web service description.
+        icons:
+          type: array
+          items:
+            format: string
+          description: Icons IDs.
+
+    Icons:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Entity'
+          - $ref: '#/components/schemas/Icon'
+
+    Icon:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        url:
+          type: string
+          description: Icon AWS s3 location.
+        type:
+          type: string
+          enum:
+            - light
+            - dark
+          description: Icon type for darkmode and lighmode.
+        width:
+          type: integer
+          description: Icon width.
+        height:
+          type: integer
+          description: Icon height.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+        updated_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    IconPayload:
+      properties:
+        name:
+          type: string
+          description: Web service name.
+        icon:
+          type: string
+          description: Base64 encoded PNG image file.
+        type:
+          type: string
+          enum:
+            - light
+            - dark
+          description: Icon type for darkmode and lighmode.
+
+    IconsRequests:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Entity'
+          - $ref: '#/components/schemas/IconRequest'
+
+    IconRequest:
+      properties:
+        caller_id:
+          type: string
+          description: Some caller identifier
+        service_name:
+          type: string
+          description: Web service name.
+        issuers:
+          type: array
+          items:
+            format: string
+          description: Web service possible issuers.
+        description:
+          type: string
+          description: Request description.
+        light_icon_url:
+          type: string
+          description: Base64 encoded PNG image file.
+        dark_icon_url:
+          type: string
+          description: Base64 encoded PNG image file.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+        updated_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    IconRequestPayload:
+      properties:
+        caller_id:
+          type: string
+          description: Some caller identifier
+        service_name:
+          type: string
+          description: Web service name.
+        issuers:
+          type: array
+          items:
+            format: string
+          description: Web service possible issuers.
+        description:
+          type: string
+          description: Request description.
+        light_icon:
+          type: string
+          description: Base64 encoded PNG image file.
+        dark_icon:
+          type: string
+          description: Base64 encoded PNG image file.
+
+    IconRequestUpdateWebServicePayload:
+      properties:
+        web_service_id:
+          type: string
+          description: Web service id.
+
+    DebugLogsAuditCollection:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Entity'
+          - $ref: '#/components/schemas/DebugLogsAudit'
+
+    DebugLogsAudit:
+      properties:
+        username:
+          type: string
+          description: Mobile app username.
+        description:
+          type: string
+          description: Problem description.
+        file:
+          type: string
+          description: Problem description.
+        expire_at:
+          type: string
+          format: date-time
+          description: Expiration date.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+        updated_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    DebugLogsAuditClaimPayload:
+      properties:
+        username:
+          type: string
+          description: Mobile app username.
+        description:
+          type: string
+          description: Problem description.
+
+    DebugLogsAuditPayload:
+      properties:
+        file:
+          type: string
+          description: Problem description.
+
+    MobileNotification:
+      properties:
+        icon:
+          type: string
+          enum:
+            - updates
+            - news
+            - features
+            - youtube
+          description: Notification icon (category).
+        link:
+          type: string
+          description: 2fas.com subpage with more detailed description.
+        message:
+          type: string
+          description: Notification message.
+        published_at:
+          type: string
+          format: date-time
+          description: Date of publishing.
+        platform:
+          type: string
+          enum:
+            - ios
+            - android
+            - huawei
+        version:
+          type: string
+          description: Platform version (semantic version format).
+        created_at:
+          type: string
+          format: date-time
+          description: Creation date.
+
+    DeviceAndExtensionHaveBeenPaired:
+      properties:
+        extension_id:
+          type: string
+        extension_name:
+          type: string
+        extension_public_key:
+          type: string
+
+    AlreadyRegisteredBrowserExtension:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        browser_name:
+          type: string
+        browser_version:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    BrowserExtension:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        browser_name:
+          type: string
+        browser_version:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        paired_at:
+          type: string
+
+    BrowserExtensionDevice:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        platform:
+          type: string
+        paired_at:
+          type: string
+          format: date-time
+
+    BrowserExtension2FaRequest:
+      properties:
+        extension_id:
+          type: string
+          format: uuid
+        token_request_id:
+          type: string
+          format: uuid
+        domain:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - completed
+        created_at:
+          type: string
+          format: date-time
+
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        reason:
+          type: string
+
+  responses:
+    Success:
+      description: Standard response for successful HTTP requests.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              type:
+                type: string
+              description:
+                type: string
+              message:
+                type: string
+
+    BadRequestError:
+      description: The server cannot or will not process the request, (e.g., malformed request syntax, size too large etc)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    ConflictError:
+      description: The request could not be completed due to a conflict with the current state of the target resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    NotFoundError:
+      description: The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    GoneError:
+      description: The requested resource is no longer available.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    InternalServerError:
+        description: Unexpected condition was encountered.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+
+    MobileDevice:
+      description: Registered mobile device.
+      content:
+        application/json:
+          schema:
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              platform:
+                type: string
+                enum:
+                  - ios
+                  - android
+                  - huawei
+              created_at:
+                type: string
+              updated_at:
+                type: string
+
+    SystemInfo:
+      description: System configuration
+      content:
+        application/json:
+          schema:
+            properties:
+              environment:
+                type: object
+                description: System environment variables.
+              configuration:
+                type: object
+                description: Application configuration.
+
+    BrowserExtension2FaRequest:
+      description: Browser extension 2FA token request (return only PENDING and no older than 2-3 minutes).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BrowserExtension2FaRequest'
+
+    PairingResponse:
+      description: Mobile device and extension have been paired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceAndExtensionHaveBeenPaired'
+
+    MobileNotificationsCollectionResponse:
+      description: Mobile notifications collection.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MobileNotification'
+
+    MobileNotificationResponse:
+      description: Mobile device and extension have been paired.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/MobileNotification'
+              - $ref: '#/components/schemas/MetaData'
+
+    BrowserExtensionsCollectionResponse:
+      description: Browser extensions collection.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BrowserExtension'
+
+    BrowserExtensionsPairedDevicesCollectionResponse:
+      description: Mobile devices paired with browser extension.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BrowserExtensionDevice'
+
+    BrowserExtension2FaRequestsCollectionResponse:
+      description: Current (not older than few minutes) browser extension 2fa requests.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BrowserExtension2FaRequest'
+
+    WebServiceResponse:
+      description: Web service.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WebService"
+
+    WebServicesCollectionResponse:
+      description: Web services.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Entity'
+              - $ref: '#/components/schemas/WebServices'
+
+    IconsCollectionResponse:
+      description: Icons collection.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IconsCollection"
+
+    IconsCollectionsResponse:
+      description: Icons collections.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Entity'
+              - $ref: '#/components/schemas/IconsCollections'
+
+    IconResponse:
+      description: Icon.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Icon"
+
+    IconsResponse:
+      description: Icons.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Entity'
+              - $ref: '#/components/schemas/Icons'
+
+    IconRequestResponse:
+      description: Icon request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IconRequest"
+
+    IconsRequestsResponse:
+      description: Icons requests.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Entity'
+              - $ref: '#/components/schemas/IconsRequests'
+
+    DebugLogsAuditClaimResponse:
+      description: Debug logs audit claim.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DebugLogsAudit"
+
+    DebugLogsAuditResponse:
+      description: Debug logs audit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DebugLogsAudit"
+
+    DebugLogsAuditCollectionResponse:
+      description: Icons.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Entity'
+              - $ref: '#/components/schemas/DebugLogsAuditCollection'

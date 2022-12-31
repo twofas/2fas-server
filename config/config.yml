@@ -1,0 +1,28 @@
+debug: false
+env: production
+
+aws:
+  region: "us-east-2"
+
+app:
+  url: "api:8082"
+  listen_addr: ":8082"
+
+websocket:
+  listen_addr: ":8081"
+  url: "ws://websocket:8081"
+
+redis:
+  port: 6379
+  service_url: "redis"
+  persistent_connection: "true"
+
+mobile:
+  debug:
+    directory: "2fas-mobile-debug-logs"
+    aws_profile: "2fas-mobile-debug-logs-reporter"
+    aws_region: "us-east-2"
+
+icons:
+  aws_profile: "2fas_icons"
+  s3_bucket: "2fas-icons"

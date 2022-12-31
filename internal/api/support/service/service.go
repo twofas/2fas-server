@@ -1,0 +1,105 @@
+package service
+
+import (
+	"database/sql"
+	"github.com/2fas/api/config"
+	"github.com/2fas/api/internal/api/support/adapters"
+	"github.com/2fas/api/internal/api/support/app"
+	"github.com/2fas/api/internal/api/support/app/command"
+	"github.com/2fas/api/internal/api/support/app/queries"
+	"github.com/2fas/api/internal/api/support/domain"
+	"github.com/2fas/api/internal/api/support/ports"
+	"github.com/2fas/api/internal/common/aws"
+	"github.com/2fas/api/internal/common/clock"
+	"github.com/2fas/api/internal/common/db"
+	httpsec "github.com/2fas/api/internal/common/http"
+	"github.com/2fas/api/internal/common/storage"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
+)
+
+type SupportModule struct {
+	Cqrs          *app.Cqrs
+	RoutesHandler *ports.RoutesHandler
+	Config        config.Configuration
+}
+
+func NewSupportModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate) *SupportModule {
+	queryBuilder := db.NewQueryBuilder(database)
+
+	debugLogsConfig := domain.LoadDebugLogsConfig()
+
+	var debugLogsStorage storage.FileSystemStorage
+
+	if config.IsTestingEnv() {
+		debugLogsStorage = storage.NewTmpFileSystem()
+	} else {
+		debugLogsStorage = aws.NewAwsS3(debugLogsConfig.AwsRegion, debugLogsConfig.AwsAccessKeyId, debugLogsConfig.AwsSecretAccessKey)
+	}
+
+	debugLogsAuditRepository := adapters.NewDebugLogsAuditMysqlRepository(gorm)
+
+	cqrs := &app.Cqrs{
+		Commands: app.Commands{
+			CreateDebugLogsAudit: &command.CreateDebugLogsAuditHandler{
+				DebugLogsAuditRepository: debugLogsAuditRepository,
+				FileSystem:               debugLogsStorage,
+				Config:                   debugLogsConfig,
+				Clock:                    clock.New(),
+			},
+			CreateDebugLogsAuditClain: &command.CreateDebugLogsAuditClaimHandler{
+				DebugLogsAuditRepository: debugLogsAuditRepository,
+				DebugLogsAuditConfig:     debugLogsConfig,
+				Clock:                    clock.New(),
+			},
+			UpdateDebugLogsAudit: &command.UpdateDebugLogsAuditHandler{
+				DebugLogsAuditRepository: debugLogsAuditRepository,
+			},
+			DeleteDebugLogsAudit: &command.DeleteDebugLogsAuditHandler{
+				DebugLogsAuditRepository: debugLogsAuditRepository,
+			},
+			DeleteAllDebugLogsAudit: &command.DeleteAllDebugLogsAuditHandler{
+				Database: gorm,
+				Qb:       queryBuilder,
+			},
+		},
+		Queries: app.Queries{
+			DebugLogsAuditQuery: &queries.DebugLogsAuditQueryHandler{
+				Database: gorm,
+				Qb:       queryBuilder,
+			},
+		},
+	}
+
+	routesHandler := ports.NewRoutesHandler(cqrs, validate)
+
+	module := &SupportModule{
+		Cqrs:          cqrs,
+		RoutesHandler: routesHandler,
+		Config:        config,
+	}
+
+	return module
+}
+
+func (m *SupportModule) RegisterRoutes(router *gin.Engine) {
+	// internal/admin
+	adminRouter := router.Group("/")
+	adminRouter.Use(httpsec.IPWhitelistMiddleware(m.Config.Security))
+
+	adminRouter.POST("/mobile/support/debug_logs/audit/claim", m.RoutesHandler.CreateDebugLogsAuditClaim)
+	adminRouter.PUT("/mobile/support/debug_logs/audit/claim/:audit_id", m.RoutesHandler.UpdateDebugLogsAuditClaim)
+	adminRouter.DELETE("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.DeleteDebugLogsAudit)
+	adminRouter.GET("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.GetDebugLogsAudit)
+	adminRouter.GET("/mobile/support/debug_logs/audit", m.RoutesHandler.GetDebugAllLogsAudit)
+
+	if m.Config.IsTestingEnv() {
+		adminRouter.DELETE("/mobile/support/debug_logs/audit", m.RoutesHandler.DeleteAllDebugLogsAudit)
+	}
+
+	// public
+	publicRouter := router.Group("/")
+
+	publicRouter.POST("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.CreateDebugLogsAudit)
+}

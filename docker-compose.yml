@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    depends_on:
+      - mysql
+    volumes:
+      - ./migrations:/migrations
+      - go-modules:/go/pkg/mod
+    ports:
+      - "80:8080"
+    env_file:
+      - .env
+
+  websocket:
+    build:
+      context: .
+      dockerfile: docker/websocket/Dockerfile
+    depends_on:
+      - mysql
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+
+  mysql:
+    image: mysql:8
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./docker/mysql/dev-schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - "127.0.0.1:6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  swaggerui:
+    build:
+      context: .
+      dockerfile: docker/swaggerui/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api/openapi:/usr/share/nginx/html/doc
+
+volumes:
+  go-modules:
