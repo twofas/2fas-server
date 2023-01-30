@@ -77,16 +77,23 @@ func LogCommand(command interface{}) {
 
 	commandName := reflect.TypeOf(command).Elem().Name()
 
-	customLogger.WithFields(logrus.Fields{
-		"command_name": commandName,
-		"command":      string(context),
-	}).Info("Start command " + commandName)
+	var commandAsFields logrus.Fields
+	json.Unmarshal(context, &commandAsFields)
+
+	customLogger.
+		WithFields(defaultFields).
+		WithFields(logrus.Fields{
+			"command_name": commandName,
+			"command":      commandAsFields,
+		}).Info("Start command " + commandName)
 }
 
 func LogCommandFailed(command interface{}, err error) {
 	commandName := reflect.TypeOf(command).Elem().Name()
 
-	customLogger.WithFields(logrus.Fields{
-		"reason": err.Error(),
-	}).Info("Command failed" + commandName)
+	customLogger.
+		WithFields(defaultFields).
+		WithFields(logrus.Fields{
+			"reason": err.Error(),
+		}).Info("Command failed" + commandName)
 }
