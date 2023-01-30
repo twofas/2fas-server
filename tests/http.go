@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-const DebugHttpRequests = true
+const DebugHttpRequests = false
 
 var baseUrl *url.URL
 var Auth *BasicAuth
