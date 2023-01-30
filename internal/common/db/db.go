@@ -3,8 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/2fas/api/config"
 	"github.com/go-sql-driver/mysql"
+	"github.com/twofas/2fas-server/config"
 )
 
 func NewDbConnection(conf config.Configuration) *sql.DB {

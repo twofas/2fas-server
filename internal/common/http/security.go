@@ -2,10 +2,10 @@ package http
 
 import (
 	"errors"
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/common/api"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"net/http"
 )
 

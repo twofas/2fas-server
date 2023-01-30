@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/2fas/api/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"io"
 	"io/ioutil"
 	"net"

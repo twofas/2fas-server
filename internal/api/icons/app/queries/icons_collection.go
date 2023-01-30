@@ -1,8 +1,8 @@
 package queries
 
 import (
-	"github.com/2fas/api/internal/api/icons/adapters"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )

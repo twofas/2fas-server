@@ -1,10 +1,10 @@
 package security
 
 import (
-	"github.com/2fas/api/config"
-	http2 "github.com/2fas/api/internal/common/http"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/twofas/2fas-server/config"
+	http2 "github.com/twofas/2fas-server/internal/common/http"
 	"net/http"
 	"net/http/httptest"
 	"testing"

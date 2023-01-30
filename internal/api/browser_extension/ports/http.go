@@ -1,17 +1,17 @@
 package ports
 
 import (
-	"github.com/2fas/api/internal/api/browser_extension/adapters"
-	"github.com/2fas/api/internal/api/browser_extension/app"
-	"github.com/2fas/api/internal/api/browser_extension/app/command"
-	"github.com/2fas/api/internal/api/browser_extension/app/query"
-	"github.com/2fas/api/internal/api/browser_extension/domain"
-	"github.com/2fas/api/internal/common/api"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/app"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/app/command"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/app/query"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
+	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"gorm.io/gorm"
 )
 

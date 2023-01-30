@@ -1,10 +1,10 @@
 package websocket
 
 import (
-	"github.com/2fas/api/internal/common/http"
-	"github.com/2fas/api/internal/websocket/browser_extension"
-	"github.com/2fas/api/internal/websocket/common"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/websocket/browser_extension"
+	"github.com/twofas/2fas-server/internal/websocket/common"
 )
 
 type Server struct {

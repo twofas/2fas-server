@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/2fas/api/internal/api/mobile/app/command"
-	"github.com/2fas/api/internal/api/mobile/app/queries"
+	"github.com/twofas/2fas-server/internal/api/mobile/app/command"
+	"github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 )
 
 type Commands struct {

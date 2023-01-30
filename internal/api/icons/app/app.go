@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/2fas/api/internal/api/icons/app/command"
-	"github.com/2fas/api/internal/api/icons/app/queries"
+	"github.com/twofas/2fas-server/internal/api/icons/app/command"
+	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
 )
 
 type Commands struct {

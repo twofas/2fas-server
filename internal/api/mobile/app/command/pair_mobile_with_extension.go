@@ -2,11 +2,11 @@ package command
 
 import (
 	"fmt"
-	"github.com/2fas/api/internal/api/browser_extension/domain"
-	"github.com/2fas/api/internal/api/mobile/adapters"
-	mobile_domain "github.com/2fas/api/internal/api/mobile/domain"
-	"github.com/2fas/api/internal/common/websocket"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
+	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
+	mobile_domain "github.com/twofas/2fas-server/internal/api/mobile/domain"
+	"github.com/twofas/2fas-server/internal/common/websocket"
 )
 
 type BrowserExtensionHasBeenPairedWithDevice struct {

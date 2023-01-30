@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/api/health/ports"
-	"github.com/2fas/api/internal/common/http"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/api/health/ports"
+	"github.com/twofas/2fas-server/internal/common/http"
 )
 
 type HealthModule struct {

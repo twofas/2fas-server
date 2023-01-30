@@ -2,10 +2,10 @@ package tests
 
 import (
 	"fmt"
-	"github.com/2fas/api/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/tests"
 	"testing"
 )
 

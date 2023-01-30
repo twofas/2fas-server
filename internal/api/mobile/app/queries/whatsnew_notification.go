@@ -1,8 +1,8 @@
 package query
 
 import (
-	"github.com/2fas/api/internal/api/mobile/adapters"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"gorm.io/gorm"
 )
 

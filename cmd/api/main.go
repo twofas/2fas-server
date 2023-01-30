@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/api"
-	"github.com/2fas/api/internal/common/http"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/api"
+	"github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 func main() {

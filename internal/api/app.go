@@ -2,17 +2,17 @@ package api
 
 import (
 	"errors"
-	"github.com/2fas/api/config"
-	extension "github.com/2fas/api/internal/api/browser_extension/service"
-	health "github.com/2fas/api/internal/api/health/service"
-	icons "github.com/2fas/api/internal/api/icons/service"
-	mobile "github.com/2fas/api/internal/api/mobile/service"
-	support "github.com/2fas/api/internal/api/support/service"
-	"github.com/2fas/api/internal/common/api"
-	"github.com/2fas/api/internal/common/db"
-	"github.com/2fas/api/internal/common/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/twofas/2fas-server/config"
+	extension "github.com/twofas/2fas-server/internal/api/browser_extension/service"
+	health "github.com/twofas/2fas-server/internal/api/health/service"
+	icons "github.com/twofas/2fas-server/internal/api/icons/service"
+	mobile "github.com/twofas/2fas-server/internal/api/mobile/service"
+	support "github.com/twofas/2fas-server/internal/api/support/service"
+	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/db"
+	"github.com/twofas/2fas-server/internal/common/redis"
 )
 
 var validate *validator.Validate

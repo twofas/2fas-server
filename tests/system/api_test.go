@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"github.com/2fas/api/tests"
 	"github.com/stretchr/testify/assert"
+	"github.com/twofas/2fas-server/tests"
 	"io/ioutil"
 	"testing"
 )

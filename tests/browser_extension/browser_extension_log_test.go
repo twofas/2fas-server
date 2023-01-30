@@ -2,9 +2,9 @@ package tests
 
 import (
 	"encoding/json"
-	"github.com/2fas/api/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/twofas/2fas-server/tests"
 	"testing"
 )
 

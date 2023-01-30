@@ -2,7 +2,7 @@ package adapters
 
 import (
 	"fmt"
-	"github.com/2fas/api/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
 )
 

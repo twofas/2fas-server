@@ -2,18 +2,18 @@ package service
 
 import (
 	"database/sql"
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/api/icons/adapters"
-	"github.com/2fas/api/internal/api/icons/app"
-	"github.com/2fas/api/internal/api/icons/app/command"
-	"github.com/2fas/api/internal/api/icons/app/queries"
-	"github.com/2fas/api/internal/api/icons/ports"
-	"github.com/2fas/api/internal/common/aws"
-	"github.com/2fas/api/internal/common/db"
-	httpsec "github.com/2fas/api/internal/common/http"
-	"github.com/2fas/api/internal/common/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
+	"github.com/twofas/2fas-server/internal/api/icons/app"
+	"github.com/twofas/2fas-server/internal/api/icons/app/command"
+	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
+	"github.com/twofas/2fas-server/internal/api/icons/ports"
+	"github.com/twofas/2fas-server/internal/common/aws"
+	"github.com/twofas/2fas-server/internal/common/db"
+	httpsec "github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/storage"
 	"gorm.io/gorm"
 )
 

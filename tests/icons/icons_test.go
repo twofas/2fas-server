@@ -2,11 +2,11 @@ package tests
 
 import (
 	"encoding/base64"
-	query "github.com/2fas/api/internal/api/icons/app/queries"
-	"github.com/2fas/api/tests"
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	query "github.com/twofas/2fas-server/internal/api/icons/app/queries"
+	"github.com/twofas/2fas-server/tests"
 	"io/ioutil"
 	"testing"
 )

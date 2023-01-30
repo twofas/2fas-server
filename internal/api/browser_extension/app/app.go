@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/2fas/api/internal/api/browser_extension/app/command"
-	"github.com/2fas/api/internal/api/browser_extension/app/query"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/app/command"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/app/query"
 )
 
 type Commands struct {

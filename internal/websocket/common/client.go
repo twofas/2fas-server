@@ -2,8 +2,8 @@ package common
 
 import (
 	"bytes"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gorilla/websocket"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"time"
 )
 

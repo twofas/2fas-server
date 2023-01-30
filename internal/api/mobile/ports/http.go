@@ -2,17 +2,17 @@ package ports
 
 import (
 	"errors"
-	browser_adapters "github.com/2fas/api/internal/api/browser_extension/adapters"
-	"github.com/2fas/api/internal/api/mobile/adapters"
-	"github.com/2fas/api/internal/api/mobile/app"
-	"github.com/2fas/api/internal/api/mobile/app/command"
-	"github.com/2fas/api/internal/api/mobile/app/queries"
-	"github.com/2fas/api/internal/api/mobile/domain"
-	"github.com/2fas/api/internal/common/api"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	browser_adapters "github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
+	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
+	"github.com/twofas/2fas-server/internal/api/mobile/app"
+	"github.com/twofas/2fas-server/internal/api/mobile/app/command"
+	"github.com/twofas/2fas-server/internal/api/mobile/app/queries"
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
+	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 type RoutesHandler struct {

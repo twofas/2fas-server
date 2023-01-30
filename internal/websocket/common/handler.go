@@ -1,9 +1,9 @@
 package common
 
 import (
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"net/http"
 	"os"
 	"time"

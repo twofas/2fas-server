@@ -3,8 +3,8 @@ package adapters
 import (
 	"errors"
 	"fmt"
-	"github.com/2fas/api/internal/api/icons/domain"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
 )
 

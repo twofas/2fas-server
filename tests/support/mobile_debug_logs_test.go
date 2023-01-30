@@ -2,12 +2,12 @@ package tests
 
 import (
 	"bytes"
-	query "github.com/2fas/api/internal/api/support/app/queries"
-	"github.com/2fas/api/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	query "github.com/twofas/2fas-server/internal/api/support/app/queries"
+	"github.com/twofas/2fas-server/tests"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"

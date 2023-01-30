@@ -1,8 +1,8 @@
 package command
 
 import (
-	"github.com/2fas/api/internal/api/mobile/domain"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 
 type UpdateMobileDevice struct {

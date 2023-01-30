@@ -1,8 +1,8 @@
 package browser_extension
 
 import (
-	"github.com/2fas/api/internal/websocket/common"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/internal/websocket/common"
 )
 
 type RoutesHandler struct {

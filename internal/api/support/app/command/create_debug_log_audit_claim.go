@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/2fas/api/internal/api/support/domain"
-	"github.com/2fas/api/internal/common/clock"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/support/domain"
+	"github.com/twofas/2fas-server/internal/common/clock"
 )
 
 type CreateDebugLogsAuditClaim struct {

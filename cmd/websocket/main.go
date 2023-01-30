@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/common/logging"
-	"github.com/2fas/api/internal/websocket"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/websocket"
 )
 
 func main() {

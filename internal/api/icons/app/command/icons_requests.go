@@ -2,11 +2,11 @@ package command
 
 import (
 	"encoding/json"
-	"github.com/2fas/api/internal/api/icons/domain"
-	"github.com/2fas/api/internal/common/logging"
-	"github.com/2fas/api/internal/common/storage"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/storage"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"image/png"

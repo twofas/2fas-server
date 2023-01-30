@@ -2,9 +2,9 @@ package command
 
 import (
 	"encoding/json"
-	"github.com/2fas/api/internal/api/browser_extension/domain"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 type StoreLogEvent struct {

@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/2fas/api/config"
-	"github.com/2fas/api/internal/common/db"
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/common/db"
 	"log"
 	"os"
 

@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/2fas/api/internal/api/support/domain"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"gorm.io/gorm"
 )
 

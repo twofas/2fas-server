@@ -3,7 +3,7 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/2fas/api/internal/common/crypto"
+	"github.com/twofas/2fas-server/internal/common/crypto"
 	"testing"
 )
 

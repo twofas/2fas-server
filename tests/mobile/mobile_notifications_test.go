@@ -1,11 +1,11 @@
 package tests
 
 import (
-	query "github.com/2fas/api/internal/api/mobile/app/queries"
-	"github.com/2fas/api/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
+	"github.com/twofas/2fas-server/tests"
 	"testing"
 )
 

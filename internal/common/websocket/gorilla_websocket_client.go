@@ -2,9 +2,9 @@ package websocket
 
 import (
 	"encoding/json"
-	app_http "github.com/2fas/api/internal/common/http"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gorilla/websocket"
+	app_http "github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"net/http"
 	"net/url"
 	"path"

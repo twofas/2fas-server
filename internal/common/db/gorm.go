@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"github.com/2fas/api/config"
+	"github.com/twofas/2fas-server/config"
 	"gorm.io/gorm/logger"
 
 	gosql "github.com/go-sql-driver/mysql"

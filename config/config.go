@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/spf13/viper"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"os"
 	"strings"
 )

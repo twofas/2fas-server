@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"github.com/2fas/api/internal/common/logging"
-	"github.com/2fas/api/internal/common/storage"
+	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/storage"
 	"os"
 )
 

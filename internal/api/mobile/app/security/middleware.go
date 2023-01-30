@@ -3,9 +3,9 @@ package security
 import (
 	"context"
 	"fmt"
-	"github.com/2fas/api/internal/common/logging"
-	"github.com/2fas/api/internal/common/rate_limit"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/rate_limit"
 	"strings"
 	"time"
 )

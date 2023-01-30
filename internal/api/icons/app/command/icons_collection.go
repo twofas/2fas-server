@@ -2,9 +2,9 @@ package command
 
 import (
 	"encoding/json"
-	domain2 "github.com/2fas/api/internal/api/icons/domain"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
+	domain2 "github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )

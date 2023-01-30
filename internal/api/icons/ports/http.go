@@ -3,16 +3,16 @@ package ports
 import (
 	"errors"
 	"fmt"
-	"github.com/2fas/api/internal/api/icons/adapters"
-	"github.com/2fas/api/internal/api/icons/app"
-	"github.com/2fas/api/internal/api/icons/app/command"
-	"github.com/2fas/api/internal/api/icons/app/queries"
-	"github.com/2fas/api/internal/api/icons/domain"
-	"github.com/2fas/api/internal/common/api"
-	"github.com/2fas/api/internal/common/logging"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
+	"github.com/twofas/2fas-server/internal/api/icons/app"
+	"github.com/twofas/2fas-server/internal/api/icons/app/command"
+	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 type RoutesHandler struct {
