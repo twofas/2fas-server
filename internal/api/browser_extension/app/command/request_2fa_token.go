@@ -2,7 +2,7 @@ package command
 
 import (
 	"context"
-	"firebase.google.com/go/messaging"
+	"firebase.google.com/go/v4/messaging"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

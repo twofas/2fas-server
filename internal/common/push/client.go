@@ -3,8 +3,8 @@ package push
 import (
 	"context"
 	"encoding/json"
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"google.golang.org/api/option"

@@ -3,12 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/pressly/goose/v3"
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/common/db"
 	"log"
 	"os"
-
-	"github.com/pressly/goose"
 )
 
 const dialect = "mysql"
