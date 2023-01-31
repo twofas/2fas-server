@@ -1,6 +1,6 @@
 [
     {
-        "package": "cloud.google.com/go",
+        "package": "cloud.google.com/go/compute/metadata",
         "license": "Apache-2.0"
     },
     {
@@ -8,11 +8,27 @@
         "license": "Apache-2.0"
     },
     {
+        "package": "cloud.google.com/go/iam",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "cloud.google.com/go/internal",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "cloud.google.com/go/longrunning/autogen/longrunningpb",
+        "license": "Apache-2.0"
+    },
+    {
         "package": "cloud.google.com/go/storage",
         "license": "Apache-2.0"
     },
     {
-        "package": "firebase.google.com/go",
+        "package": "firebase.google.com/go/v4",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/MicahParks/keyfunc",
         "license": "Apache-2.0"
     },
     {
@@ -72,6 +88,10 @@
         "license": "MPL-2.0"
     },
     {
+        "package": "github.com/golang-jwt/jwt/v4",
+        "license": "MIT"
+    },
+    {
         "package": "github.com/golang/groupcache/lru",
         "license": "Apache-2.0"
     },
@@ -86,6 +106,10 @@
     {
         "package": "github.com/google/uuid",
         "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/googleapis/enterprise-certificate-proxy/client",
+        "license": "Apache-2.0"
     },
     {
         "package": "github.com/googleapis/gax-go/v2",
@@ -128,8 +152,8 @@
         "license": "MIT"
     },
     {
-        "package": "github.com/pelletier/go-toml",
-        "license": "Apache-2.0"
+        "package": "github.com/pelletier/go-toml/v2",
+        "license": "MIT"
     },
     {
         "package": "github.com/pkg/errors",
@@ -188,11 +212,23 @@
         "license": "BSD-3-Clause"
     },
     {
-        "package": "golang.org/x/sys",
+        "package": "golang.org/x/sync/semaphore",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/sys/unix",
         "license": "BSD-3-Clause"
     },
     {
         "package": "golang.org/x/text",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/time/rate",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/xerrors",
         "license": "BSD-3-Clause"
     },
     {
@@ -204,7 +240,7 @@
         "license": "BSD-3-Clause"
     },
     {
-        "package": "google.golang.org/genproto/googleapis",
+        "package": "google.golang.org/genproto",
         "license": "Apache-2.0"
     },
     {
@@ -222,6 +258,10 @@
     {
         "package": "gopkg.in/yaml.v2",
         "license": "Apache-2.0"
+    },
+    {
+        "package": "gopkg.in/yaml.v3",
+        "license": "MIT"
     },
     {
         "package": "gorm.io/datatypes",
