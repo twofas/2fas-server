@@ -174,5 +174,7 @@ func (m *IconsModule) RegisterRoutes(router *gin.Engine) {
 	publicRouter.GET("/mobile/icons/collections/:collection_id", m.RoutesHandler.FindIconsCollection)
 	publicRouter.GET("/mobile/icons/collections", m.RoutesHandler.FindAllIconsCollection)
 
-	publicRouter.POST("/mobile/icons/requests", m.RoutesHandler.CreateIconRequest)
+	publicRouter.
+		Use(httpsec.BodySizeLimitMiddleware(64*1000)).
+		POST("/mobile/icons/requests", m.RoutesHandler.CreateIconRequest)
 }

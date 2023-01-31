@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"net/http"
 )
 
 const (
@@ -41,5 +42,13 @@ func CorrelationIdMiddleware() gin.HandlerFunc {
 		logging.WithDefaultField(CorrelationIdKey, CorrelationId)
 
 		c.Set(CorrelationIdKey, CorrelationId)
+	}
+}
+
+func BodySizeLimitMiddleware(requestBytesLimit int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var w http.ResponseWriter = c.Writer
+
+		c.Request.Body = http.MaxBytesReader(w, c.Request.Body, requestBytesLimit)
 	}
 }
