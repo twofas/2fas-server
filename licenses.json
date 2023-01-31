@@ -1,0 +1,238 @@
+[
+    {
+        "package": "cloud.google.com/go",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "cloud.google.com/go/firestore",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "cloud.google.com/go/storage",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "firebase.google.com/go",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/aws/aws-sdk-go",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/aws/aws-sdk-go/internal/sync/singleflight",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/cespare/xxhash/v2",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/dgryski/go-rendezvous",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/doug-martin/goqu/v9",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/fsnotify/fsnotify",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/gin-contrib/cors",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/gin-contrib/sse",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/gin-gonic/gin",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/go-playground/locales",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/go-playground/universal-translator",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/go-playground/validator/v10",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/go-redis/redis/v8",
+        "license": "BSD-2-Clause"
+    },
+    {
+        "package": "github.com/go-sql-driver/mysql",
+        "license": "MPL-2.0"
+    },
+    {
+        "package": "github.com/golang/groupcache/lru",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/golang/protobuf",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/google/go-cmp/cmp",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/google/uuid",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/googleapis/gax-go/v2",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/gorilla/websocket",
+        "license": "BSD-2-Clause"
+    },
+    {
+        "package": "github.com/hashicorp/hcl",
+        "license": "MPL-2.0"
+    },
+    {
+        "package": "github.com/jinzhu/inflection",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/jinzhu/now",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/jmespath/go-jmespath",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/leodido/go-urn",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/magiconair/properties",
+        "license": "BSD-2-Clause"
+    },
+    {
+        "package": "github.com/mattn/go-isatty",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/mitchellh/mapstructure",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/pelletier/go-toml",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/pkg/errors",
+        "license": "BSD-2-Clause"
+    },
+    {
+        "package": "github.com/sirupsen/logrus",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/spf13/afero",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "github.com/spf13/cast",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/spf13/jwalterweatherman",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/spf13/pflag",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "github.com/spf13/viper",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/subosito/gotenv",
+        "license": "MIT"
+    },
+    {
+        "package": "github.com/twofas/2fas-server",
+        "license": "GPL-3.0"
+    },
+    {
+        "package": "github.com/ugorji/go/codec",
+        "license": "MIT"
+    },
+    {
+        "package": "go.opencensus.io",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "golang.org/x/crypto/sha3",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/net",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/oauth2",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/sys",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "golang.org/x/text",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "google.golang.org/api",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "google.golang.org/api/internal/third_party/uritemplates",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "google.golang.org/genproto/googleapis",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "google.golang.org/grpc",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "google.golang.org/protobuf",
+        "license": "BSD-3-Clause"
+    },
+    {
+        "package": "gopkg.in/ini.v1",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "gopkg.in/yaml.v2",
+        "license": "Apache-2.0"
+    },
+    {
+        "package": "gorm.io/datatypes",
+        "license": "MIT"
+    },
+    {
+        "package": "gorm.io/driver/mysql",
+        "license": "MIT"
+    },
+    {
+        "package": "gorm.io/gorm",
+        "license": "MIT"
+    }
+]
