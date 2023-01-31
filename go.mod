@@ -1,6 +1,6 @@
 module github.com/twofas/2fas-server
 
-go 1.15
+go 1.19
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
