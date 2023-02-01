@@ -39,6 +39,11 @@ func (h *ConnectionHandler) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		channel := c.Request.URL.Path
 
+		logging.WithDefaultField("channel", channel)
+		logging.WithDefaultField("ip", c.ClientIP())
+
+		logging.Info("New channel subscriber")
+
 		hub := h.getHub(channel)
 
 		h.serveWs(hub, c.Writer, c.Request)
@@ -71,10 +76,13 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 	go client.readPump()
 
 	go func() {
-		<-time.After(time.Duration(3) * time.Minute)
+		disconnectAfter := time.Duration(3) * time.Minute
+
+		<-time.After(disconnectAfter)
 
 		defer func() {
-			logging.Debug("Disconnect websocket client")
+			logging.Info("Connection closed after", disconnectAfter, "minutes")
+
 			client.hub.unregister <- client
 			client.conn.Close()
 		}()

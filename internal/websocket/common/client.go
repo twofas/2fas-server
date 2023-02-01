@@ -67,6 +67,10 @@ func (c *Client) readPump() {
 				logging.WithFields(logging.Fields{
 					"reason": err.Error(),
 				}).Error("Websocket connection closed unexpected")
+			} else {
+				logging.WithFields(logging.Fields{
+					"reason": err.Error(),
+				}).Info("Connection closed")
 			}
 
 			break
