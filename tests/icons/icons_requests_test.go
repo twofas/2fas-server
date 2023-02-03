@@ -30,6 +30,7 @@ func (s *IconsRequestsTestSuite) TestCreateIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	assert.Equal(s.T(), "service", iconRequest.ServiceName)
+	assert.Equal(s.T(), "desc", iconRequest.Description)
 }
 
 func (s *IconsRequestsTestSuite) TestDeleteIconRequest() {

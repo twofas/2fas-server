@@ -18,7 +18,7 @@ type CreateIconRequest struct {
 	CallerId    string   `json:"caller_id" validate:"required,max=128"`
 	ServiceName string   `json:"service_name" validate:"required,max=128"`
 	Issuers     []string `json:"issuers" validate:"required,max=128"`
-	Description string   `json:"name" validate:"omitempty,max=512"`
+	Description string   `json:"description" validate:"omitempty,max=512"`
 	LightIcon   string   `json:"light_icon" validate:"required,base64"`
 	DarkIcon    string   `json:"dark_icon" validate:"omitempty,base64"`
 }
