@@ -41,38 +41,55 @@ func WithDefaultField(key, value string) *logrus.Logger {
 }
 
 func Info(args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	customLogger.WithFields(defaultFields).Info(args)
 }
 
 func Error(args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	customLogger.WithFields(defaultFields).Error(args)
 }
 
 func Warning(args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	customLogger.WithFields(defaultFields).Warning(args)
 }
 
-func Debug(args ...interface{}) {
-	customLogger.WithFields(defaultFields).Debug(args)
-}
-
 func Fatal(args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	customLogger.WithFields(defaultFields).Fatal(args)
 }
 
 func WithField(key string, value interface{}) *logrus.Entry {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	return customLogger.
-		WithField(key, value).
-		WithFields(defaultFields)
+		WithFields(defaultFields).
+		WithField(key, value)
 }
 
 func WithFields(fields Fields) *logrus.Entry {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	return customLogger.
 		WithFields(logrus.Fields(fields)).
 		WithFields(defaultFields)
 }
 
 func LogCommand(command interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	context, _ := json.Marshal(command)
 
 	commandName := reflect.TypeOf(command).Elem().Name()
@@ -89,6 +106,9 @@ func LogCommand(command interface{}) {
 }
 
 func LogCommandFailed(command interface{}, err error) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
 	commandName := reflect.TypeOf(command).Elem().Name()
 
 	customLogger.
