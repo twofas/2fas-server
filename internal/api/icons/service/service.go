@@ -158,7 +158,6 @@ func (m *IconsModule) RegisterRoutes(router *gin.Engine) {
 	adminRouter.POST("/mobile/icons/requests/:icon_request_id/commands/update_web_service", m.RoutesHandler.UpdateWebServiceFromIconRequest)
 	adminRouter.POST("/mobile/icons/requests/:icon_request_id/commands/transform_to_web_service", m.RoutesHandler.TransformToWebService)
 	adminRouter.GET("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.FindIconRequest)
-	adminRouter.GET("/mobile/icons/requests", m.RoutesHandler.FindAllIconsRequests)
 
 	// public
 	publicRouter := router.Group("/")
@@ -177,4 +176,6 @@ func (m *IconsModule) RegisterRoutes(router *gin.Engine) {
 	publicRouter.
 		Use(httpsec.BodySizeLimitMiddleware(64*1000)).
 		POST("/mobile/icons/requests", m.RoutesHandler.CreateIconRequest)
+
+	publicRouter.GET("/mobile/icons/requests", m.RoutesHandler.FindAllIconsRequests)
 }
