@@ -33,6 +33,34 @@ func (s *IconsRequestsTestSuite) TestCreateIconRequest() {
 	assert.Equal(s.T(), "desc", iconRequest.Description)
 }
 
+func (s *IconsRequestsTestSuite) TestCreateIconRequestWithNotAllowedIconDimensions() {
+	img := faker.New().Image().Image(120, 60)
+
+	pngImg, err := ioutil.ReadFile(img.Name())
+
+	if err != nil {
+		s.T().Error(err)
+	}
+
+	iconBase64Encoded := base64.StdEncoding.EncodeToString(pngImg)
+
+	payload := []byte(`
+		{
+			"caller_id":"some-caller-uniq-name",
+			"service_name":"some-service",
+			"issuers": ["fb"],
+			"description":"desc",
+			"light_icon":"` + iconBase64Encoded + `"
+		}
+	`)
+
+	var iconRequest *queries.IconRequestPresenter
+
+	response := tests.DoPost("mobile/icons/requests", payload, &iconRequest)
+
+	assert.Equal(s.T(), 400, response.StatusCode)
+}
+
 func (s *IconsRequestsTestSuite) TestDeleteIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 

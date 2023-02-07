@@ -50,7 +50,7 @@ func processB64PngImage(b64Img string) (image.Image, io.Reader, error) {
 
 func validateImage(img image.Image) error {
 	imageWidth := img.Bounds().Dx()
-	imageHeight := img.Bounds().Dx()
+	imageHeight := img.Bounds().Dy()
 
 	validDimensions := []*image.Point{
 		{X: 120, Y: 120},
