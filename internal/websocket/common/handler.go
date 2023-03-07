@@ -76,15 +76,15 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 	go client.readPump()
 
 	go func() {
-		disconnectAfter := time.Duration(3) * time.Minute
+		disconnectAfter := 3 * time.Minute
+		timeout := time.After(disconnectAfter)
 
-		<-time.After(disconnectAfter)
-
-		defer func() {
+		select {
+		case <-timeout:
 			logging.Info("Connection closed after", disconnectAfter)
 
 			client.hub.unregister <- client
 			client.conn.Close()
-		}()
+		}
 	}()
 }
