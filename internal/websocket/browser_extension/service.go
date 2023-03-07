@@ -16,10 +16,8 @@ func NewRoutesHandler(handler *common.ConnectionHandler) *RoutesHandler {
 }
 
 func GinRoutesHandler(routes *RoutesHandler, router *gin.Engine) {
-	connectionHandler := routes.connectionHandler.Handle()
-
-	router.GET("/browser_extensions/:extension_id", connectionHandler)
-	router.GET("/browser_extensions/:extension_id/2fa_requests/:token_request_id", connectionHandler)
+	router.GET("/browser_extensions/:extension_id", routes.connectionHandler.Handler())
+	router.GET("/browser_extensions/:extension_id/2fa_requests/:token_request_id", routes.connectionHandler.Handler())
 
 	router.GET("/health", func(c *gin.Context) {
 		c.String(200, "")

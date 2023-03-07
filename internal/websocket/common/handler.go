@@ -35,7 +35,7 @@ func NewConnectionHandler() *ConnectionHandler {
 	}
 }
 
-func (h *ConnectionHandler) Handle() gin.HandlerFunc {
+func (h *ConnectionHandler) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		channel := c.Request.URL.Path
 
@@ -81,7 +81,7 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 		<-time.After(disconnectAfter)
 
 		defer func() {
-			logging.Info("Connection closed after", disconnectAfter, "minutes")
+			logging.Info("Connection closed after", disconnectAfter)
 
 			client.hub.unregister <- client
 			client.conn.Close()
