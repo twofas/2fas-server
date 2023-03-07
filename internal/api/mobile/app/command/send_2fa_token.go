@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
@@ -59,7 +60,13 @@ func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
 	message := NewSend2FaTokenWebsocketMessage(cmd.ExtensionId, cmd.DeviceId, cmd.Token, cmd.TokenRequestId)
 
 	uri := fmt.Sprintf("browser_extensions/%s/2fa_requests/%s", browserExtension.Id.String(), cmd.TokenRequestId)
-	err = h.WebsocketClient.SendMessage(uri, message)
+
+	err = retry.Do(
+		func() error {
+			return h.WebsocketClient.SendMessage(uri, message)
+		},
+		retry.Attempts(5),
+	)
 
 	if err != nil {
 		logging.WithFields(logging.Fields{
