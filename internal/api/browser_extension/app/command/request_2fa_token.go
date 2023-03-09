@@ -4,6 +4,7 @@ import (
 	"context"
 	"firebase.google.com/go/v4/messaging"
 	"fmt"
+	"github.com/avast/retry-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
@@ -94,7 +95,12 @@ func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
 			notification = createPushNotificationForIos(device.FcmToken, data)
 		}
 
-		err = h.Pusher.Send(context.Background(), notification)
+		err = retry.Do(
+			func() error {
+				return h.Pusher.Send(context.Background(), notification)
+			},
+			retry.Attempts(5),
+		)
 
 		if err != nil && !messaging.IsRegistrationTokenNotRegistered(err) {
 			logging.WithFields(logging.Fields{
