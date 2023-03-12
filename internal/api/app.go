@@ -13,6 +13,7 @@ import (
 	"github.com/twofas/2fas-server/internal/common/api"
 	"github.com/twofas/2fas-server/internal/common/db"
 	"github.com/twofas/2fas-server/internal/common/redis"
+	"github.com/twofas/2fas-server/internal/common/validation"
 )
 
 var validate *validator.Validate
@@ -38,11 +39,13 @@ func NewApplication(config config.Configuration) *Application {
 	database := db.NewDbConnection(config)
 	redisClient := redis.New(config.Redis.ServiceUrl, config.Redis.Port)
 
+	validate.RegisterValidation("not_blank", validation.NotBlank)
+
 	modules := []Module{
 		health.NewHealthModule(config, redisClient),
 		support.NewSupportModule(config, gorm, database, validate),
 		icons.NewIconsModule(config, gorm, database, validate),
-		extension.NewBrowserExtensionModule(config, gorm, database, redisClient),
+		extension.NewBrowserExtensionModule(config, gorm, database, redisClient, validate),
 		mobile.NewMobileModule(config, gorm, database, validate, redisClient),
 	}
 

@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v8"
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
@@ -27,7 +28,13 @@ type BrowserExtensionModule struct {
 	Config        config.Configuration
 }
 
-func NewBrowserExtensionModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, redisClient *redis.Client) *BrowserExtensionModule {
+func NewBrowserExtensionModule(
+	config config.Configuration,
+	gorm *gorm.DB,
+	database *sql.DB,
+	redisClient *redis.Client,
+	validate *validator.Validate,
+) *BrowserExtensionModule {
 	queryBuilder := db.NewQueryBuilder(database)
 
 	browserExtensionsMysqlRepository := adapters.NewBrowserExtensionsMysqlRepository(gorm)
@@ -102,7 +109,7 @@ func NewBrowserExtensionModule(config config.Configuration, gorm *gorm.DB, datab
 		},
 	}
 
-	routesHandler := ports.NewRoutesHandler(cqrs)
+	routesHandler := ports.NewRoutesHandler(cqrs, validate)
 
 	module := &BrowserExtensionModule{
 		Cqrs:          cqrs,

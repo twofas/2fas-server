@@ -1,10 +1,13 @@
 package tests
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/internal/common/crypto"
 	"github.com/twofas/2fas-server/tests"
+	"net/http"
 	"testing"
 )
 
@@ -18,6 +21,28 @@ type BrowserExtensionTestSuite struct {
 
 func (s *BrowserExtensionTestSuite) SetupTest() {
 	tests.DoSuccessDelete(s.T(), "/browser_extensions")
+}
+
+func (s *BrowserExtensionTestSuite) TestCreateBrowserExtension() {
+	type testCase struct {
+		extensionName    string
+		expectedHttpCode int
+	}
+
+	testsCases := []testCase{
+		{extensionName: "", expectedHttpCode: 400},
+		{extensionName: " ", expectedHttpCode: 400},
+		{extensionName: "   ", expectedHttpCode: 400},
+		{extensionName: "abc", expectedHttpCode: 200},
+		{extensionName: "efg ", expectedHttpCode: 200},
+		{extensionName: " ab123 ", expectedHttpCode: 200},
+	}
+
+	for _, tc := range testsCases {
+		response := createBrowserExtension(tc.extensionName)
+
+		assert.Equal(s.T(), tc.expectedHttpCode, response.StatusCode)
+	}
 }
 
 func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtension() {
@@ -48,4 +73,15 @@ func (s *BrowserExtensionTestSuite) TestDoNotFindNotExistingExtension() {
 	response := tests.DoGet("/browser_extensions/"+notExistingId.String(), &browserExtension)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
+}
+
+func createBrowserExtension(name string) *http.Response {
+	keyPair := crypto.GenerateKeyPair(2048)
+
+	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
+
+	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, pubKey))
+
+	return tests.DoPost("/browser_extensions", payload, nil)
+
 }

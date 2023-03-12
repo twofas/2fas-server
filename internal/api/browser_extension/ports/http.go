@@ -20,9 +20,7 @@ type RoutesHandler struct {
 	validator *validator.Validate
 }
 
-func NewRoutesHandler(cqrs *app.Cqrs) *RoutesHandler {
-	validate := validator.New()
-
+func NewRoutesHandler(cqrs *app.Cqrs, validate *validator.Validate) *RoutesHandler {
 	return &RoutesHandler{
 		cqrs:      cqrs,
 		validator: validate,
