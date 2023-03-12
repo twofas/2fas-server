@@ -7,7 +7,7 @@ import (
 
 type RegisterBrowserExtension struct {
 	BrowserExtensionId uuid.UUID
-	Name               string `json:"name" validate:"required,lte=64"`
+	Name               string `json:"name" validate:"not_blank,lte=64"`
 	BrowserName        string `json:"browser_name" validate:"required,lte=255"`
 	BrowserVersion     string `json:"browser_version" validate:"required,lte=32"`
 	PublicKey          string `json:"public_key" validate:"required,lte=768"`
