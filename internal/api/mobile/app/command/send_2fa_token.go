@@ -66,6 +66,7 @@ func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
 			return h.WebsocketClient.SendMessage(uri, message)
 		},
 		retry.Attempts(5),
+		retry.LastErrorOnly(true),
 	)
 
 	if err != nil {

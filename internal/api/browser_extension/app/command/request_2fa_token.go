@@ -100,9 +100,10 @@ func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
 				return h.Pusher.Send(context.Background(), notification)
 			},
 			retry.Attempts(5),
+			retry.LastErrorOnly(true),
 		)
 
-		if err != nil && !messaging.IsRegistrationTokenNotRegistered(err) {
+		if err != nil && !messaging.IsUnregistered(err) {
 			logging.WithFields(logging.Fields{
 				"extension_id":     extId.String(),
 				"device_id":        device.Id.String(),
