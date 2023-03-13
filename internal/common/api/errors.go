@@ -29,7 +29,7 @@ func NewInternalServerError(err error) error {
 	return &ApiError{
 		Code:        http.StatusInternalServerError,
 		Type:        "InternalServerError",
-		Description: "Unexpected condition was encounteredn",
+		Description: "Unexpected condition was encountered",
 		Reason:      err.Error(),
 	}
 }
