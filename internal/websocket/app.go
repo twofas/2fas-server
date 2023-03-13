@@ -16,7 +16,7 @@ type Server struct {
 func NewServer(addr string) *Server {
 	router := gin.New()
 
-	router.Use(gin.Recovery())
+	router.Use(RecoveryMiddleware())
 	router.Use(http.RequestIdMiddleware())
 	router.Use(http.CorrelationIdMiddleware())
 	router.Use(http.RequestJsonLogger())
