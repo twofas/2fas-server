@@ -2,7 +2,6 @@ package ports
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -99,9 +98,7 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `UpdateWebService`")
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.UpdateWebService.Handle(cmd)
 
@@ -139,9 +136,7 @@ func (r *RoutesHandler) RemoveWebService(c *gin.Context) {
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `DeleteWebService`")
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.RemoveWebService.Handle(cmd)
 
@@ -165,7 +160,7 @@ func (r *RoutesHandler) RemoveAllWebServices(c *gin.Context) {
 
 	r.cqrs.Commands.RemoveAllWebServices.Handle(cmd)
 
-	c.JSON(200, api.NewOk("Web services has been removed."))
+	c.JSON(200, api.NewOk("Web services have been removed."))
 }
 
 func (r *RoutesHandler) FindWebService(c *gin.Context) {
@@ -265,9 +260,7 @@ func (r *RoutesHandler) CreateIcon(c *gin.Context) {
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `CreateIcon`")
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.CreateIcon.Handle(cmd)
 
@@ -306,9 +299,7 @@ func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `UpdateIcon`")
+	logging.LogCommand(cmd)
 
 	if err != nil {
 		var iconNotFound *adapters.IconCouldNotBeFound
@@ -359,9 +350,7 @@ func (r *RoutesHandler) RemoveIcon(c *gin.Context) {
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `DeleteIcon`")
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.RemoveIcon.Handle(cmd)
 
@@ -385,7 +374,7 @@ func (r *RoutesHandler) RemoveAllIcons(c *gin.Context) {
 
 	r.cqrs.Commands.RemoveAllIcons.Handle(cmd)
 
-	c.JSON(200, api.NewOk("Icons has been removed."))
+	c.JSON(200, api.NewOk("Icons have been removed."))
 }
 
 func (r *RoutesHandler) FindIcon(c *gin.Context) {
@@ -521,7 +510,7 @@ func (r *RoutesHandler) RemoveIconRequest(c *gin.Context) {
 func (r *RoutesHandler) RemoveAllIconsRequests(c *gin.Context) {
 	r.cqrs.Commands.RemoveAllIconsRequests.Handle()
 
-	c.JSON(200, api.NewOk("Icons requests has been removed."))
+	c.JSON(200, api.NewOk("Icons requests have been removed."))
 }
 
 func (r *RoutesHandler) UpdateWebServiceFromIconRequest(c *gin.Context) {
@@ -572,8 +561,6 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 
 	c.BindUri(cmd)
 
-	logging.LogCommand(cmd)
-
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
@@ -581,6 +568,8 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
+
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.TransformIconRequestToWebService.Handle(cmd)
 
@@ -675,17 +664,13 @@ func (r *RoutesHandler) CreateIconsCollection(c *gin.Context) {
 
 	err := r.validator.Struct(cmd)
 
-	logging.Info("Start command", cmd)
-
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `CreateIconsCollection`")
+	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.CreateIconsCollection.Handle(cmd)
 
@@ -716,15 +701,13 @@ func (r *RoutesHandler) UpdateIconsCollection(c *gin.Context) {
 
 	err := r.validator.Struct(cmd)
 
-	logging.WithFields(logging.Fields{
-		"command": fmt.Sprintf("%#v", cmd),
-	}).Info("Start command `UpdateIconsCollection`")
-
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
+
+	logging.LogCommand(cmd)
 
 	if err != nil {
 		var notFound *adapters.IconsCollectionCouldNotBeFound
