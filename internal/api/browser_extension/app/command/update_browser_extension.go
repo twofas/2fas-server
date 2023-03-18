@@ -7,7 +7,7 @@ import (
 
 type UpdateBrowserExtension struct {
 	BrowserExtensionId string `uri:"extension_id" validate:"required,uuid4"`
-	Name               string `json:"name" validate:"lte=64"`
+	Name               string `json:"name" validate:"not_blank,lte=64"`
 	BrowserName        string `json:"browser_name" validate:"lte=255"`
 	BrowserVersion     string `json:"browser_version" validate:"lte=32"`
 }

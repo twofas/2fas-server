@@ -66,6 +66,15 @@ func (s *BrowserExtensionTestSuite) TestUpdateNotExistingBrowserExtension() {
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
+func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtensionSetEmptyName() {
+	browserExt := tests.CreateBrowserExtension(s.T(), "go-test")
+
+	payload := []byte(`{"name": ""}`)
+	response := tests.DoPut("/browser_extensions/"+browserExt.Id, payload, nil)
+
+	assert.Equal(s.T(), 400, response.StatusCode)
+}
+
 func (s *BrowserExtensionTestSuite) TestDoNotFindNotExistingExtension() {
 	notExistingId := uuid.New()
 
