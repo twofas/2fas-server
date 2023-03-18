@@ -7,7 +7,7 @@ import (
 
 type UpdateMobileDevice struct {
 	Id       string `uri:"device_id" validate:"required,uuid4"`
-	Name     string `json:"name" validate:"max=128"`
+	Name     string `json:"name" validate:"not_blank,max=128"`
 	Platform string `json:"platform" validate:"omitempty,oneof=ios android huawei"`
 	FcmToken string `json:"fcm_token" validate:"max=256"`
 }
