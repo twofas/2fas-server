@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/twofas/2fas-server/config"
-	http2 "github.com/twofas/2fas-server/internal/common/http"
+	httpsec "github.com/twofas/2fas-server/internal/common/http"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +15,7 @@ func Test_DoNotAllowUntrustedIp(t *testing.T) {
 		"192.168.0.1/32",
 	}}
 
-	whitelistMiddleware := http2.IPWhitelistMiddleware(c)
+	whitelistMiddleware := httpsec.IPWhitelistMiddleware(c)
 
 	recorder := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(recorder)
