@@ -3,35 +3,50 @@ package tests
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
 	"testing"
 )
 
-func Test_BrowserExtensionAuthFullFlow(t *testing.T) {
-	device, devicePubKey := tests.CreateDevice(t, "SM-955F", "some-token")
-	browserExtension := tests.CreateBrowserExtension(t, "go-ext")
+func TestTwoFactorAuthTestSuite(t *testing.T) {
+	suite.Run(t, new(TwoFactorAuthTestSuite))
+}
+
+type TwoFactorAuthTestSuite struct {
+	suite.Suite
+}
+
+func (s *TwoFactorAuthTestSuite) SetupTest() {
+	tests.DoSuccessDelete(s.T(), "/mobile/devices")
+	tests.DoSuccessDelete(s.T(), "/browser_extensions")
+	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+}
+
+func (s *TwoFactorAuthTestSuite) TestBrowserExtensionAuthFullFlow() {
+	device, devicePubKey := tests.CreateDevice(s.T(), "SM-955F", "some-token")
+	browserExtension := tests.CreateBrowserExtension(s.T(), "go-ext")
 
 	websocketTestListener := tests.NewWebsocketTestListener("browser_extensions/" + browserExtension.Id)
 	websocketConnection := websocketTestListener.StartListening()
 	defer websocketConnection.Close()
 
-	tests.PairDeviceWithBrowserExtension(t, devicePubKey, browserExtension, device)
+	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExtension, device)
 
-	assertDeviceHasPairedExtension(t, device, browserExtension)
-	assertBrowserExtensionHasPairedDevice(t, browserExtension, device)
+	assertDeviceHasPairedExtension(s.T(), device, browserExtension)
+	assertBrowserExtensionHasPairedDevice(s.T(), browserExtension, device)
 	expectedPairingSuccessWebsocket := createPairingSuccessWebsocketMessage(browserExtension, device, devicePubKey)
-	websocketTestListener.AssertMessageHasBeenReceived(t, expectedPairingSuccessWebsocket)
+	websocketTestListener.AssertMessageHasBeenReceived(s.T(), expectedPairingSuccessWebsocket)
 
-	tokenRequest := tests.Request2FaToken(t, "facebook.com", browserExtension.Id)
+	tokenRequest := tests.Request2FaToken(s.T(), "facebook.com", browserExtension.Id)
 
 	extensionTokenRequestWebsocketListener := tests.NewWebsocketTestListener("browser_extensions/" + browserExtension.Id + "/2fa_requests/" + tokenRequest.Id)
 	extensionTokenRequestWebsocketConnection := extensionTokenRequestWebsocketListener.StartListening()
 	defer extensionTokenRequestWebsocketConnection.Close()
 
-	tests.Send2FaTokenToExtension(t, browserExtension.Id, device.Id, tokenRequest.Id, "2fa-token")
+	tests.Send2FaTokenToExtension(s.T(), browserExtension.Id, device.Id, tokenRequest.Id, "2fa-token")
 
 	expected2FaTokenWebsocket := createBrowserExtensionReceived2FaTokenMessage(browserExtension.Id, device.Id, tokenRequest.Id)
-	extensionTokenRequestWebsocketListener.AssertMessageHasBeenReceived(t, expected2FaTokenWebsocket)
+	extensionTokenRequestWebsocketListener.AssertMessageHasBeenReceived(s.T(), expected2FaTokenWebsocket)
 }
 
 func createBrowserExtensionReceived2FaTokenMessage(extensionId, deviceId, requestId string) string {
