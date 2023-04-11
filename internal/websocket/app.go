@@ -3,6 +3,7 @@ package websocket
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/recovery"
 	"github.com/twofas/2fas-server/internal/websocket/browser_extension"
 	"github.com/twofas/2fas-server/internal/websocket/common"
 )
@@ -16,7 +17,7 @@ type Server struct {
 func NewServer(addr string) *Server {
 	router := gin.New()
 
-	router.Use(RecoveryMiddleware())
+	router.Use(recovery.RecoveryMiddleware())
 	router.Use(http.RequestIdMiddleware())
 	router.Use(http.CorrelationIdMiddleware())
 	router.Use(http.RequestJsonLogger())

@@ -1,4 +1,4 @@
-package websocket
+package recovery
 
 import (
 	"bytes"
