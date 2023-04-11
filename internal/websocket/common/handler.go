@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/recovery"
 	"net/http"
 	"os"
 	"time"
@@ -72,8 +73,13 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
-	go client.writePump()
-	go client.readPump()
+	go recovery.DoNotPanic(func() {
+		client.writePump()
+	})
+
+	go recovery.DoNotPanic(func() {
+		client.readPump()
+	})
 
 	go func() {
 		disconnectAfter := 3 * time.Minute
