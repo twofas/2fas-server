@@ -2,9 +2,10 @@ package http
 
 import (
 	"bytes"
+	"io"
+
 	"github.com/gin-gonic/gin"
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"io"
 )
 
 func RequestJsonLogger() gin.HandlerFunc {
@@ -17,7 +18,6 @@ func RequestJsonLogger() gin.HandlerFunc {
 		c.Request.Body = io.NopCloser(&buf)
 
 		logging.WithFields(logging.Fields{
-			"client_ip":      c.ClientIP(),
 			"method":         c.Request.Method,
 			"path":           c.Request.URL.Path,
 			"headers":        c.Request.Header,
@@ -29,7 +29,6 @@ func RequestJsonLogger() gin.HandlerFunc {
 		c.Next()
 
 		logging.WithFields(logging.Fields{
-			"client_ip":      c.ClientIP(),
 			"method":         c.Request.Method,
 			"path":           c.Request.URL.Path,
 			"request_id":     c.GetString(RequestIdKey),
