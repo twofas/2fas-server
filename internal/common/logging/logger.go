@@ -2,9 +2,10 @@ package logging
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"reflect"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Fields map[string]interface{}
@@ -44,28 +45,35 @@ func Info(args ...interface{}) {
 	defaultFieldsMutex.Lock()
 	defer defaultFieldsMutex.Unlock()
 
-	customLogger.WithFields(defaultFields).Info(args)
+	customLogger.WithFields(defaultFields).Info(args...)
+}
+
+func Infof(format string, args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
+	customLogger.WithFields(defaultFields).Infof(format, args...)
 }
 
 func Error(args ...interface{}) {
 	defaultFieldsMutex.Lock()
 	defer defaultFieldsMutex.Unlock()
 
-	customLogger.WithFields(defaultFields).Error(args)
+	customLogger.WithFields(defaultFields).Error(args...)
 }
 
 func Warning(args ...interface{}) {
 	defaultFieldsMutex.Lock()
 	defer defaultFieldsMutex.Unlock()
 
-	customLogger.WithFields(defaultFields).Warning(args)
+	customLogger.WithFields(defaultFields).Warning(args...)
 }
 
 func Fatal(args ...interface{}) {
 	defaultFieldsMutex.Lock()
 	defer defaultFieldsMutex.Unlock()
 
-	customLogger.WithFields(defaultFields).Fatal(args)
+	customLogger.WithFields(defaultFields).Fatal(args...)
 }
 
 func WithField(key string, value interface{}) *logrus.Entry {

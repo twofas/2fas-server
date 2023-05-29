@@ -3,13 +3,14 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"time"
+
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"google.golang.org/api/option"
-	"io/ioutil"
-	"time"
 )
 
 type Pusher interface {
@@ -57,7 +58,7 @@ func (p *FcmPushClient) Send(ctx context.Context, message *messaging.Message) er
 		return err
 	}
 
-	logging.Info("FCM notification has been sent: %s", response)
+	logging.Infof("FCM notification has been sent: %s", response)
 
 	return nil
 }

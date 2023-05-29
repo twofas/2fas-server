@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: docker/api/Dockerfile
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     volumes:
       - ./migrations:/migrations
       - go-modules:/go/pkg/mod
@@ -35,6 +36,10 @@ services:
       - "127.0.0.1:3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 20s
+        retries: 10
 
   redis:
     image: bitnami/redis:latest

@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+
 	"github.com/twofas/2fas-server/config"
 	"gorm.io/gorm/logger"
 

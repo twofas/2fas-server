@@ -25,7 +25,12 @@ test: ## run unit tests
 
 
 tests-e2e: ## run end to end tests
-	go test ./tests/...
+    ## There is some race condition when running tests as go test -count=1 ./tests/... Come back at some point and fix it
+	go test ./tests/browser_extension/... -count=1
+	go test ./tests/icons/... -count=1
+	go test ./tests/mobile/... -count=1
+	go test ./tests/support/... -count=1
+	go test ./tests/system/... -count=1
 
 
 vendor-licenses: ## report vendor licenses

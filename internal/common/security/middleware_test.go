@@ -1,13 +1,14 @@
 package security
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/twofas/2fas-server/config"
 	httpsec "github.com/twofas/2fas-server/internal/common/http"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func Test_DoNotAllowUntrustedIp(t *testing.T) {
@@ -24,5 +25,5 @@ func Test_DoNotAllowUntrustedIp(t *testing.T) {
 	ctx.Request.Header.Set("X-Forwarded-For", "192.168.0.2")
 
 	whitelistMiddleware(ctx)
-	assert.Equal(t, recorder.Code, 401)
+	assert.Equal(t, recorder.Code, http.StatusForbidden)
 }
