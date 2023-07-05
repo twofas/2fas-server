@@ -1,13 +1,14 @@
 package common
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/recovery"
-	"net/http"
-	"os"
-	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -41,7 +42,6 @@ func (h *ConnectionHandler) Handler() gin.HandlerFunc {
 		channel := c.Request.URL.Path
 
 		logging.WithDefaultField("channel", channel)
-		logging.WithDefaultField("ip", c.ClientIP())
 
 		logging.Info("New channel subscriber")
 
@@ -68,7 +68,12 @@ func (h *ConnectionHandler) getHub(channel string) *Hub {
 }
 
 func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, _ := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		logging.Errorf("Failed to upgrade connection: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
@@ -81,16 +86,14 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 		client.readPump()
 	})
 
-	go func() {
+	go recovery.DoNotPanic(func() {
 		disconnectAfter := 3 * time.Minute
 		timeout := time.After(disconnectAfter)
 
-		select {
-		case <-timeout:
-			logging.Info("Connection closed after", disconnectAfter)
+		<-timeout
+		logging.Info("Connection closed after", disconnectAfter)
 
-			client.hub.unregister <- client
-			client.conn.Close()
-		}
-	}()
+		client.hub.unregister <- client
+		client.conn.Close()
+	})
 }

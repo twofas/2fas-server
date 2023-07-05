@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// TODO: do not log reuse on every request.
 type Fields map[string]interface{}
 
 var (
@@ -60,6 +61,13 @@ func Error(args ...interface{}) {
 	defer defaultFieldsMutex.Unlock()
 
 	customLogger.WithFields(defaultFields).Error(args...)
+}
+
+func Errorf(format string, args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
+	customLogger.WithFields(defaultFields).Errorf(format, args...)
 }
 
 func Warning(args ...interface{}) {
