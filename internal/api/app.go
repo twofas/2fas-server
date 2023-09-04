@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/twofas/2fas-server/config"
@@ -20,6 +21,7 @@ var validate *validator.Validate
 
 type Module interface {
 	RegisterRoutes(router *gin.Engine)
+	RegisterAdminRoutes(g *gin.RouterGroup)
 }
 
 type Application struct {
@@ -65,5 +67,17 @@ func (a *Application) RegisterRoutes(router *gin.Engine) {
 
 	for _, module := range a.Modules {
 		module.RegisterRoutes(router)
+	}
+}
+
+func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(404, api.NotFoundError(errors.New("URI not found")))
+	})
+
+	g := router.Group("/")
+
+	for _, module := range a.Modules {
+		module.RegisterAdminRoutes(g)
 	}
 }

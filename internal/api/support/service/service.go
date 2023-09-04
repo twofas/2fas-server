@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/twofas/2fas-server/config"
@@ -102,4 +103,16 @@ func (m *SupportModule) RegisterRoutes(router *gin.Engine) {
 	publicRouter := router.Group("/")
 
 	publicRouter.POST("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.CreateDebugLogsAudit)
+}
+
+func (m *SupportModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	g.POST("/mobile/support/debug_logs/audit/claim", m.RoutesHandler.CreateDebugLogsAuditClaim)
+	g.PUT("/mobile/support/debug_logs/audit/claim/:audit_id", m.RoutesHandler.UpdateDebugLogsAuditClaim)
+	g.DELETE("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.DeleteDebugLogsAudit)
+	g.GET("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.GetDebugLogsAudit)
+	g.GET("/mobile/support/debug_logs/audit", m.RoutesHandler.GetDebugAllLogsAudit)
+
+	if m.Config.IsTestingEnv() {
+		g.DELETE("/mobile/support/debug_logs/audit", m.RoutesHandler.DeleteAllDebugLogsAudit)
+	}
 }

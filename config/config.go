@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/spf13/viper"
-	"github.com/twofas/2fas-server/internal/common/logging"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 var Config Configuration
@@ -17,6 +18,7 @@ type Configuration struct {
 	Redis     RedisConf       `json:"redis"`
 	App       AppConfig       `json:"app"`
 	Websocket WebsocketConfig `json:"websocket"`
+	Admin     AdminAPIConfig  `json:"admin"`
 	Security  SecurityConfig  `json:"security"`
 	Icons     IconsConfig     `json:"icons"`
 }
@@ -64,6 +66,11 @@ func (c *SecurityConfig) IsIpTrusted(ip string) bool {
 }
 
 type WebsocketConfig struct {
+	ListenAddr string `mapstructure:"listen_addr" json:"listen_addr"`
+	ApiUrl     string `mapstructure:"url" json:"api_url"`
+}
+
+type AdminAPIConfig struct {
 	ListenAddr string `mapstructure:"listen_addr" json:"listen_addr"`
 	ApiUrl     string `mapstructure:"url" json:"api_url"`
 }

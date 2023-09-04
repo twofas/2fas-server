@@ -34,3 +34,13 @@ func (m *HealthModule) RegisterRoutes(router *gin.Engine) {
 	internalFor2FasUsersOnly.GET("/system/fake_warning", m.RoutesHandler.FakeWarning)
 	internalFor2FasUsersOnly.GET("/system/fake_security_warning", m.RoutesHandler.FakeSecurityWarning)
 }
+
+func (m *HealthModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	g.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+
+	g.GET("/system/redis/info", m.RoutesHandler.RedisInfo)
+	g.GET("/system/info", m.RoutesHandler.GetApplicationConfiguration)
+	g.GET("/system/fake_error", m.RoutesHandler.FakeError)
+	g.GET("/system/fake_warning", m.RoutesHandler.FakeWarning)
+	g.GET("/system/fake_security_warning", m.RoutesHandler.FakeSecurityWarning)
+}
