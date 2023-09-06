@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api"
 	"github.com/twofas/2fas-server/internal/common/http"

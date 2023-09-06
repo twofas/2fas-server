@@ -12,10 +12,6 @@ websocket:
   listen_addr: ":8081"
   url: "ws://websocket:8081"
 
-admin:
-  listen_addr: ":8082"
-  url: "api:8082"
-
 redis:
   port: 6379
   service_url: "redis"
