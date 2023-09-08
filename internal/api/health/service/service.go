@@ -23,8 +23,6 @@ func NewHealthModule(config config.Configuration, redis *redis.Client) *HealthMo
 }
 
 func (m *HealthModule) RegisterRoutes(router *gin.Engine) {
-	router.GET("/health", m.RoutesHandler.CheckApplicationHealth)
-
 	internalFor2FasUsersOnly := router.Group("/")
 	internalFor2FasUsersOnly.Use(http.IPWhitelistMiddleware(m.Config.Security))
 
@@ -35,9 +33,11 @@ func (m *HealthModule) RegisterRoutes(router *gin.Engine) {
 	internalFor2FasUsersOnly.GET("/system/fake_security_warning", m.RoutesHandler.FakeSecurityWarning)
 }
 
-func (m *HealthModule) RegisterAdminRoutes(g *gin.RouterGroup) {
-	g.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+func (m *HealthModule) RegisterHealth(router *gin.Engine) {
+	router.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+}
 
+func (m *HealthModule) RegisterAdminRoutes(g *gin.RouterGroup) {
 	g.GET("/system/redis/info", m.RoutesHandler.RedisInfo)
 	g.GET("/system/info", m.RoutesHandler.GetApplicationConfiguration)
 	g.GET("/system/fake_error", m.RoutesHandler.FakeError)

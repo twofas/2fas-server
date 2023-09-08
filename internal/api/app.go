@@ -25,13 +25,11 @@ type Module interface {
 }
 
 type Application struct {
-	Addr string
-
-	Router *gin.Engine
-
-	Config config.Configuration
-
-	Modules []Module
+	Addr         string
+	Router       *gin.Engine
+	Config       config.Configuration
+	Modules      []Module
+	HealthModule *health.HealthModule
 }
 
 func NewApplication(config config.Configuration) *Application {
@@ -43,8 +41,10 @@ func NewApplication(config config.Configuration) *Application {
 
 	validate.RegisterValidation("not_blank", validation.NotBlank)
 
+	h := health.NewHealthModule(config, redisClient)
+
 	modules := []Module{
-		health.NewHealthModule(config, redisClient),
+		h,
 		support.NewSupportModule(config, gorm, database, validate),
 		icons.NewIconsModule(config, gorm, database, validate),
 		extension.NewBrowserExtensionModule(config, gorm, database, redisClient, validate),
@@ -52,9 +52,10 @@ func NewApplication(config config.Configuration) *Application {
 	}
 
 	app := &Application{
-		Addr:    config.App.ListenAddr,
-		Config:  config,
-		Modules: modules,
+		Addr:         config.App.ListenAddr,
+		Config:       config,
+		Modules:      modules,
+		HealthModule: h,
 	}
 
 	return app
@@ -74,6 +75,8 @@ func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, api.NotFoundError(errors.New("URI not found")))
 	})
+
+	a.HealthModule.RegisterHealth(router)
 
 	g := router.Group("/admin")
 
