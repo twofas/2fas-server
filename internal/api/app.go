@@ -75,7 +75,7 @@ func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
 		c.JSON(404, api.NotFoundError(errors.New("URI not found")))
 	})
 
-	g := router.Group("/")
+	g := router.Group("/admin")
 
 	for _, module := range a.Modules {
 		module.RegisterAdminRoutes(g)
