@@ -77,7 +77,7 @@ func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
 	})
 
 	// The only route method is /health. Everything else
-	// is nested under /admin so that oauth proxy can route to it.
+	// is nested under /admin so that oAuth proxy can route to it.
 	a.HealthModule.RegisterHealth(router)
 
 	g := router.Group("/admin")
