@@ -23,6 +23,8 @@ func NewHealthModule(config config.Configuration, redis *redis.Client) *HealthMo
 }
 
 func (m *HealthModule) RegisterRoutes(router *gin.Engine) {
+	router.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+
 	internalFor2FasUsersOnly := router.Group("/")
 	internalFor2FasUsersOnly.Use(http.IPWhitelistMiddleware(m.Config.Security))
 
