@@ -16,8 +16,8 @@ func main() {
 
 	application := api.NewApplication(config.Config)
 
-	logging.Info("Initialize admin application ", config.Config.App.ListenAddr)
-	logging.Info("Environment is: ", config.Config.Env)
+	logging.Infof("Initialize admin application: %q", config.Config.App.ListenAddr)
+	logging.Infof("Environment is: %q", config.Config.Env)
 
 	http.RunHttpServer(config.Config.App.ListenAddr, func(engine *gin.Engine) {
 		application.RegisterAdminRoutes(engine)
