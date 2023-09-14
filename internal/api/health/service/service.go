@@ -38,6 +38,7 @@ func (m *HealthModule) RegisterHealth(router *gin.Engine) {
 }
 
 func (m *HealthModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	g.GET("/health", m.RoutesHandler.CheckApplicationHealth)
 	g.GET("/system/redis/info", m.RoutesHandler.RedisInfo)
 	g.GET("/system/info", m.RoutesHandler.GetApplicationConfiguration)
 	g.GET("/system/fake_error", m.RoutesHandler.FakeError)
