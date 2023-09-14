@@ -7,9 +7,9 @@
       "essential": true,
       "portMappings": [
         {
-          "hostPort": 8081,
+          "hostPort": 8082,
           "protocol": "tcp",
-          "containerPort": 8081
+          "containerPort": 8082
         }
       ],
       "environmentFiles": [
