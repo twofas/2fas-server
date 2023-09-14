@@ -76,6 +76,8 @@ func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
 		c.JSON(404, api.NotFoundError(errors.New("URI not found")))
 	})
 
+	// The only route method is /health. Everything else
+	// is nested under /admin so that oauth proxy can route to it.
 	a.HealthModule.RegisterHealth(router)
 
 	g := router.Group("/admin")
