@@ -13,7 +13,7 @@ func main() {
 
 	config.LoadConfiguration()
 
-	application := api.NewApplication(config.Config)
+	application := api.NewApplication("api", config.Config)
 
 	logging.Info("Initialize application ", config.Config.App.ListenAddr)
 	logging.Info("Environment is: ", config.Config.Env)

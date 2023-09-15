@@ -3,6 +3,9 @@ package ports
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/twofas/2fas-server/config"
@@ -11,17 +14,17 @@ import (
 	"github.com/twofas/2fas-server/internal/common/aws"
 	"github.com/twofas/2fas-server/internal/common/clock"
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"os"
-	"time"
 )
 
 type RoutesHandler struct {
-	redis *redis.Client
+	applicationName string
+	redis           *redis.Client
 }
 
-func NewRoutesHandler(redis *redis.Client) *RoutesHandler {
+func NewRoutesHandler(applicationName string, redis *redis.Client) *RoutesHandler {
 	return &RoutesHandler{
-		redis: redis,
+		applicationName: applicationName,
+		redis:           redis,
 	}
 }
 
@@ -84,10 +87,11 @@ type redisStatus struct {
 }
 
 type systemInfo struct {
-	LocalTime   string        `json:"local_time"`
-	Config      configuration `json:"configuration"`
-	Environment []string      `json:"environment"`
-	Redis       redisStatus   `json:"redis"`
+	ApplicationName string        `json:"application_name"`
+	LocalTime       string        `json:"local_time"`
+	Config          configuration `json:"configuration"`
+	Environment     []string      `json:"environment"`
+	Redis           redisStatus   `json:"redis"`
 }
 
 func (r *RoutesHandler) RedisInfo(c *gin.Context) {

@@ -14,7 +14,7 @@ func main() {
 
 	config.LoadConfiguration()
 
-	application := api.NewApplication(config.Config)
+	application := api.NewApplication("admin-api", config.Config)
 
 	logging.Infof("Initialize admin application: %q", config.Config.App.ListenAddr)
 	logging.Infof("Environment is: %q", config.Config.Env)

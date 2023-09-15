@@ -32,7 +32,7 @@ type Application struct {
 	HealthModule *health.HealthModule
 }
 
-func NewApplication(config config.Configuration) *Application {
+func NewApplication(applicationName string, config config.Configuration) *Application {
 	validate = validator.New()
 
 	gorm := db.NewGormConnection(config)
@@ -41,7 +41,7 @@ func NewApplication(config config.Configuration) *Application {
 
 	validate.RegisterValidation("not_blank", validation.NotBlank)
 
-	h := health.NewHealthModule(config, redisClient)
+	h := health.NewHealthModule(applicationName, config, redisClient)
 
 	modules := []Module{
 		h,

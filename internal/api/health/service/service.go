@@ -13,8 +13,8 @@ type HealthModule struct {
 	Config        config.Configuration
 }
 
-func NewHealthModule(config config.Configuration, redis *redis.Client) *HealthModule {
-	routesHandler := ports.NewRoutesHandler(redis)
+func NewHealthModule(applicationName string, config config.Configuration, redis *redis.Client) *HealthModule {
+	routesHandler := ports.NewRoutesHandler(applicationName, redis)
 
 	return &HealthModule{
 		RoutesHandler: routesHandler,
