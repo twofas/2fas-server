@@ -16,7 +16,7 @@ func main() {
 
 	application := api.NewApplication("admin-api", config.Config)
 
-	logging.Infof("Initialize admin application: %q", config.Config.App.ListenAddr)
+	logging.Infof("Initialize admin-api application: %q", config.Config.App.ListenAddr)
 	logging.Infof("Environment is: %q", config.Config.Env)
 
 	http.RunHttpServer(config.Config.App.ListenAddr, func(engine *gin.Engine) {
