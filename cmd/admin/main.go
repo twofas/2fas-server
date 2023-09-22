@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api"
 	"github.com/twofas/2fas-server/internal/common/http"
@@ -9,16 +10,16 @@ import (
 )
 
 func main() {
-	logging.WithDefaultField("service_name", "api")
+	logging.WithDefaultField("service_name", "admin_api")
 
 	config.LoadConfiguration()
 
-	application := api.NewApplication("api", config.Config)
+	application := api.NewApplication("admin-api", config.Config)
 
-	logging.Info("Initialize application ", config.Config.App.ListenAddr)
-	logging.Info("Environment is: ", config.Config.Env)
+	logging.Infof("Initialize admin-api application: %q", config.Config.App.ListenAddr)
+	logging.Infof("Environment is: %q", config.Config.Env)
 
 	http.RunHttpServer(config.Config.App.ListenAddr, func(engine *gin.Engine) {
-		application.RegisterRoutes(engine)
+		application.RegisterAdminRoutes(engine)
 	})
 }

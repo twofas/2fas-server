@@ -16,6 +16,18 @@ services:
     env_file:
       - .env
 
+  admin:
+    build:
+      context: .
+      dockerfile: docker/admin/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    env_file:
+      - .env
+
   websocket:
     build:
       context: .

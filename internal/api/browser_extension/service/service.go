@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v8"
@@ -151,5 +152,8 @@ func (m *BrowserExtensionModule) RegisterRoutes(router *gin.Engine) {
 		publicRouter.DELETE("/browser_extensions", m.RoutesHandler.RemoveAllBrowserExtensions)
 		publicRouter.DELETE("/browser_extensions/devices", m.RoutesHandler.RemoveAllBrowserExtensionsDevices)
 	}
+
+}
+func (m *BrowserExtensionModule) RegisterAdminRoutes(g *gin.RouterGroup) {
 
 }

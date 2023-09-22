@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v8"
@@ -10,7 +11,7 @@ import (
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"github.com/twofas/2fas-server/internal/api/mobile/app"
 	"github.com/twofas/2fas-server/internal/api/mobile/app/command"
-	"github.com/twofas/2fas-server/internal/api/mobile/app/queries"
+	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 	apisec "github.com/twofas/2fas-server/internal/api/mobile/app/security"
 	"github.com/twofas/2fas-server/internal/api/mobile/ports"
 	"github.com/twofas/2fas-server/internal/common/clock"
@@ -152,4 +153,16 @@ func (m *MobileModule) RegisterRoutes(router *gin.Engine) {
 	publicRouter.DELETE("/mobile/devices/:device_id/browser_extensions/:extension_id", m.RoutesHandler.RemovePairingWithExtension)
 	publicRouter.GET("/mobile/devices/:device_id/browser_extensions", m.RoutesHandler.FindAllMobileAppExtensions)
 	publicRouter.GET("/mobile/devices/:device_id/browser_extensions/:extension_id", m.RoutesHandler.FindMobileAppExtensionById)
+}
+
+func (m *MobileModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	g.POST("/mobile/notifications", m.RoutesHandler.CreateMobileNotification)
+	g.PUT("/mobile/notifications/:notification_id", m.RoutesHandler.UpdateMobileNotification)
+	g.DELETE("/mobile/notifications/:notification_id", m.RoutesHandler.RemoveMobileNotification)
+	g.POST("/mobile/notifications/:notification_id/commands/publish", m.RoutesHandler.PublishMobileNotification)
+
+	if m.Config.IsTestingEnv() {
+		g.DELETE("/mobile/notifications", m.RoutesHandler.RemoveAllMobileNotifications)
+		g.DELETE("/mobile/devices", m.RoutesHandler.RemoveAllMobileDevices)
+	}
 }

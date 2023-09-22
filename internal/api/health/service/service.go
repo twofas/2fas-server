@@ -13,8 +13,8 @@ type HealthModule struct {
 	Config        config.Configuration
 }
 
-func NewHealthModule(config config.Configuration, redis *redis.Client) *HealthModule {
-	routesHandler := ports.NewRoutesHandler(redis)
+func NewHealthModule(applicationName string, config config.Configuration, redis *redis.Client) *HealthModule {
+	routesHandler := ports.NewRoutesHandler(applicationName, redis)
 
 	return &HealthModule{
 		RoutesHandler: routesHandler,
@@ -33,4 +33,17 @@ func (m *HealthModule) RegisterRoutes(router *gin.Engine) {
 	internalFor2FasUsersOnly.GET("/system/fake_error", m.RoutesHandler.FakeError)
 	internalFor2FasUsersOnly.GET("/system/fake_warning", m.RoutesHandler.FakeWarning)
 	internalFor2FasUsersOnly.GET("/system/fake_security_warning", m.RoutesHandler.FakeSecurityWarning)
+}
+
+func (m *HealthModule) RegisterHealth(router *gin.Engine) {
+	router.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+}
+
+func (m *HealthModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	g.GET("/health", m.RoutesHandler.CheckApplicationHealth)
+	g.GET("/system/redis/info", m.RoutesHandler.RedisInfo)
+	g.GET("/system/info", m.RoutesHandler.GetApplicationConfiguration)
+	g.GET("/system/fake_error", m.RoutesHandler.FakeError)
+	g.GET("/system/fake_warning", m.RoutesHandler.FakeWarning)
+	g.GET("/system/fake_security_warning", m.RoutesHandler.FakeSecurityWarning)
 }

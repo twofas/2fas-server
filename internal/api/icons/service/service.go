@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/twofas/2fas-server/config"
@@ -178,4 +179,31 @@ func (m *IconsModule) RegisterRoutes(router *gin.Engine) {
 		POST("/mobile/icons/requests", m.RoutesHandler.CreateIconRequest)
 
 	publicRouter.GET("/mobile/icons/requests", m.RoutesHandler.FindAllIconsRequests)
+}
+
+func (m *IconsModule) RegisterAdminRoutes(g *gin.RouterGroup) {
+	// internal/admin
+	g.POST("/mobile/web_services", m.RoutesHandler.CreateWebService)
+	g.PUT("/mobile/web_services/:service_id", m.RoutesHandler.UpdateWebService)
+	g.DELETE("/mobile/web_services/:service_id", m.RoutesHandler.RemoveWebService)
+
+	if m.Config.IsTestingEnv() {
+		g.DELETE("/mobile/web_services", m.RoutesHandler.RemoveAllWebServices)
+		g.DELETE("/mobile/icons", m.RoutesHandler.RemoveAllIcons)
+		g.DELETE("/mobile/icons/collections", m.RoutesHandler.RemoveAllIconsCollections)
+		g.DELETE("/mobile/icons/requests", m.RoutesHandler.RemoveAllIconsRequests)
+	}
+
+	g.POST("/mobile/icons/collections", m.RoutesHandler.CreateIconsCollection)
+	g.PUT("/mobile/icons/collections/:collection_id", m.RoutesHandler.UpdateIconsCollection)
+	g.DELETE("/mobile/icons/collections/:collection_id", m.RoutesHandler.RemoveIconsCollection)
+
+	g.POST("/mobile/icons", m.RoutesHandler.CreateIcon)
+	g.PUT("/mobile/icons/:icon_id", m.RoutesHandler.UpdateIcon)
+	g.DELETE("/mobile/icons/:icon_id", m.RoutesHandler.RemoveIcon)
+
+	g.DELETE("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.RemoveIconRequest)
+	g.POST("/mobile/icons/requests/:icon_request_id/commands/update_web_service", m.RoutesHandler.UpdateWebServiceFromIconRequest)
+	g.POST("/mobile/icons/requests/:icon_request_id/commands/transform_to_web_service", m.RoutesHandler.TransformToWebService)
+	g.GET("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.FindIconRequest)
 }

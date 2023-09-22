@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/twofas/2fas-server/config"
@@ -20,19 +21,18 @@ var validate *validator.Validate
 
 type Module interface {
 	RegisterRoutes(router *gin.Engine)
+	RegisterAdminRoutes(g *gin.RouterGroup)
 }
 
 type Application struct {
-	Addr string
-
-	Router *gin.Engine
-
-	Config config.Configuration
-
-	Modules []Module
+	Addr         string
+	Router       *gin.Engine
+	Config       config.Configuration
+	Modules      []Module
+	HealthModule *health.HealthModule
 }
 
-func NewApplication(config config.Configuration) *Application {
+func NewApplication(applicationName string, config config.Configuration) *Application {
 	validate = validator.New()
 
 	gorm := db.NewGormConnection(config)
@@ -41,8 +41,10 @@ func NewApplication(config config.Configuration) *Application {
 
 	validate.RegisterValidation("not_blank", validation.NotBlank)
 
+	h := health.NewHealthModule(applicationName, config, redisClient)
+
 	modules := []Module{
-		health.NewHealthModule(config, redisClient),
+		h,
 		support.NewSupportModule(config, gorm, database, validate),
 		icons.NewIconsModule(config, gorm, database, validate),
 		extension.NewBrowserExtensionModule(config, gorm, database, redisClient, validate),
@@ -50,9 +52,10 @@ func NewApplication(config config.Configuration) *Application {
 	}
 
 	app := &Application{
-		Addr:    config.App.ListenAddr,
-		Config:  config,
-		Modules: modules,
+		Addr:         config.App.ListenAddr,
+		Config:       config,
+		Modules:      modules,
+		HealthModule: h,
 	}
 
 	return app
@@ -65,5 +68,21 @@ func (a *Application) RegisterRoutes(router *gin.Engine) {
 
 	for _, module := range a.Modules {
 		module.RegisterRoutes(router)
+	}
+}
+
+func (a *Application) RegisterAdminRoutes(router *gin.Engine) {
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(404, api.NotFoundError(errors.New("URI not found")))
+	})
+
+	// The only route method is /health. Everything else
+	// is nested under /admin so that oAuth proxy can route to it.
+	a.HealthModule.RegisterHealth(router)
+
+	g := router.Group("/admin")
+
+	for _, module := range a.Modules {
+		module.RegisterAdminRoutes(g)
 	}
 }
