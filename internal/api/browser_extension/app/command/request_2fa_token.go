@@ -2,16 +2,17 @@ package command
 
 import (
 	"context"
-	"firebase.google.com/go/v4/messaging"
 	"fmt"
+	"net/url"
+	"time"
+
+	"firebase.google.com/go/v4/messaging"
 	"github.com/avast/retry-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/push"
-	"net/url"
-	"time"
 )
 
 var tokenPushNotificationTtl = time.Minute * 3
@@ -134,6 +135,7 @@ func createPushNotificationForIos(token string, data map[string]interface{}) *me
 						Body:  fmt.Sprintf("2FA request for %s", data["domain"]),
 					},
 					Category: "authReq",
+					Sound:    "default",
 				},
 				CustomData: data,
 			},
