@@ -122,7 +122,7 @@ func NewBrowserExtensionModule(
 	return module
 }
 
-func (m *BrowserExtensionModule) RegisterRoutes(router *gin.Engine) {
+func (m *BrowserExtensionModule) RegisterPublicRoutes(router *gin.Engine) {
 	rateLimiter := rate_limit.New(m.Redis)
 
 	bandwidthAuditMiddleware := apisec.BrowserExtensionBandwidthAuditMiddleware(rateLimiter)

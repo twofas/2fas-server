@@ -15,7 +15,6 @@ import (
 	"github.com/twofas/2fas-server/internal/common/aws"
 	"github.com/twofas/2fas-server/internal/common/clock"
 	"github.com/twofas/2fas-server/internal/common/db"
-	httpsec "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/storage"
 	"gorm.io/gorm"
 )
@@ -84,22 +83,7 @@ func NewSupportModule(config config.Configuration, gorm *gorm.DB, database *sql.
 	return module
 }
 
-func (m *SupportModule) RegisterRoutes(router *gin.Engine) {
-	// internal/admin
-	adminRouter := router.Group("/")
-	adminRouter.Use(httpsec.IPWhitelistMiddleware(m.Config.Security))
-
-	adminRouter.POST("/mobile/support/debug_logs/audit/claim", m.RoutesHandler.CreateDebugLogsAuditClaim)
-	adminRouter.PUT("/mobile/support/debug_logs/audit/claim/:audit_id", m.RoutesHandler.UpdateDebugLogsAuditClaim)
-	adminRouter.DELETE("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.DeleteDebugLogsAudit)
-	adminRouter.GET("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.GetDebugLogsAudit)
-	adminRouter.GET("/mobile/support/debug_logs/audit", m.RoutesHandler.GetDebugAllLogsAudit)
-
-	if m.Config.IsTestingEnv() {
-		adminRouter.DELETE("/mobile/support/debug_logs/audit", m.RoutesHandler.DeleteAllDebugLogsAudit)
-	}
-
-	// public
+func (m *SupportModule) RegisterPublicRoutes(router *gin.Engine) {
 	publicRouter := router.Group("/")
 
 	publicRouter.POST("/mobile/support/debug_logs/audit/:audit_id", m.RoutesHandler.CreateDebugLogsAudit)

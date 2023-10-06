@@ -20,7 +20,7 @@ import (
 var validate *validator.Validate
 
 type Module interface {
-	RegisterRoutes(router *gin.Engine)
+	RegisterPublicRoutes(router *gin.Engine)
 	RegisterAdminRoutes(g *gin.RouterGroup)
 }
 
@@ -67,7 +67,7 @@ func (a *Application) RegisterRoutes(router *gin.Engine) {
 	})
 
 	for _, module := range a.Modules {
-		module.RegisterRoutes(router)
+		module.RegisterPublicRoutes(router)
 	}
 }
 
