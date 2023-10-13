@@ -16,7 +16,6 @@ import (
 	"github.com/twofas/2fas-server/internal/api/mobile/ports"
 	"github.com/twofas/2fas-server/internal/common/clock"
 	"github.com/twofas/2fas-server/internal/common/db"
-	httpsec "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/rate_limit"
 	"github.com/twofas/2fas-server/internal/common/security"
 	"github.com/twofas/2fas-server/internal/common/websocket"
@@ -115,22 +114,7 @@ func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.D
 	return module
 }
 
-func (m *MobileModule) RegisterRoutes(router *gin.Engine) {
-	// internal/admin
-	adminRouter := router.Group("/")
-	adminRouter.Use(httpsec.IPWhitelistMiddleware(m.Config.Security))
-
-	adminRouter.POST("/mobile/notifications", m.RoutesHandler.CreateMobileNotification)
-	adminRouter.PUT("/mobile/notifications/:notification_id", m.RoutesHandler.UpdateMobileNotification)
-	adminRouter.DELETE("/mobile/notifications/:notification_id", m.RoutesHandler.RemoveMobileNotification)
-	adminRouter.POST("/mobile/notifications/:notification_id/commands/publish", m.RoutesHandler.PublishMobileNotification)
-
-	if m.Config.IsTestingEnv() {
-		adminRouter.DELETE("/mobile/notifications", m.RoutesHandler.RemoveAllMobileNotifications)
-		adminRouter.DELETE("/mobile/devices", m.RoutesHandler.RemoveAllMobileDevices)
-	}
-
-	// public
+func (m *MobileModule) RegisterPublicRoutes(router *gin.Engine) {
 	rateLimiter := rate_limit.New(m.Redis)
 
 	bandwidthMobileApiMiddleware := apisec.MobileIpAbuseAuditMiddleware(rateLimiter)

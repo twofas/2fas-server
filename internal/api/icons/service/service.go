@@ -131,36 +131,7 @@ func NewIconsModule(config config.Configuration, gorm *gorm.DB, database *sql.DB
 	return module
 }
 
-func (m *IconsModule) RegisterRoutes(router *gin.Engine) {
-	// internal/admin
-	adminRouter := router.Group("/")
-	adminRouter.Use(httpsec.IPWhitelistMiddleware(m.Config.Security))
-
-	adminRouter.POST("/mobile/web_services", m.RoutesHandler.CreateWebService)
-	adminRouter.PUT("/mobile/web_services/:service_id", m.RoutesHandler.UpdateWebService)
-	adminRouter.DELETE("/mobile/web_services/:service_id", m.RoutesHandler.RemoveWebService)
-
-	if m.Config.IsTestingEnv() {
-		adminRouter.DELETE("/mobile/web_services", m.RoutesHandler.RemoveAllWebServices)
-		adminRouter.DELETE("/mobile/icons", m.RoutesHandler.RemoveAllIcons)
-		adminRouter.DELETE("/mobile/icons/collections", m.RoutesHandler.RemoveAllIconsCollections)
-		adminRouter.DELETE("/mobile/icons/requests", m.RoutesHandler.RemoveAllIconsRequests)
-	}
-
-	adminRouter.POST("/mobile/icons/collections", m.RoutesHandler.CreateIconsCollection)
-	adminRouter.PUT("/mobile/icons/collections/:collection_id", m.RoutesHandler.UpdateIconsCollection)
-	adminRouter.DELETE("/mobile/icons/collections/:collection_id", m.RoutesHandler.RemoveIconsCollection)
-
-	adminRouter.POST("/mobile/icons", m.RoutesHandler.CreateIcon)
-	adminRouter.PUT("/mobile/icons/:icon_id", m.RoutesHandler.UpdateIcon)
-	adminRouter.DELETE("/mobile/icons/:icon_id", m.RoutesHandler.RemoveIcon)
-
-	adminRouter.DELETE("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.RemoveIconRequest)
-	adminRouter.POST("/mobile/icons/requests/:icon_request_id/commands/update_web_service", m.RoutesHandler.UpdateWebServiceFromIconRequest)
-	adminRouter.POST("/mobile/icons/requests/:icon_request_id/commands/transform_to_web_service", m.RoutesHandler.TransformToWebService)
-	adminRouter.GET("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.FindIconRequest)
-
-	// public
+func (m *IconsModule) RegisterPublicRoutes(router *gin.Engine) {
 	publicRouter := router.Group("/")
 
 	publicRouter.GET("/mobile/web_services/:service_id", m.RoutesHandler.FindWebService)
