@@ -9,7 +9,7 @@ type RegisterMobileDevice struct {
 	Id       uuid.UUID
 	Name     string `json:"name" validate:"not_blank,max=128"`
 	Platform string `json:"platform" validate:"required,oneof=ios android huawei"`
-	FcmToken string `json:"fcm_token" validate:"required,max=256"`
+	FcmToken string `json:"fcm_token" validate:"max=256"`
 }
 
 type RegisterMobileDeviceHandler struct {

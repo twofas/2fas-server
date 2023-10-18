@@ -86,6 +86,18 @@ func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
 	}
 
 	for _, device := range pairedDevices {
+		if device.FcmToken == "" {
+			logging.WithFields(logging.Fields{
+				"extension_id":     extId.String(),
+				"device_id":        device.Id.String(),
+				"token_request_id": cmd.Id,
+				"domain":           cmd.Domain,
+				"platform":         device.Platform,
+				"type":             "browser_extension_request",
+			}).Info("Cannot send push notification, missing FCM token")
+			continue
+		}
+
 		var err error
 		var notification *messaging.Message
 
