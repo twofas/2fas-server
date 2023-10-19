@@ -1,12 +1,13 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestMobileNotificationsTestSuite(t *testing.T) {
@@ -18,7 +19,7 @@ type MobileNotificationsTestSuite struct {
 }
 
 func (s *MobileNotificationsTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/notifications")
+	tests.RemoveAllMobileNotifications(s.T())
 }
 
 func (s *MobileNotificationsTestSuite) TestCreateMobileNotification() {
@@ -26,7 +27,7 @@ func (s *MobileNotificationsTestSuite) TestCreateMobileNotification() {
 
 	var notification *query.MobileNotificationPresenter
 
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload, &notification)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload, &notification)
 
 	assert.Equal(s.T(), "android", notification.Platform)
 	assert.Equal(s.T(), "0.1", notification.Version)
@@ -38,11 +39,11 @@ func (s *MobileNotificationsTestSuite) TestCreateMobileNotification() {
 func (s *MobileNotificationsTestSuite) TestUpdateMobileNotification() {
 	payload := []byte(`{"icon":"features","platform":"android","link":"2fas.com","message":"demo","version":"0.1"}`)
 	var notification *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload, &notification)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload, &notification)
 
 	payload = []byte(`{"icon":"youtube","platform":"ios","link":"new-2fas.com","message":"new-demo","version":"1.1"}`)
 	var updatedNotification *query.MobileNotificationPresenter
-	tests.DoSuccessPut(s.T(), "mobile/notifications/"+notification.Id, payload, &updatedNotification)
+	tests.DoSuccessPutAdmin(s.T(), "mobile/notifications/"+notification.Id, payload, &updatedNotification)
 
 	assert.Equal(s.T(), "ios", updatedNotification.Platform)
 	assert.Equal(s.T(), "1.1", updatedNotification.Version)
@@ -54,9 +55,9 @@ func (s *MobileNotificationsTestSuite) TestUpdateMobileNotification() {
 func (s *MobileNotificationsTestSuite) TestDeleteMobileNotification() {
 	payload := []byte(`{"icon":"features","platform":"android","link":"2fas.com","message":"demo","version":"0.1"}`)
 	var notification *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload, &notification)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload, &notification)
 
-	tests.DoSuccessDelete(s.T(), "mobile/notifications/"+notification.Id)
+	tests.DoSuccessDeleteAdmin(s.T(), "mobile/notifications/"+notification.Id)
 
 	response := tests.DoGet("mobile/notifications/"+notification.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
@@ -73,11 +74,11 @@ func (s *MobileNotificationsTestSuite) TestDeleteNotExistingMobileNotification()
 func (s *MobileNotificationsTestSuite) TestFindAllNotifications() {
 	payload1 := []byte(`{"icon":"features","platform":"android","link":"2fas.com","message":"demo","version":"0.1"}`)
 	var notification1 *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload1, &notification1)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload1, &notification1)
 
 	payload2 := []byte(`{"icon":"youtube","platform":"android","link":"2fas.com","message":"demo2","version":"1.1"}`)
 	var notification2 *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload2, &notification2)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload2, &notification2)
 
 	var collection []*query.MobileNotificationPresenter
 	tests.DoSuccessGet(s.T(), "mobile/notifications", &collection)
@@ -96,10 +97,10 @@ func (s *MobileNotificationsTestSuite) TestDoNotFindNotifications() {
 func (s *MobileNotificationsTestSuite) TestPublishNotification() {
 	payload := []byte(`{"icon":"features","platform":"android","link":"2fas.com","message":"demo","version":"0.1"}`)
 	var notification *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications", payload, &notification)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications", payload, &notification)
 
 	var publishedNotification *query.MobileNotificationPresenter
-	tests.DoSuccessPost(s.T(), "mobile/notifications/"+notification.Id+"/commands/publish", payload, &publishedNotification)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/notifications/"+notification.Id+"/commands/publish", payload, &publishedNotification)
 
 	assert.NotEmpty(s.T(), "published_at", notification.PublishedAt)
 }

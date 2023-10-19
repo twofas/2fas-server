@@ -2,11 +2,12 @@ package tests
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"net/http"
-	"testing"
 )
 
 func TestMobileDeviceTestSuite(t *testing.T) {
@@ -18,7 +19,7 @@ type MobileDeviceTestSuite struct {
 }
 
 func (s *MobileDeviceTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/devices")
+	tests.RemoveAllMobileDevices(s.T())
 }
 
 func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {

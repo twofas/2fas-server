@@ -2,13 +2,14 @@ package tests
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/internal/common/crypto"
 	"github.com/twofas/2fas-server/tests"
-	"net/http"
-	"testing"
 )
 
 func TestBrowserExtensionTestSuite(t *testing.T) {
@@ -20,7 +21,7 @@ type BrowserExtensionTestSuite struct {
 }
 
 func (s *BrowserExtensionTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "/browser_extensions")
+	tests.RemoveAllBrowserExtensions(s.T())
 }
 
 func (s *BrowserExtensionTestSuite) TestCreateBrowserExtension() {

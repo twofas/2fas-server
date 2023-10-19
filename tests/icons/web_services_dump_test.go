@@ -2,11 +2,12 @@ package tests
 
 import (
 	"fmt"
+	"math/rand"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"math/rand"
-	"testing"
 )
 
 func TestWebServicesDumpTestSuite(t *testing.T) {
@@ -18,9 +19,9 @@ type WebServicesDumpTestSuite struct {
 }
 
 func (s *WebServicesDumpTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/icons")
-	tests.DoSuccessDelete(s.T(), "mobile/icons/collections")
-	tests.DoSuccessDelete(s.T(), "mobile/web_services")
+	tests.RemoveAllMobileIcons(s.T())
+	tests.RemoveAllMobileIconsCollections(s.T())
+	tests.RemoveAllMobileWebServices(s.T())
 }
 
 func (s *WebServicesDumpTestSuite) TestWebServicesDump() {
@@ -47,7 +48,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 
 	var webService *webServiceResponse
 
-	tests.DoSuccessPost(t, "mobile/web_services", payload, &webService)
+	tests.DoSuccessPostAdmin(t, "mobile/web_services", payload, &webService)
 
 	return webService
 }
@@ -65,7 +66,7 @@ func createIconsCollection(t *testing.T) *iconsCollectionResponse {
 
 	var createdIconsCollection *iconsCollectionResponse
 
-	tests.DoSuccessPost(t, "mobile/icons/collections", payload, &createdIconsCollection)
+	tests.DoSuccessPostAdmin(t, "mobile/icons/collections", payload, &createdIconsCollection)
 
 	return createdIconsCollection
 }

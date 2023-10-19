@@ -2,13 +2,14 @@ package tests
 
 import (
 	"encoding/base64"
+	"io/ioutil"
+	"testing"
+
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	query "github.com/twofas/2fas-server/internal/api/icons/app/queries"
 	"github.com/twofas/2fas-server/tests"
-	"io/ioutil"
-	"testing"
 )
 
 func createIcon(t *testing.T) *query.IconPresenter {
@@ -33,7 +34,7 @@ func createIcon(t *testing.T) *query.IconPresenter {
 
 	var icon *query.IconPresenter
 
-	tests.DoSuccessPost(t, "mobile/icons", payload, &icon)
+	tests.DoSuccessPostAdmin(t, "mobile/icons", payload, &icon)
 
 	return icon
 }
@@ -47,7 +48,7 @@ type IconsTestSuite struct {
 }
 
 func (s *IconsTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/icons")
+	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons")
 }
 
 func (s *IconsTestSuite) TestCreateIcon() {
@@ -66,7 +67,7 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 	`)
 
 	var updatedIcon *query.IconPresenter
-	tests.DoSuccessPut(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
+	tests.DoSuccessPutAdmin(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
 
 	assert.Equal(s.T(), "meta", updatedIcon.Name)
 }
@@ -74,7 +75,7 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 func (s *IconsTestSuite) TestDeleteIcon() {
 	icon := createIcon(s.T())
 
-	tests.DoSuccessDelete(s.T(), "mobile/icons/"+icon.Id)
+	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons/"+icon.Id)
 
 	response := tests.DoGet("mobile/icons/"+icon.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)

@@ -9,15 +9,16 @@ help:
 
 
 migration: ## create database migrations file
-	docker-compose run -u ${USERID}:${USERID} --rm api migrate create new_migration sql
+	docker compose run -u ${USERID}:${USERID} --rm api migrate create new_migration sql
 
 
 migration-up: ## apply all available migrations
-	docker-compose run -u ${USERID}:${USERID} --rm api migrate up
+	docker compose run -u ${USERID}:${USERID} --rm api migrate up
 
 
 up: ## run all applications in stack
-	docker-compose up -d
+	docker compose build
+	docker compose up -d
 
 
 test: ## run unit tests

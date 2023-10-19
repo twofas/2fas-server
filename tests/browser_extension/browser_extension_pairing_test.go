@@ -2,12 +2,13 @@ package tests
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestBrowserExtensionPairingTestSuite(t *testing.T) {
@@ -19,8 +20,8 @@ type BrowserExtensionPairingTestSuite struct {
 }
 
 func (s *BrowserExtensionPairingTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "browser_extensions")
-	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+	tests.RemoveAllBrowserExtensions(s.T())
+	tests.RemoveAllBrowserExtensionsDevices(s.T())
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestPairBrowserExtensionWithMobileDevice() {

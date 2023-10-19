@@ -1,10 +1,11 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestMobileDeviceExtensionIntegrationTestSuite(t *testing.T) {
@@ -16,9 +17,9 @@ type MobileDeviceExtensionIntegrationTestSuite struct {
 }
 
 func (s *MobileDeviceExtensionIntegrationTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "browser_extensions")
-	tests.DoSuccessDelete(s.T(), "mobile/devices")
-	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+	tests.RemoveAllMobileDevices(s.T())
+	tests.RemoveAllBrowserExtensions(s.T())
+	tests.RemoveAllBrowserExtensionsDevices(s.T())
 }
 
 func (s *MobileDeviceExtensionIntegrationTestSuite) TestGetPending2FaRequests() {

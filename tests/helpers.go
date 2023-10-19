@@ -3,8 +3,9 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/twofas/2fas-server/internal/common/crypto"
 	"testing"
+
+	"github.com/twofas/2fas-server/internal/common/crypto"
 )
 
 func CreateDevice(t *testing.T, name, fcmToken string) (*DeviceResponse, string) {
@@ -86,4 +87,36 @@ func Send2FaTokenToExtension(t *testing.T, extensionId, deviceId, requestId, tok
 	j := fmt.Sprintf(`{"token_request_id":"%s","extension_id":"%s","token":"%s"}`, requestId, extensionId, token)
 
 	DoSuccessPost(t, "mobile/devices/"+deviceId+"/commands/send_2fa_token", []byte(j), nil)
+}
+
+func RemoveAllBrowserExtensionsDevices(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "browser_extensions/devices")
+}
+
+func RemoveAllBrowserExtensions(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "browser_extensions")
+}
+
+func RemoveAllMobileDevices(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "/mobile/devices")
+}
+
+func RemoveAllMobileIconsCollections(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "mobile/icons/collections")
+}
+
+func RemoveAllMobileWebServices(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "mobile/web_services")
+}
+
+func RemoveAllMobileIcons(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "mobile/icons")
+}
+
+func RemoveAllMobileIconsRequests(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "mobile/icons/requests")
+}
+
+func RemoveAllMobileNotifications(t *testing.T) {
+	DoSuccessDeleteAdmin(t, "mobile/notifications")
 }

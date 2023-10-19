@@ -2,13 +2,14 @@ package tests
 
 import (
 	"encoding/base64"
+	"io/ioutil"
+	"testing"
+
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
 	"github.com/twofas/2fas-server/tests"
-	"io/ioutil"
-	"testing"
 )
 
 func TestIconsRequestsTestSuite(t *testing.T) {
@@ -20,10 +21,10 @@ type IconsRequestsTestSuite struct {
 }
 
 func (s *IconsRequestsTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/web_services")
-	tests.DoSuccessDelete(s.T(), "mobile/icons")
-	tests.DoSuccessDelete(s.T(), "mobile/icons/collections")
-	tests.DoSuccessDelete(s.T(), "mobile/icons/requests")
+	tests.RemoveAllMobileWebServices(s.T())
+	tests.RemoveAllMobileIcons(s.T())
+	tests.RemoveAllMobileIconsCollections(s.T())
+	tests.RemoveAllMobileIconsRequests(s.T())
 }
 
 func (s *IconsRequestsTestSuite) TestCreateIconRequest() {
@@ -64,7 +65,7 @@ func (s *IconsRequestsTestSuite) TestCreateIconRequestWithNotAllowedIconDimensio
 func (s *IconsRequestsTestSuite) TestDeleteIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
-	tests.DoSuccessDelete(s.T(), "mobile/icons/requests/"+iconRequest.Id)
+	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id)
 
 	response := tests.DoGet("mobile/icons/requests/"+iconRequest.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
@@ -84,7 +85,7 @@ func (s *IconsRequestsTestSuite) TestFindIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	var searchResult *queries.IconPresenter
-	tests.DoSuccessGet(s.T(), "mobile/icons/requests/"+iconRequest.Id, &searchResult)
+	tests.DoSuccessGetAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id, &searchResult)
 
 	assert.Equal(s.T(), "service", searchResult.Name)
 }
@@ -93,7 +94,7 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestIntoWebService() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	tests.DoSuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
 	assert.Equal(s.T(), "service", result.Name)
 }
@@ -103,7 +104,7 @@ func (s *IconsRequestsTestSuite) TestTransformSingleIconRequestsIntoWebServiceFr
 	createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	tests.DoSuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
 	var icons []*queries.IconPresenter
 	tests.DoGet("mobile/icons", &icons)
@@ -116,7 +117,7 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestWithAlreadyExistingWebS
 	iconRequest := createIconRequest(s.T(), webService.Name)
 
 	var result *queries.WebServicePresenter
-	response := tests.DoPost("mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	response := tests.DoPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
 	assert.Equal(s.T(), 409, response.StatusCode)
 }
@@ -127,7 +128,7 @@ func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
 
 	var result *queries.WebServicePresenter
 	payload := []byte(`{"web_service_id":"` + webService.Id + `"}`)
-	tests.DoSuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
+	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
 
 	assert.Equal(s.T(), webService.Name, result.Name)
 }

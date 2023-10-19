@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -14,7 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const DebugHttpRequests = false
+const (
+	DebugHttpRequests = false
+	adminRawURL       = "http://localhost:8082/admin"
+)
 
 var baseUrl *url.URL
 var Auth *BasicAuth
@@ -42,11 +45,32 @@ func DoSuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
 
 	logRequest(request, response)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	if resp != nil {
 		responseDataReader := bytes.NewReader(rawBody)
 		err = json.NewDecoder(responseDataReader).Decode(resp)
+	}
+
+	require.Equal(t, 200, response.StatusCode)
+}
+
+func DoSuccessPostAdmin(t *testing.T, uri string, payload []byte, resp interface{}) {
+	adminURL, err := url.Parse(adminRawURL)
+	require.NoError(t, err)
+	request := createRequest(http.MethodPost, adminURL.JoinPath(uri).String(), payload)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(t, err)
+
+	logRequest(request, response)
+
+	rawBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	if resp != nil {
+		responseDataReader := bytes.NewReader(rawBody)
+		err = json.NewDecoder(responseDataReader).Decode(resp)
+		require.NoError(t, err)
 	}
 
 	require.Equal(t, 200, response.StatusCode)
@@ -60,7 +84,7 @@ func DoPost(uri string, payload []byte, resp interface{}) *http.Response {
 
 	logRequest(request, response)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	if resp != nil {
 		responseDataReader := bytes.NewReader(rawBody)
@@ -68,9 +92,54 @@ func DoPost(uri string, payload []byte, resp interface{}) *http.Response {
 	}
 
 	response.Body.Close()
-	response.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
+	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
 	return response
+}
+
+func DoPostAdmin(t *testing.T, uri string, payload []byte, resp interface{}) *http.Response {
+	adminURL, err := url.Parse(adminRawURL)
+	require.NoError(t, err)
+	request := createRequest(http.MethodPost, adminURL.JoinPath(uri).String(), payload)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(t, err)
+
+	logRequest(request, response)
+
+	rawBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	if resp != nil {
+		responseDataReader := bytes.NewReader(rawBody)
+		err = json.NewDecoder(responseDataReader).Decode(resp)
+		require.NoError(t, err)
+	}
+
+	response.Body.Close()
+	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
+
+	return response
+}
+
+func DoSuccessPutAdmin(t *testing.T, uri string, payload []byte, resp interface{}) {
+	adminURL, err := url.Parse(adminRawURL)
+	require.NoError(t, err)
+	request := createRequest(http.MethodPut, adminURL.JoinPath(uri).String(), payload)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(t, err)
+
+	logRequest(request, response)
+
+	rawBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	if resp != nil {
+		responseDataReader := bytes.NewReader(rawBody)
+		err = json.NewDecoder(responseDataReader).Decode(resp)
+		require.NoError(t, err)
+	}
+
+	require.Equal(t, 200, response.StatusCode)
 }
 
 func DoSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
@@ -82,7 +151,7 @@ func DoSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
 
 	logRequest(request, response)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	if resp != nil {
 		responseDataReader := bytes.NewReader(rawBody)
@@ -100,7 +169,7 @@ func DoPut(uri string, payload []byte, resp interface{}) *http.Response {
 
 	logRequest(request, response)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	if resp != nil {
 		responseDataReader := bytes.NewReader(rawBody)
@@ -117,7 +186,7 @@ func DoSuccessGet(t *testing.T, uri string, resp interface{}) {
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(t, err)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	logRequest(request, response)
 
@@ -128,20 +197,51 @@ func DoSuccessGet(t *testing.T, uri string, resp interface{}) {
 	require.NoError(t, err)
 }
 
+func DoSuccessGetAdmin(t *testing.T, uri string, resp interface{}) {
+	adminURL, err := url.Parse(adminRawURL)
+	require.NoError(t, err)
+	request := createRequest(http.MethodGet, adminURL.JoinPath(uri).String(), nil)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(t, err)
+
+	rawBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	logRequest(request, response)
+
+	require.Equal(t, 200, response.StatusCode)
+
+	err = json.Unmarshal(rawBody, resp)
+	require.NoError(t, err)
+}
+
 func DoGet(uri string, resp interface{}) *http.Response {
 	u, _ := baseUrl.Parse(uri)
 
 	request := createRequest(http.MethodGet, u.String(), nil)
 	response, _ := http.DefaultClient.Do(request)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	response.Body.Close()
-	response.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
+	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
 	logRequest(request, response)
 
 	json.Unmarshal(rawBody, resp)
+
+	return response
+}
+
+func DoSuccessDeleteAdmin(t *testing.T, uri string) *http.Response {
+	adminURL, err := url.Parse(adminRawURL)
+	require.NoError(t, err)
+	request := createRequest(http.MethodDelete, adminURL.JoinPath(uri).String(), nil)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(t, err)
+
+	logRequest(request, response)
+	require.Equal(t, 200, response.StatusCode)
 
 	return response
 }
@@ -185,10 +285,10 @@ func createRequest(method, uri string, payload []byte) *http.Request {
 
 func logRequest(req *http.Request, resp *http.Response) {
 	if DebugHttpRequests {
-		rawBody, _ := ioutil.ReadAll(resp.Body)
+		rawBody, _ := io.ReadAll(resp.Body)
 
 		resp.Body.Close()
-		resp.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
+		resp.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
 		fmt.Printf("Request: %s: %s %v \n", req.Method, req.URL.RequestURI(), req.Body)
 		fmt.Println("Response: ", req.URL.RequestURI(), resp.StatusCode, string(rawBody))

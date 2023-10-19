@@ -19,7 +19,7 @@ type TmpFileSystem struct {
 }
 
 func NewTmpFileSystem() FileSystemStorage {
-	tmpDir := "/tmp"
+	tmpDir := "/tmp/2fas"
 
 	return &TmpFileSystem{
 		baseDirectory: tmpDir,

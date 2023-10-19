@@ -2,11 +2,12 @@ package tests
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestMobileDeviceExtensionTestSuite(t *testing.T) {
@@ -18,9 +19,9 @@ type MobileDeviceExtensionTestSuite struct {
 }
 
 func (s *MobileDeviceExtensionTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "browser_extensions")
-	tests.DoSuccessDelete(s.T(), "mobile/devices")
-	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+	tests.RemoveAllMobileDevices(s.T())
+	tests.RemoveAllBrowserExtensions(s.T())
+	tests.RemoveAllBrowserExtensionsDevices(s.T())
 }
 
 func (s *MobileDeviceExtensionTestSuite) TestDoNotFindExtensionsForNotExistingDevice() {
