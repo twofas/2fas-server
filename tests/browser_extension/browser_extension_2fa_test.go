@@ -90,7 +90,7 @@ func createPairingSuccessWebsocketMessage(browserExtension *tests.BrowserExtensi
 
 func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *tests.BrowserExtensionResponse, device *tests.DeviceResponse) {
 	var browserExtensionDevices []*tests.DeviceResponse
-	tests.DoSuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
+	tests.DoAPISuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
 
 	assert.Len(t, browserExtensionDevices, 1)
 	assert.Equal(t, device.Id, browserExtensionDevices[0].Id)
@@ -98,7 +98,7 @@ func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *tests
 
 func assertDeviceHasPairedExtension(t *testing.T, device *tests.DeviceResponse, browserExtension *tests.BrowserExtensionResponse) {
 	var deviceBrowserExtensions []*tests.BrowserExtensionResponse
-	tests.DoSuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)
+	tests.DoAPISuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)
 
 	assert.Len(t, deviceBrowserExtensions, 1)
 	assert.Equal(t, browserExtension.Id, deviceBrowserExtensions[0].Id)

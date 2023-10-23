@@ -1,16 +1,19 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/twofas/2fas-server/tests"
-	"io/ioutil"
+	"io"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/twofas/2fas-server/tests"
 )
 
 func Test_Default404Response(t *testing.T) {
-	response := tests.DoGet("some/not/existing/endpoint", nil)
+	response := tests.DoAPIGet(t, "some/not/existing/endpoint", nil)
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
 
 	expected := `{"Code":404,"Type":"NotFound","Description":"Requested resource can not be found","Reason":"URI not found"}`
 

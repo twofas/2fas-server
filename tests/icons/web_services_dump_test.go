@@ -28,7 +28,7 @@ func (s *WebServicesDumpTestSuite) TestWebServicesDump() {
 	createWebService(s.T())
 	createWebService(s.T())
 
-	response := tests.DoGet("mobile/web_services/dump", nil)
+	response := tests.DoAPIGet(s.T(), "mobile/web_services/dump", nil)
 
 	assert.Equal(s.T(), 200, response.StatusCode)
 }
@@ -48,7 +48,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 
 	var webService *webServiceResponse
 
-	tests.DoSuccessPostAdmin(t, "mobile/web_services", payload, &webService)
+	tests.DoAdminAPISuccessPost(t, "mobile/web_services", payload, &webService)
 
 	return webService
 }
@@ -66,7 +66,7 @@ func createIconsCollection(t *testing.T) *iconsCollectionResponse {
 
 	var createdIconsCollection *iconsCollectionResponse
 
-	tests.DoSuccessPostAdmin(t, "mobile/icons/collections", payload, &createdIconsCollection)
+	tests.DoAdminAPISuccessPost(t, "mobile/icons/collections", payload, &createdIconsCollection)
 
 	return createdIconsCollection
 }

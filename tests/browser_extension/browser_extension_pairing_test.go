@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/json"
+	"net/http"
 	"testing"
 
 	"github.com/google/uuid"
@@ -36,7 +37,7 @@ func (s *BrowserExtensionPairingTestSuite) TestPairBrowserExtensionWithMobileDev
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
 	var extensionDevice *tests.DevicePairedBrowserExtensionResponse
-	tests.DoSuccessGet(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, &extensionDevice)
+	tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, &extensionDevice)
 
 	assert.Equal(s.T(), extensionDevice.Id, device.Id)
 }
@@ -48,7 +49,7 @@ func (s *BrowserExtensionPairingTestSuite) TestDoNotFindNotPairedBrowserExtensio
 
 	device, _ := tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 
-	response := tests.DoGet("/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, nil)
+	response := tests.DoAPIGet(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, nil)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
@@ -81,7 +82,7 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevic
 	extensionDevices := getExtensionPairedDevices(s.T(), browserExt)
 	assert.Len(s.T(), extensionDevices, 2)
 
-	tests.DoSuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device1.Id)
+	tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device1.Id)
 
 	extensionDevices = getExtensionPairedDevices(s.T(), browserExt)
 	assert.Len(s.T(), extensionDevices, 1)
@@ -94,8 +95,8 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevic
 	device, devicePubKey := tests.CreateDevice(s.T(), "go-test-device-1", "some-device-id-1")
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
-	tests.DoSuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id)
-	response := tests.DoDelete("/browser_extensions/" + browserExt.Id + "/devices/" + device.Id)
+	tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id)
+	response := tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, http.MethodDelete, nil /*payload*/, nil /*resp*/)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
@@ -107,7 +108,7 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveAllBrowserExtensionPairedDe
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey1, browserExt, device1)
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey2, browserExt, device2)
 
-	tests.DoSuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices")
+	tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices")
 
 	extensionDevices := tests.GetExtensionDevices(s.T(), browserExt.Id)
 	assert.Len(s.T(), extensionDevices, 0)
@@ -142,10 +143,10 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByInvalidExtensio
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey1, browserExt1, device1)
 	tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey2, browserExt2, device2)
 
-	var firstExtensionDevices []*tests.ExtensionPairedDeviceResponse
-	response := tests.DoGet("/browser_extensions/some-invalid-id/devices/", &firstExtensionDevices)
-	assert.Len(s.T(), firstExtensionDevices, 0)
+	invalidResp := map[string]any{}
+	response := tests.DoAPIGet(s.T(), "/browser_extensions/some-invalid-id/devices/", &invalidResp)
 	assert.Equal(s.T(), 400, response.StatusCode)
+	assert.Contains(s.T(), invalidResp["Reason"], `Field validation for 'ExtensionId' failed on the 'uuid4'`)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByNotExistingExtensionId() {
@@ -160,7 +161,7 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByNotExistingExte
 
 	notExistingExtensionId := uuid.New()
 	var firstExtensionDevices []*tests.ExtensionPairedDeviceResponse
-	tests.DoSuccessGet(s.T(), "/browser_extensions/"+notExistingExtensionId.String()+"/devices/", &firstExtensionDevices)
+	tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+notExistingExtensionId.String()+"/devices/", &firstExtensionDevices)
 	assert.Len(s.T(), firstExtensionDevices, 0)
 }
 
@@ -196,12 +197,11 @@ func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionT
 	pairingResult := new(tests.PairingResultResponse)
 	payloadJson, _ := json.Marshal(payload)
 
-	response := tests.DoPost("/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
-	assert.Equal(s.T(), 409, response.StatusCode)
+	tests.DoAPIPostAndAssertCode(s.T(), 409, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 }
 
 func getExtensionPairedDevices(t *testing.T, browserExt *tests.BrowserExtensionResponse) []*tests.ExtensionPairedDeviceResponse {
 	var extensionDevices []*tests.ExtensionPairedDeviceResponse
-	tests.DoSuccessGet(t, "/browser_extensions/"+browserExt.Id+"/devices/", &extensionDevices)
+	tests.DoAPISuccessGet(t, "/browser_extensions/"+browserExt.Id+"/devices/", &extensionDevices)
 	return extensionDevices
 }

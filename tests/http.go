@@ -10,16 +10,15 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const (
 	DebugHttpRequests = false
 	adminRawURL       = "http://localhost:8082/admin"
+	apiRawURL         = "http://localhost:80"
 )
 
-var baseUrl *url.URL
 var Auth *BasicAuth
 
 type BasicAuth struct {
@@ -32,99 +31,74 @@ func (a *BasicAuth) Header() string {
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(base))
 }
 
-func init() {
-	baseUrl, _ = url.Parse("http://localhost")
+func DoAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func DoSuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodPost, u.String(), payload)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		err = json.NewDecoder(responseDataReader).Decode(resp)
-	}
-
-	require.Equal(t, 200, response.StatusCode)
+func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func DoSuccessPostAdmin(t *testing.T, uri string, payload []byte, resp interface{}) {
-	adminURL, err := url.Parse(adminRawURL)
-	require.NoError(t, err)
-	request := createRequest(http.MethodPost, adminURL.JoinPath(uri).String(), payload)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-
-	rawBody, err := io.ReadAll(response.Body)
-	require.NoError(t, err)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		err = json.NewDecoder(responseDataReader).Decode(resp)
-		require.NoError(t, err)
-	}
-
-	require.Equal(t, 200, response.StatusCode)
+func DoAdminPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
+	require.Equal(t, expCode, response.StatusCode)
 }
 
-func DoPost(uri string, payload []byte, resp interface{}) *http.Response {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodPost, u.String(), payload)
-	response, _ := http.DefaultClient.Do(request)
-
-	logRequest(request, response)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		_ = json.NewDecoder(responseDataReader).Decode(resp)
-	}
-
-	response.Body.Close()
-	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
-
-	return response
+func DoAPIPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
+	require.Equal(t, expCode, response.StatusCode)
 }
 
-func DoPostAdmin(t *testing.T, uri string, payload []byte, resp interface{}) *http.Response {
-	adminURL, err := url.Parse(adminRawURL)
-	require.NoError(t, err)
-	request := createRequest(http.MethodPost, adminURL.JoinPath(uri).String(), payload)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-
-	rawBody, err := io.ReadAll(response.Body)
-	require.NoError(t, err)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		err = json.NewDecoder(responseDataReader).Decode(resp)
-		require.NoError(t, err)
-	}
-
-	response.Body.Close()
-	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
-
-	return response
+func DoAPIRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+	return doRequest(t, apiRawURL, uri, method, payload, resp)
 }
 
-func DoSuccessPutAdmin(t *testing.T, uri string, payload []byte, resp interface{}) {
-	adminURL, err := url.Parse(adminRawURL)
+func DoAdminRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+	return doRequest(t, apiRawURL, uri, method, payload, resp)
+}
+
+func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, adminRawURL, uri, http.MethodPut, payload, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func DoAPISuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+	response := doRequest(t, apiRawURL, uri, http.MethodPut, payload, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func DoAPISuccessGet(t *testing.T, uri string, resp interface{}) {
+	response := doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func DoAPIGet(t *testing.T, uri string, resp interface{}) *http.Response {
+	return doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
+}
+
+func DoAdminSuccessGet(t *testing.T, uri string, resp interface{}) {
+	response := doRequest(t, adminRawURL, uri, http.MethodGet, nil /*payload*/, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func DoAdminSuccessDelete(t *testing.T, uri string) {
+	response := doRequest(t, adminRawURL, uri, http.MethodDelete, nil /*payload*/, nil /*response*/)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func DoAPISuccessDelete(t *testing.T, uri string) {
+	response := doRequest(t, apiRawURL, uri, http.MethodDelete, nil /*payload*/, nil /*response*/)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+func doRequest(t *testing.T, base, uri, method string, payload []byte, resp interface{}) *http.Response {
+	t.Helper()
+	baseURL, err := url.Parse(base)
 	require.NoError(t, err)
-	request := createRequest(http.MethodPut, adminURL.JoinPath(uri).String(), payload)
+
+	request := createRequest(method, baseURL.JoinPath(uri).String(), payload)
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(t, err)
 
@@ -139,134 +113,8 @@ func DoSuccessPutAdmin(t *testing.T, uri string, payload []byte, resp interface{
 		require.NoError(t, err)
 	}
 
-	require.Equal(t, 200, response.StatusCode)
-}
-
-func DoSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodPut, u.String(), payload)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		err = json.NewDecoder(responseDataReader).Decode(resp)
-	}
-
-	assert.Equal(t, 200, response.StatusCode)
-}
-
-func DoPut(uri string, payload []byte, resp interface{}) *http.Response {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodPut, u.String(), payload)
-	response, _ := http.DefaultClient.Do(request)
-
-	logRequest(request, response)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
-	if resp != nil {
-		responseDataReader := bytes.NewReader(rawBody)
-		json.NewDecoder(responseDataReader).Decode(resp)
-	}
-
-	return response
-}
-
-func DoSuccessGet(t *testing.T, uri string, resp interface{}) {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodGet, u.String(), nil)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
-	logRequest(request, response)
-
-	require.Equal(t, 200, response.StatusCode)
-
-	err = json.Unmarshal(rawBody, resp)
-
-	require.NoError(t, err)
-}
-
-func DoSuccessGetAdmin(t *testing.T, uri string, resp interface{}) {
-	adminURL, err := url.Parse(adminRawURL)
-	require.NoError(t, err)
-	request := createRequest(http.MethodGet, adminURL.JoinPath(uri).String(), nil)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	rawBody, err := io.ReadAll(response.Body)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-
-	require.Equal(t, 200, response.StatusCode)
-
-	err = json.Unmarshal(rawBody, resp)
-	require.NoError(t, err)
-}
-
-func DoGet(uri string, resp interface{}) *http.Response {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodGet, u.String(), nil)
-	response, _ := http.DefaultClient.Do(request)
-
-	rawBody, _ := io.ReadAll(response.Body)
-
 	response.Body.Close()
 	response.Body = io.NopCloser(bytes.NewBuffer(rawBody))
-
-	logRequest(request, response)
-
-	json.Unmarshal(rawBody, resp)
-
-	return response
-}
-
-func DoSuccessDeleteAdmin(t *testing.T, uri string) *http.Response {
-	adminURL, err := url.Parse(adminRawURL)
-	require.NoError(t, err)
-	request := createRequest(http.MethodDelete, adminURL.JoinPath(uri).String(), nil)
-	response, err := http.DefaultClient.Do(request)
-	require.NoError(t, err)
-
-	logRequest(request, response)
-	require.Equal(t, 200, response.StatusCode)
-
-	return response
-}
-
-func DoSuccessDelete(t *testing.T, uri string) *http.Response {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodDelete, u.String(), nil)
-	response, err := http.DefaultClient.Do(request)
-
-	logRequest(request, response)
-
-	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode)
-
-	return response
-}
-
-func DoDelete(uri string) *http.Response {
-	u, _ := baseUrl.Parse(uri)
-
-	request := createRequest(http.MethodDelete, u.String(), nil)
-	response, _ := http.DefaultClient.Do(request)
-
-	logRequest(request, response)
 
 	return response
 }

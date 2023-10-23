@@ -57,17 +57,15 @@ func (s *IconsRequestsTestSuite) TestCreateIconRequestWithNotAllowedIconDimensio
 
 	var iconRequest *queries.IconRequestPresenter
 
-	response := tests.DoPost("mobile/icons/requests", payload, &iconRequest)
-
-	assert.Equal(s.T(), 400, response.StatusCode)
+	tests.DoAPIPostAndAssertCode(s.T(), 400, "mobile/icons/requests", payload, &iconRequest)
 }
 
 func (s *IconsRequestsTestSuite) TestDeleteIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
-	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id)
+	tests.DoAdminSuccessDelete(s.T(), "mobile/icons/requests/"+iconRequest.Id)
 
-	response := tests.DoGet("mobile/icons/requests/"+iconRequest.Id, nil)
+	response := tests.DoAPIGet(s.T(), "mobile/icons/requests/"+iconRequest.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -76,7 +74,7 @@ func (s *IconsRequestsTestSuite) TestFindAllIconsRequests() {
 	createIconRequest(s.T(), "service2")
 
 	var iconsRequests []*queries.IconRequestPresenter
-	tests.DoSuccessGet(s.T(), "mobile/icons/requests", &iconsRequests)
+	tests.DoAPISuccessGet(s.T(), "mobile/icons/requests", &iconsRequests)
 
 	assert.Len(s.T(), iconsRequests, 2)
 }
@@ -85,7 +83,7 @@ func (s *IconsRequestsTestSuite) TestFindIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	var searchResult *queries.IconPresenter
-	tests.DoSuccessGetAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id, &searchResult)
+	tests.DoAdminSuccessGet(s.T(), "mobile/icons/requests/"+iconRequest.Id, &searchResult)
 
 	assert.Equal(s.T(), "service", searchResult.Name)
 }
@@ -94,7 +92,7 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestIntoWebService() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
 	assert.Equal(s.T(), "service", result.Name)
 }
@@ -104,10 +102,10 @@ func (s *IconsRequestsTestSuite) TestTransformSingleIconRequestsIntoWebServiceFr
 	createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
 	var icons []*queries.IconPresenter
-	tests.DoGet("mobile/icons", &icons)
+	tests.DoAPIGet(s.T(), "mobile/icons", &icons)
 
 	assert.Len(s.T(), icons, 1)
 }
@@ -117,9 +115,7 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestWithAlreadyExistingWebS
 	iconRequest := createIconRequest(s.T(), webService.Name)
 
 	var result *queries.WebServicePresenter
-	response := tests.DoPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
-
-	assert.Equal(s.T(), 409, response.StatusCode)
+	tests.DoAdminPostAndAssertCode(s.T(), 409, "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 }
 
 func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
@@ -128,7 +124,7 @@ func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
 
 	var result *queries.WebServicePresenter
 	payload := []byte(`{"web_service_id":"` + webService.Id + `"}`)
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
 
 	assert.Equal(s.T(), webService.Name, result.Name)
 }
@@ -160,7 +156,7 @@ func createIconRequest(t *testing.T, serviceName string) *queries.IconRequestPre
 
 	var iconRequest *queries.IconRequestPresenter
 
-	tests.DoSuccessPost(t, "mobile/icons/requests", payload, &iconRequest)
+	tests.DoAPISuccessPost(t, "mobile/icons/requests", payload, &iconRequest)
 
 	return iconRequest
 }

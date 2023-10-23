@@ -39,7 +39,7 @@ func (s *IconsCollectionsTestSuite) TestCreateIconsCollection() {
 	`)
 
 	var IconsCollection *iconsCollectionResponse
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload, &IconsCollection)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &IconsCollection)
 
 	assert.Equal(s.T(), "facebook", IconsCollection.Name)
 	assert.Equal(s.T(), "desc", IconsCollection.Description)
@@ -55,7 +55,7 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 		}
 	`)
 	var iconsCollection *iconsCollectionResponse
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload, &iconsCollection)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
 
 	updatePayload := []byte(`
 		{
@@ -65,7 +65,7 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 	`)
 
 	var updatedIconsCollection *iconsCollectionResponse
-	tests.DoSuccessPutAdmin(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
+	tests.DoAdminSuccessPut(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
 
 	assert.Equal(s.T(), "meta", updatedIconsCollection.Name)
 	assert.Equal(s.T(), []string{"icon-1", "icon-2"}, updatedIconsCollection.Icons)
@@ -79,11 +79,11 @@ func (s *IconsCollectionsTestSuite) TestDeleteIconsCollection() {
 		}
 	`)
 	var iconsCollection *iconsCollectionResponse
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload, &iconsCollection)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
 
-	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons/collections/"+iconsCollection.Id)
+	tests.DoAdminSuccessDelete(s.T(), "mobile/icons/collections/"+iconsCollection.Id)
 
-	response := tests.DoGet("mobile/icons/collections/"+iconsCollection.Id, nil)
+	response := tests.DoAPIGet(s.T(), "mobile/icons/collections/"+iconsCollection.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -94,7 +94,7 @@ func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
 			"icons":["icon-1", "icon-2"]
 		}
 	`)
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload, nil)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, nil)
 
 	payload2 := []byte(`
 		{
@@ -103,10 +103,10 @@ func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
 			"icons":["123e4567-e89b-12d3-a456-426614174000"]
 		}
 	`)
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload2, nil)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload2, nil)
 
 	var IconsCollections []*iconsCollectionResponse
-	tests.DoSuccessGet(s.T(), "mobile/icons/collections", &IconsCollections)
+	tests.DoAPISuccessGet(s.T(), "mobile/icons/collections", &IconsCollections)
 	assert.Len(s.T(), IconsCollections, 2)
 }
 
@@ -119,10 +119,10 @@ func (s *IconsCollectionsTestSuite) TestFindIconsCollection() {
 		}
 	`)
 	var createdIconsCollection *iconsCollectionResponse
-	tests.DoSuccessPostAdmin(s.T(), "mobile/icons/collections", payload, &createdIconsCollection)
+	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &createdIconsCollection)
 
 	var IconsCollection *iconsCollectionResponse
-	tests.DoSuccessGet(s.T(), "mobile/icons/collections/"+createdIconsCollection.Id, &IconsCollection)
+	tests.DoAPISuccessGet(s.T(), "mobile/icons/collections/"+createdIconsCollection.Id, &IconsCollection)
 
 	assert.Equal(s.T(), "just-one", IconsCollection.Name)
 }

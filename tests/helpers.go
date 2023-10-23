@@ -16,7 +16,7 @@ func CreateDevice(t *testing.T, name, fcmToken string) (*DeviceResponse, string)
 
 	device := new(DeviceResponse)
 
-	DoSuccessPost(t, "mobile/devices", payload, device)
+	DoAPISuccessPost(t, "mobile/devices", payload, device)
 
 	return device, devicePubKey
 }
@@ -30,7 +30,7 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 
 	browserExt := new(BrowserExtensionResponse)
 
-	DoSuccessPost(t, "/browser_extensions", payload, browserExt)
+	DoAPISuccessPost(t, "/browser_extensions", payload, browserExt)
 
 	return browserExt
 }
@@ -40,7 +40,7 @@ func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *
 
 	browserExt := new(BrowserExtensionResponse)
 
-	DoSuccessPost(t, "/browser_extensions", payload, browserExt)
+	DoAPISuccessPost(t, "/browser_extensions", payload, browserExt)
 
 	return browserExt
 }
@@ -60,7 +60,7 @@ func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserEx
 
 	payloadJson, _ := json.Marshal(payload)
 
-	DoSuccessPost(t, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
+	DoAPISuccessPost(t, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 
 	return pairingResult
 }
@@ -68,7 +68,7 @@ func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserEx
 func GetExtensionDevices(t *testing.T, extensionId string) []*ExtensionPairedDeviceResponse {
 	var extensionDevices []*ExtensionPairedDeviceResponse
 
-	DoSuccessGet(t, "/browser_extensions/"+extensionId+"/devices", &extensionDevices)
+	DoAPISuccessGet(t, "/browser_extensions/"+extensionId+"/devices", &extensionDevices)
 
 	return extensionDevices
 }
@@ -78,7 +78,7 @@ func Request2FaToken(t *testing.T, domain, extensionId string) *AuthTokenRequest
 
 	payload := []byte(fmt.Sprintf(`{"domain":"%s"}`, domain))
 
-	DoSuccessPost(t, "browser_extensions/"+extensionId+"/commands/request_2fa_token", payload, &response)
+	DoAPISuccessPost(t, "browser_extensions/"+extensionId+"/commands/request_2fa_token", payload, &response)
 
 	return response
 }
@@ -86,37 +86,37 @@ func Request2FaToken(t *testing.T, domain, extensionId string) *AuthTokenRequest
 func Send2FaTokenToExtension(t *testing.T, extensionId, deviceId, requestId, token string) {
 	j := fmt.Sprintf(`{"token_request_id":"%s","extension_id":"%s","token":"%s"}`, requestId, extensionId, token)
 
-	DoSuccessPost(t, "mobile/devices/"+deviceId+"/commands/send_2fa_token", []byte(j), nil)
+	DoAPISuccessPost(t, "mobile/devices/"+deviceId+"/commands/send_2fa_token", []byte(j), nil)
 }
 
 func RemoveAllBrowserExtensionsDevices(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "browser_extensions/devices")
+	DoAdminSuccessDelete(t, "browser_extensions/devices")
 }
 
 func RemoveAllBrowserExtensions(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "browser_extensions")
+	DoAdminSuccessDelete(t, "browser_extensions")
 }
 
 func RemoveAllMobileDevices(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "/mobile/devices")
+	DoAdminSuccessDelete(t, "/mobile/devices")
 }
 
 func RemoveAllMobileIconsCollections(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "mobile/icons/collections")
+	DoAdminSuccessDelete(t, "mobile/icons/collections")
 }
 
 func RemoveAllMobileWebServices(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "mobile/web_services")
+	DoAdminSuccessDelete(t, "mobile/web_services")
 }
 
 func RemoveAllMobileIcons(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "mobile/icons")
+	DoAdminSuccessDelete(t, "mobile/icons")
 }
 
 func RemoveAllMobileIconsRequests(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "mobile/icons/requests")
+	DoAdminSuccessDelete(t, "mobile/icons/requests")
 }
 
 func RemoveAllMobileNotifications(t *testing.T) {
-	DoSuccessDeleteAdmin(t, "mobile/notifications")
+	DoAdminSuccessDelete(t, "mobile/notifications")
 }

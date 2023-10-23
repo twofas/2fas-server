@@ -34,7 +34,7 @@ func createIcon(t *testing.T) *query.IconPresenter {
 
 	var icon *query.IconPresenter
 
-	tests.DoSuccessPostAdmin(t, "mobile/icons", payload, &icon)
+	tests.DoAdminAPISuccessPost(t, "mobile/icons", payload, &icon)
 
 	return icon
 }
@@ -48,7 +48,7 @@ type IconsTestSuite struct {
 }
 
 func (s *IconsTestSuite) SetupTest() {
-	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons")
+	tests.DoAdminSuccessDelete(s.T(), "mobile/icons")
 }
 
 func (s *IconsTestSuite) TestCreateIcon() {
@@ -67,7 +67,7 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 	`)
 
 	var updatedIcon *query.IconPresenter
-	tests.DoSuccessPutAdmin(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
+	tests.DoAdminSuccessPut(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
 
 	assert.Equal(s.T(), "meta", updatedIcon.Name)
 }
@@ -75,9 +75,9 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 func (s *IconsTestSuite) TestDeleteIcon() {
 	icon := createIcon(s.T())
 
-	tests.DoSuccessDeleteAdmin(s.T(), "mobile/icons/"+icon.Id)
+	tests.DoAdminSuccessDelete(s.T(), "mobile/icons/"+icon.Id)
 
-	response := tests.DoGet("mobile/icons/"+icon.Id, nil)
+	response := tests.DoAPIGet(s.T(), "mobile/icons/"+icon.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -86,7 +86,7 @@ func (s *IconsTestSuite) TestFindAllIcons() {
 	createIcon(s.T())
 
 	var Icons []*query.IconPresenter
-	tests.DoSuccessGet(s.T(), "mobile/icons", &Icons)
+	tests.DoAPISuccessGet(s.T(), "mobile/icons", &Icons)
 
 	assert.Len(s.T(), Icons, 2)
 }
@@ -95,7 +95,7 @@ func (s *IconsTestSuite) TestFindIcon() {
 	icon := createIcon(s.T())
 
 	var searchResult *query.IconPresenter
-	tests.DoSuccessGet(s.T(), "mobile/icons/"+icon.Id, &searchResult)
+	tests.DoAPISuccessGet(s.T(), "mobile/icons/"+icon.Id, &searchResult)
 
 	assert.Equal(s.T(), "facebook", searchResult.Name)
 }
