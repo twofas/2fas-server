@@ -2,10 +2,11 @@ package tests
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestTwoFactorAuthTestSuite(t *testing.T) {
@@ -17,9 +18,9 @@ type TwoFactorAuthTestSuite struct {
 }
 
 func (s *TwoFactorAuthTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "/mobile/devices")
-	tests.DoSuccessDelete(s.T(), "/browser_extensions")
-	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+	tests.RemoveAllMobileDevices(s.T())
+	tests.RemoveAllBrowserExtensions(s.T())
+	tests.RemoveAllBrowserExtensionsDevices(s.T())
 }
 
 func (s *TwoFactorAuthTestSuite) TestBrowserExtensionAuthFullFlow() {
@@ -89,7 +90,7 @@ func createPairingSuccessWebsocketMessage(browserExtension *tests.BrowserExtensi
 
 func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *tests.BrowserExtensionResponse, device *tests.DeviceResponse) {
 	var browserExtensionDevices []*tests.DeviceResponse
-	tests.DoSuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
+	tests.DoAPISuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
 
 	assert.Len(t, browserExtensionDevices, 1)
 	assert.Equal(t, device.Id, browserExtensionDevices[0].Id)
@@ -97,7 +98,7 @@ func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *tests
 
 func assertDeviceHasPairedExtension(t *testing.T, device *tests.DeviceResponse, browserExtension *tests.BrowserExtensionResponse) {
 	var deviceBrowserExtensions []*tests.BrowserExtensionResponse
-	tests.DoSuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)
+	tests.DoAPISuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)
 
 	assert.Len(t, deviceBrowserExtensions, 1)
 	assert.Equal(t, browserExtension.Id, deviceBrowserExtensions[0].Id)

@@ -1,10 +1,11 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"testing"
 )
 
 func TestMobileDeviceExtensionIntegrationTestSuite(t *testing.T) {
@@ -16,9 +17,9 @@ type MobileDeviceExtensionIntegrationTestSuite struct {
 }
 
 func (s *MobileDeviceExtensionIntegrationTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "browser_extensions")
-	tests.DoSuccessDelete(s.T(), "mobile/devices")
-	tests.DoSuccessDelete(s.T(), "browser_extensions/devices")
+	tests.RemoveAllMobileDevices(s.T())
+	tests.RemoveAllBrowserExtensions(s.T())
+	tests.RemoveAllBrowserExtensionsDevices(s.T())
 }
 
 func (s *MobileDeviceExtensionIntegrationTestSuite) TestGetPending2FaRequests() {
@@ -28,10 +29,10 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestGetPending2FaRequests() 
 
 	var tokenRequest *tests.AuthTokenRequestResponse
 	request2FaTokenPayload := []byte(`{"domain":"domain.com"}`)
-	tests.DoSuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
+	tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
 
 	var tokenRequestsCollection []*tests.AuthTokenRequestResponse
-	tests.DoSuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
+	tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
 	assert.Len(s.T(), tokenRequestsCollection, 1)
 }
 
@@ -42,12 +43,12 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestDoNotReturnCompleted2FaR
 
 	var tokenRequest *tests.AuthTokenRequestResponse
 	request2FaTokenPayload := []byte(`{"domain":"domain.com"}`)
-	tests.DoSuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
+	tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
 
 	closeTokenRequestPayload := []byte(`{"status":"completed"}`)
-	tests.DoSuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id+"/commands/close_2fa_request", closeTokenRequestPayload, nil)
+	tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id+"/commands/close_2fa_request", closeTokenRequestPayload, nil)
 
 	var tokenRequestsCollection []*tests.AuthTokenRequestResponse
-	tests.DoSuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
+	tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
 	assert.Len(s.T(), tokenRequestsCollection, 0)
 }

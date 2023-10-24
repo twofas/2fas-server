@@ -6,11 +6,16 @@ services:
       context: .
       dockerfile: docker/api/Dockerfile
     depends_on:
+      shared-volume-init:
+        condition: service_completed_successfully
       mysql:
         condition: service_healthy
+    group_add:
+      - '1000'
     volumes:
       - ./migrations:/migrations
       - go-modules:/go/pkg/mod
+      - shared-volume:/tmp/2fas
     ports:
       - "80:8080"
     env_file:
@@ -21,8 +26,14 @@ services:
       context: .
       dockerfile: docker/admin/Dockerfile
     depends_on:
+      shared-volume-init:
+        condition: service_completed_successfully
       mysql:
         condition: service_healthy
+    group_add:
+      - '1000'
+    volumes:
+      - shared-volume:/tmp/2fas
     ports:
       - "8082:8080"
     env_file:
@@ -69,5 +80,21 @@ services:
     volumes:
       - ./api/openapi:/usr/share/nginx/html/doc
 
+
+  # docker compose always mount named volumes as root (https://github.com/docker/compose/issues/3270)
+  # and without changing permission, we want be able to access shared volume
+  shared-volume-init:
+    image: ubuntu
+    user: root
+    group_add:
+      - '1000'
+    volumes:
+      - shared-volume:/tmp/2fas
+    command: chown -R 1000:1000 /tmp/2fas
+
+
 volumes:
   go-modules:
+  # shared-volume is used to share volume between api and admin. On producition AWS S3 is used, 
+  # but here for local dev shared volume is fine.
+  shared-volume:

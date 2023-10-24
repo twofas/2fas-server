@@ -2,11 +2,12 @@ package tests
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/twofas/2fas-server/tests"
-	"net/http"
-	"testing"
 )
 
 func TestMobileDeviceTestSuite(t *testing.T) {
@@ -18,7 +19,7 @@ type MobileDeviceTestSuite struct {
 }
 
 func (s *MobileDeviceTestSuite) SetupTest() {
-	tests.DoSuccessDelete(s.T(), "mobile/devices")
+	tests.RemoveAllMobileDevices(s.T())
 }
 
 func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
@@ -37,15 +38,15 @@ func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
 	}
 
 	for _, tc := range testsCases {
-		response := createDevice(tc.deviceName)
+		response := createDevice(s.T(), tc.deviceName)
 
 		assert.Equal(s.T(), tc.expectedHttpCode, response.StatusCode)
 	}
 }
 
-func createDevice(name string) *http.Response {
+func createDevice(t *testing.T, name string) *http.Response {
 	fcmToken := "some-fake-token"
 	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
 
-	return tests.DoPost("mobile/devices", payload, nil)
+	return tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
 }
