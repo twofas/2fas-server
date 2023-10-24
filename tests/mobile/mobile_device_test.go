@@ -25,28 +25,29 @@ func (s *MobileDeviceTestSuite) SetupTest() {
 func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
 	type testCase struct {
 		deviceName       string
+		fcmToken         string
 		expectedHttpCode int
 	}
-
+	defaultFCMToken := "some-fake-token"
 	testsCases := []testCase{
-		{deviceName: "", expectedHttpCode: 400},
-		{deviceName: " ", expectedHttpCode: 400},
-		{deviceName: "   ", expectedHttpCode: 400},
-		{deviceName: "john`s android", expectedHttpCode: 200},
-		{deviceName: "john ", expectedHttpCode: 200},
-		{deviceName: " john doe", expectedHttpCode: 200},
+		{deviceName: "", fcmToken: defaultFCMToken, expectedHttpCode: 400},
+		{deviceName: " ", fcmToken: defaultFCMToken, expectedHttpCode: 400},
+		{deviceName: "   ", fcmToken: defaultFCMToken, expectedHttpCode: 400},
+		{deviceName: "john`s android", fcmToken: defaultFCMToken, expectedHttpCode: 200},
+		{deviceName: "john ", fcmToken: defaultFCMToken, expectedHttpCode: 200},
+		{deviceName: " john doe", fcmToken: defaultFCMToken, expectedHttpCode: 200},
+		// empty FCM token should be also valid.
+		{deviceName: " john doe", fcmToken: "", expectedHttpCode: 200},
 	}
 
 	for _, tc := range testsCases {
-		response := createDevice(s.T(), tc.deviceName)
+		response := createDevice(s.T(), tc.deviceName, tc.fcmToken)
 
 		assert.Equal(s.T(), tc.expectedHttpCode, response.StatusCode)
 	}
 }
 
-func createDevice(t *testing.T, name string) *http.Response {
-	fcmToken := "some-fake-token"
+func createDevice(t *testing.T, name, fcmToken string) *http.Response {
 	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
-
 	return tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
 }
