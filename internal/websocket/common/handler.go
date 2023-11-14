@@ -62,6 +62,7 @@ func (h *ConnectionHandler) getHub(channel string) *Hub {
 		go hub.Run()
 
 		h.channels[channel] = hub
+		logging.Errorf("Starting new hub, there are %d hubs in total", len(h.channels))
 	}
 
 	return hub
