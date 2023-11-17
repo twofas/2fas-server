@@ -3,6 +3,7 @@ package common
 import (
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,14 +27,14 @@ var upgrader = websocket.Upgrader{
 }
 
 type ConnectionHandler struct {
-	channels map[string]*Hub
+	hubs *hubPool
+	mtx  *sync.Mutex
 }
 
 func NewConnectionHandler() *ConnectionHandler {
-	channels := make(map[string]*Hub)
-
 	return &ConnectionHandler{
-		channels: channels,
+		hubs: newHubPool(),
+		mtx:  &sync.Mutex{},
 	}
 }
 
@@ -45,30 +46,11 @@ func (h *ConnectionHandler) Handler() gin.HandlerFunc {
 
 		logging.Info("New channel subscriber")
 
-		hub := h.getHub(channel)
-
-		h.serveWs(hub, c.Writer, c.Request)
+		h.serveWs(c.Writer, c.Request, channel)
 	}
 }
 
-func (h *ConnectionHandler) getHub(channel string) *Hub {
-	var hub *Hub
-
-	hub, ok := h.channels[channel]
-
-	if !ok {
-		hub = NewHub()
-
-		go hub.Run()
-
-		h.channels[channel] = hub
-		logging.Errorf("Starting new hub, there are %d hubs in total", len(h.channels))
-	}
-
-	return hub
-}
-
-func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func (h *ConnectionHandler) serveWs(w http.ResponseWriter, r *http.Request, channel string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logging.Errorf("Failed to upgrade connection: %v", err)
@@ -76,8 +58,7 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
+	client, _ := h.hubs.registerClient(channel, conn)
 
 	go recovery.DoNotPanic(func() {
 		client.writePump()
@@ -94,7 +75,7 @@ func (h *ConnectionHandler) serveWs(hub *Hub, w http.ResponseWriter, r *http.Req
 		<-timeout
 		logging.Info("Connection closed after", disconnectAfter)
 
-		client.hub.unregister <- client
+		client.hub.unregisterClient(client)
 		client.conn.Close()
 	})
 }
