@@ -71,16 +71,6 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
-  swaggerui:
-    build:
-      context: .
-      dockerfile: docker/swaggerui/Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./api/openapi:/usr/share/nginx/html/doc
-
-
   # docker compose always mount named volumes as root (https://github.com/docker/compose/issues/3270)
   # and without changing permission, we want be able to access shared volume
   shared-volume-init:
