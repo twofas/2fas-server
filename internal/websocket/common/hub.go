@@ -5,16 +5,16 @@ import (
 )
 
 type Hub struct {
-	id                  string
-	onHubIsHasNoClients func(id string)
-	clients             *sync.Map
+	id                string
+	onHubHasNoClients func(id string)
+	clients           *sync.Map
 }
 
 func NewHub(id string, notifyOnEmpty func(id string)) *Hub {
 	h := &Hub{
-		id:                  id,
-		clients:             &sync.Map{},
-		onHubIsHasNoClients: notifyOnEmpty,
+		id:                id,
+		clients:           &sync.Map{},
+		onHubHasNoClients: notifyOnEmpty,
 	}
 	return h
 }
@@ -30,7 +30,7 @@ func (h *Hub) unregisterClient(c *Client) {
 	}
 	close(c.send)
 	if h.isEmpty() {
-		h.onHubIsHasNoClients(h.id)
+		h.onHubHasNoClients(h.id)
 	}
 }
 

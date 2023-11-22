@@ -31,7 +31,7 @@ func TestRemovingEmptyHub(t *testing.T) {
 	_, h2 := hp.registerClient(channelID, &websocket.Conn{})
 
 	if !h1.isEmpty() {
-		t.Fatalf("Hub does not report it is empty, even though uit should")
+		t.Fatalf("Hub does not report it is empty, even though it should")
 	}
 	if h1 == h2 {
 		t.Fatal("Old hub wasn't deleted")
@@ -56,7 +56,7 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(channelsNo * clientsPerChannel)
 	for i := 0; i < channelsNo; i++ {
-		var channelID = fmt.Sprintf("channel-%d", i)
+		channelID := fmt.Sprintf("channel-%d", i)
 		go func() {
 			for j := 0; j < clientsPerChannel; j++ {
 				c, h := hp.registerClient(channelID, &websocket.Conn{})
