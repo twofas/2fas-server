@@ -2,9 +2,10 @@ package common
 
 import (
 	"bytes"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"time"
 )
 
 var (
@@ -51,7 +52,7 @@ type Client struct {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		c.hub.unregister <- c
+		c.hub.unregisterClient(c)
 		c.conn.Close()
 	}()
 
@@ -82,7 +83,7 @@ func (c *Client) readPump() {
 
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		c.hub.broadcast <- message
+		go c.hub.broadcastMsg(message)
 	}
 }
 
