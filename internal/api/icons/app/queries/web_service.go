@@ -2,9 +2,12 @@ package queries
 
 import (
 	"github.com/doug-martin/goqu/v9"
-	"github.com/twofas/2fas-server/internal/api/icons/adapters"
+	"github.com/pkg/errors"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
+	"github.com/twofas/2fas-server/internal/common/db"
 )
 
 type WebServicePresenter struct {
@@ -37,13 +40,18 @@ func (h *WebServiceQueryHandler) FindOne(query *WebServiceQuery) (*WebServicePre
 		goqu.C("deleted_at").IsNull(),
 	)
 
-	sql, _, _ := ds.ToSQL()
+	sql, _, err := ds.ToSQL()
+	if err != nil {
+		return nil, db.QueryPrepError(err)
+	}
 
 	presenter := &WebServicePresenter{}
 
 	result := h.Database.Raw(sql).First(&presenter)
-
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, db.WrapError(err)
+		}
 		return nil, adapters.WebServiceCouldNotBeFound{WebServiceId: query.Id}
 	}
 
@@ -69,9 +77,15 @@ func (h *WebServiceQueryHandler) FindAll(query *WebServiceQuery) ([]*WebServiceP
 		)
 	}
 
-	sql, _, _ := ds.ToSQL()
+	sql, _, err := ds.ToSQL()
+	if err != nil {
+		return nil, db.QueryPrepError(err)
+	}
 
-	h.Database.Raw(sql).Find(&presenter)
+	result := h.Database.Raw(sql).Find(&presenter)
+	if err := result.Error; err != nil {
+		return nil, db.WrapError(err)
+	}
 
 	return presenter, nil
 }
