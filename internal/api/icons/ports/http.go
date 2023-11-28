@@ -2,6 +2,7 @@ package ports
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -11,6 +12,7 @@ import (
 	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
 	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/db"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -49,8 +51,13 @@ func (r *RoutesHandler) CreateWebService(c *gin.Context) {
 	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.CreateWebService.Handle(cmd)
-
 	if err != nil {
+		if db.IsDBError(err) {
+			logging.LogCommandFailed(cmd, err)
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
+
 		var conflictErr domain.WebServiceAlreadyExistsError
 
 		if errors.As(err, &conflictErr) {
@@ -93,18 +100,21 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 			return
 		}
 
-		validationErrors := err.(validator.ValidationErrors)
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+		c.JSON(400, api.NewBadRequestError(err))
 		return
 	}
 
 	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.UpdateWebService.Handle(cmd)
-
 	if err != nil {
-		c.JSON(400, api.NewBadRequestError(err))
+		if db.IsDBError(err) {
+			logging.LogCommandFailed(cmd, err)
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 
+		c.JSON(400, api.NewBadRequestError(err))
 		return
 	}
 
@@ -113,10 +123,14 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 	}
 
 	presenter, err := r.cqrs.Queries.WebServiceQuery.FindOne(q)
-
 	if err != nil {
-		c.JSON(404, api.NotFoundError(err))
+		if db.IsDBError(err) {
+			logging.LogCommandFailed(cmd, err)
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 
+		c.JSON(404, api.NotFoundError(err))
 		return
 	}
 
@@ -209,8 +223,11 @@ func (r *RoutesHandler) FindAllWebServices(c *gin.Context) {
 	result, err := r.cqrs.Queries.WebServiceQuery.FindAll(q)
 
 	if err != nil {
+		if db.IsDBError(err) {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(err))
-
 		return
 	}
 

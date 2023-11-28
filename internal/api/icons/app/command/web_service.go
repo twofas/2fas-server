@@ -2,6 +2,7 @@ package command
 
 import (
 	"encoding/json"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/icons/domain"
@@ -51,7 +52,9 @@ func (h *CreateWebServiceHandler) Handle(cmd *CreateWebService) error {
 	}
 
 	conflict, err := h.Repository.FindByName(cmd.Name)
-
+	if err != nil {
+		return err
+	}
 	if conflict != nil {
 		return domain.WebServiceAlreadyExistsError{Name: cmd.Name}
 	}
@@ -87,7 +90,6 @@ func (h *UpdateWebServiceHandler) Handle(cmd *UpdateWebService) error {
 	id, _ := uuid.Parse(cmd.Id)
 
 	webService, err := h.Repository.FindById(id)
-
 	if err != nil {
 		return err
 	}

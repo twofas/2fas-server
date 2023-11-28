@@ -3,9 +3,12 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/db"
 )
 
 type WebServiceCouldNotBeFound struct {
@@ -53,8 +56,11 @@ func (r *WebServiceMysqlRepository) FindById(id uuid.UUID) (*domain.WebService, 
 
 	result := r.db.First(&webService, "id = ?", id.String())
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, WebServiceCouldNotBeFound{WebServiceId: id.String()}
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, WebServiceCouldNotBeFound{WebServiceId: id.String()}
+		}
+		return nil, db.WrapError(err)
 	}
 
 	return webService, nil
@@ -65,8 +71,11 @@ func (r *WebServiceMysqlRepository) FindByName(name string) (*domain.WebService,
 
 	result := r.db.First(&webService, "name = ?", name)
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, errors.New("web service could not be found")
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("web service could not be found")
+		}
+		return nil, db.WrapError(err)
 	}
 
 	return webService, nil
