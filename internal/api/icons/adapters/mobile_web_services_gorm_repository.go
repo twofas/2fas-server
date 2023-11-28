@@ -56,10 +56,11 @@ func (r *WebServiceMysqlRepository) FindById(id uuid.UUID) (*domain.WebService, 
 
 	result := r.db.First(&webService, "id = ?", id.String())
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, WebServiceCouldNotBeFound{WebServiceId: id.String()}
-	} else if result.Error != nil {
-		return nil, db.WrapError(result.Error)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, WebServiceCouldNotBeFound{WebServiceId: id.String()}
+		}
+		return nil, db.WrapError(err)
 	}
 
 	return webService, nil
@@ -70,9 +71,10 @@ func (r *WebServiceMysqlRepository) FindByName(name string) (*domain.WebService,
 
 	result := r.db.First(&webService, "name = ?", name)
 
-	if err := result.Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("web service could not be found")
-	} else if err != nil {
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("web service could not be found")
+		}
 		return nil, db.WrapError(err)
 	}
 
