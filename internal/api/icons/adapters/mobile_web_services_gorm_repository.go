@@ -12,11 +12,11 @@ import (
 )
 
 type WebServiceCouldNotBeFound struct {
-	WebServiceId string
+	Identifier string
 }
 
 func (e WebServiceCouldNotBeFound) Error() string {
-	return fmt.Sprintf("Web service could not be found: %s", e.WebServiceId)
+	return fmt.Sprintf("Web service could not be found: %s", e.Identifier)
 }
 
 type WebServiceMysqlRepository struct {
@@ -29,7 +29,7 @@ func NewWebServiceMysqlRepository(db *gorm.DB) *WebServiceMysqlRepository {
 
 func (r *WebServiceMysqlRepository) Save(webService *domain.WebService) error {
 	if err := r.db.Create(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -37,7 +37,7 @@ func (r *WebServiceMysqlRepository) Save(webService *domain.WebService) error {
 
 func (r *WebServiceMysqlRepository) Update(webService *domain.WebService) error {
 	if err := r.db.Updates(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -45,7 +45,7 @@ func (r *WebServiceMysqlRepository) Update(webService *domain.WebService) error 
 
 func (r *WebServiceMysqlRepository) Delete(webService *domain.WebService) error {
 	if err := r.db.Delete(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -58,7 +58,7 @@ func (r *WebServiceMysqlRepository) FindById(id uuid.UUID) (*domain.WebService, 
 
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, WebServiceCouldNotBeFound{WebServiceId: id.String()}
+			return nil, WebServiceCouldNotBeFound{Identifier: id.String()}
 		}
 		return nil, db.WrapError(err)
 	}
@@ -73,7 +73,7 @@ func (r *WebServiceMysqlRepository) FindByName(name string) (*domain.WebService,
 
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("web service could not be found")
+			return nil, WebServiceCouldNotBeFound{Identifier: name}
 		}
 		return nil, db.WrapError(err)
 	}

@@ -3,9 +3,12 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/db"
 )
 
 type IconCouldNotBeFound struct {
@@ -53,8 +56,11 @@ func (r *IconMysqlRepository) FindById(id uuid.UUID) (*domain.Icon, error) {
 
 	result := r.db.First(&Icon, "id = ?", id.String())
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, IconCouldNotBeFound{IconId: id.String()}
+	if err := result.Error; err != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, IconCouldNotBeFound{IconId: id.String()}
+		}
+		return nil, db.WrapError(err)
 	}
 
 	return Icon, nil

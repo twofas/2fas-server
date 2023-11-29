@@ -1,15 +1,18 @@
 package aws
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"io"
-	"os"
-	"path/filepath"
 )
 
 type AwsS3 struct {
@@ -44,27 +47,16 @@ func (s *AwsS3) Get(path string) (file *os.File, err error) {
 	downloader := s3manager.NewDownloader(sess)
 
 	f, err := os.Create(name)
-
 	if err != nil {
-		logging.WithFields(logging.Fields{
-			"error": err.Error(),
-			"file":  f.Name(),
-		}).Error("Cannot create file")
+		return nil, fmt.Errorf("failed to create file: %w", err)
 	}
 
 	_, err = downloader.Download(f, &s3.GetObjectInput{
 		Bucket: aws.String(directory),
 		Key:    aws.String(name),
 	})
-
 	if err != nil {
-		logging.WithFields(logging.Fields{
-			"error":    err.Error(),
-			"bucket":   directory,
-			"filename": name,
-		}).Error("Cannot download file")
-
-		return nil, err
+		return nil, fmt.Errorf("failed to download the object from s3: %w", err)
 	}
 
 	return f, nil
