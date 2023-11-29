@@ -59,9 +59,8 @@ func (r *IconMysqlRepository) FindById(id uuid.UUID) (*domain.Icon, error) {
 	if err := result.Error; err != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, IconCouldNotBeFound{IconId: id.String()}
-		} else {
-			return nil, db.WrapError(err)
 		}
+		return nil, db.WrapError(err)
 	}
 
 	return Icon, nil

@@ -6,6 +6,9 @@ import (
 	"image/png"
 	"path/filepath"
 
+	"github.com/pkg/errors"
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -324,12 +327,14 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 		return err
 	}
 
-	conflict, err := h.WebServiceRepository.FindByName(iconRequest.ServiceName)
-	if err != nil && db.IsDBError(err) {
-		return fmt.Errorf("failed to find web service by name: %w", err)
-	}
-	if conflict != nil {
+	_, err = h.WebServiceRepository.FindByName(iconRequest.ServiceName)
+	if err == nil {
 		return domain.WebServiceAlreadyExistsError{Name: iconRequest.ServiceName}
+	} else {
+		var notFound adapters.WebServiceCouldNotBeFound
+		if !errors.Is(err, &notFound) {
+			return fmt.Errorf("failed to find web service by name: %w", err)
+		}
 	}
 
 	iconsCollectionId := uuid.New()
