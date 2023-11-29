@@ -29,7 +29,7 @@ func NewWebServiceMysqlRepository(db *gorm.DB) *WebServiceMysqlRepository {
 
 func (r *WebServiceMysqlRepository) Save(webService *domain.WebService) error {
 	if err := r.db.Create(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -37,7 +37,7 @@ func (r *WebServiceMysqlRepository) Save(webService *domain.WebService) error {
 
 func (r *WebServiceMysqlRepository) Update(webService *domain.WebService) error {
 	if err := r.db.Updates(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -45,7 +45,7 @@ func (r *WebServiceMysqlRepository) Update(webService *domain.WebService) error 
 
 func (r *WebServiceMysqlRepository) Delete(webService *domain.WebService) error {
 	if err := r.db.Delete(webService).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil

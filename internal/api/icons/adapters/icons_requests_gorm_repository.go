@@ -3,9 +3,12 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/db"
 )
 
 type IconRequestCouldNotBeFound struct {
@@ -42,7 +45,7 @@ func (r *IconRequestMysqlRepository) Update(iconRequest *domain.IconRequest) err
 
 func (r *IconRequestMysqlRepository) Delete(iconRequest *domain.IconRequest) error {
 	if err := r.db.Delete(iconRequest).Error; err != nil {
-		return err
+		return db.WrapError(err)
 	}
 
 	return nil
@@ -52,9 +55,11 @@ func (r *IconRequestMysqlRepository) FindById(id uuid.UUID) (*domain.IconRequest
 	iconRequest := &domain.IconRequest{}
 
 	result := r.db.First(&iconRequest, "id = ?", id.String())
-
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, IconRequestCouldNotBeFound{IconRequestId: id.String()}
+	if err := result.Error; err != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, IconRequestCouldNotBeFound{IconRequestId: id.String()}
+		}
+		return nil, db.WrapError(err)
 	}
 
 	return iconRequest, nil

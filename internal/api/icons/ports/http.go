@@ -91,7 +91,6 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 	c.ShouldBindJSON(cmd)
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
 		var notFoundErr adapters.WebServiceCouldNotBeFound
 
@@ -537,7 +536,6 @@ func (r *RoutesHandler) UpdateWebServiceFromIconRequest(c *gin.Context) {
 	c.BindJSON(cmd)
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		c.JSON(400, api.NewBadRequestError(validationErrors))
@@ -548,10 +546,15 @@ func (r *RoutesHandler) UpdateWebServiceFromIconRequest(c *gin.Context) {
 	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.UpdateWebServiceFromIconRequest.Handle(cmd)
-
 	if err != nil {
-		c.JSON(400, api.NewBadRequestError(err))
 		logging.LogCommandFailed(cmd, err)
+
+		if db.IsDBError(err) {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
+
+		c.JSON(400, api.NewBadRequestError(err))
 		return
 	}
 
@@ -576,10 +579,12 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 		WebServiceId: webServiceId,
 	}
 
-	c.BindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		c.JSON(400, api.NewBadRequestError(validationErrors))
@@ -589,7 +594,6 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 	logging.LogCommand(cmd)
 
 	err = r.cqrs.Commands.TransformIconRequestToWebService.Handle(cmd)
-
 	if err != nil {
 		var conflictErr domain.WebServiceAlreadyExistsError
 
