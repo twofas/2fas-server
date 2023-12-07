@@ -38,7 +38,10 @@ func DoAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}
 
 func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
 	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
-	require.Equal(t, http.StatusOK, response.StatusCode)
+	bb, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	require.Equal(t, http.StatusOK, response.StatusCode, "invalid status code, response payload is: %q", string(bb))
 }
 
 func DoAdminPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
