@@ -18,6 +18,8 @@ This is the official server-side API for the Open Source 2FAS project.
 
 We use GitHub for bug reports. Please visit the [2FAS Server API issues page](https://github.com/twofas/2fas-api/issues) to search for and report any bugs you may have found. Before adding a new issue, please search for existing issues to avoid duplicates.
 
+For reporting security issues only, please send a detailed description of the vulnerability to security@2fas.com. Do not use this address for general inquiries or bug reports unrelated to security concerns.
+
 ## Contributing
 
 We welcome contributions to the Open Source 2FAS project. If you would like to contribute, please follow these steps:
