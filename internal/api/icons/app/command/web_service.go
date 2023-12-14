@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/twofas/2fas-server/internal/api/icons/adapters"R
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 	"github.com/twofas/2fas-server/internal/api/icons/domain"
 )
 
