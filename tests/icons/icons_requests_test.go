@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -127,6 +128,12 @@ func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
 	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
 
 	assert.Equal(s.T(), webService.Name, result.Name)
+
+	var iconsCollections []string
+	if err := json.Unmarshal(result.IconsCollections, &iconsCollections); err != nil {
+		assert.NoError(s.T(), err)
+	}
+	assert.Equal(s.T(), webService.IconsCollections, iconsCollections, "icons collections id should not change")
 }
 
 func createIconRequest(t *testing.T, serviceName string) *queries.IconRequestPresenter {

@@ -2,11 +2,14 @@ package command
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"R
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
 )
 
 type MatchRule struct {
@@ -53,7 +56,10 @@ func (h *CreateWebServiceHandler) Handle(cmd *CreateWebService) error {
 
 	conflict, err := h.Repository.FindByName(cmd.Name)
 	if err != nil {
-		return err
+		var notFound adapters.WebServiceCouldNotBeFound
+		if !errors.As(err, &notFound) {
+			return err
+		}
 	}
 	if conflict != nil {
 		return domain.WebServiceAlreadyExistsError{Name: cmd.Name}
