@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app"
@@ -125,8 +125,8 @@ func NewBrowserExtensionModule(
 func (m *BrowserExtensionModule) RegisterPublicRoutes(router *gin.Engine) {
 	rateLimiter := rate_limit.New(m.Redis)
 
-	bandwidthAuditMiddleware := apisec.BrowserExtensionBandwidthAuditMiddleware(rateLimiter)
-	iPAbuseAuditMiddleware := security.IPAbuseAuditMiddleware(rateLimiter)
+	bandwidthAuditMiddleware := apisec.BrowserExtensionBandwidthAuditMiddleware(rateLimiter, m.Config.Security.RateLimitBE)
+	iPAbuseAuditMiddleware := security.IPAbuseAuditMiddleware(rateLimiter, m.Config.Security.RateLimitIP)
 
 	publicRouter := router.Group("/")
 	publicRouter.Use(iPAbuseAuditMiddleware)

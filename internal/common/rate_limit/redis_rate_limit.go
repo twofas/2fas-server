@@ -2,8 +2,11 @@ package rate_limit
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
 	"time"
+
+	"github.com/go-redis/redis_rate/v10"
+	"github.com/redis/go-redis/v9"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 type Rate struct {
@@ -18,33 +21,33 @@ type RateLimiter interface {
 type LimitHandler func()
 
 type RedisRateLimit struct {
-	Client *redis.Client
+	limiter *redis_rate.Limiter
 }
 
 func New(client *redis.Client) RateLimiter {
-	return &RedisRateLimit{Client: client}
+	return &RedisRateLimit{
+		limiter: redis_rate.NewLimiter(client),
+	}
 }
 
+// Test returns information if limit has been reached.
 func (r *RedisRateLimit) Test(ctx context.Context, key string, rate Rate) bool {
-	counter, err := r.Client.Get(context.Background(), key).Int()
-
-	if err == redis.Nil {
-		r.Client.Set(ctx, key, 1, rate.TimeUnit)
-
-		return false
-	}
-
+	res, err := r.limiter.Allow(ctx, key, redis_rate.Limit{
+		Rate:   rate.Limit,
+		Burst:  rate.Limit,
+		Period: rate.TimeUnit,
+	})
 	if err != nil {
+		logging.WithFields(logging.Fields{
+			"type": "security",
+		}).Warnf("Could not check rate limit: %v", err)
+
+		// for now we return that limit has not been reached.
 		return false
 	}
-
-	if counter >= rate.Limit {
-		r.Client.Del(context.Background(), key)
-
+	if res.Allowed <= 0 {
+		// limit has been reached.
 		return true
-	} else {
-		r.Client.Incr(context.Background(), key)
 	}
-
 	return false
 }

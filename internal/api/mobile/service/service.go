@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/twofas/2fas-server/config"
 	browser_extension_adapters "github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
@@ -117,8 +117,8 @@ func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.D
 func (m *MobileModule) RegisterPublicRoutes(router *gin.Engine) {
 	rateLimiter := rate_limit.New(m.Redis)
 
-	bandwidthMobileApiMiddleware := apisec.MobileIpAbuseAuditMiddleware(rateLimiter)
-	iPAbuseAuditMiddleware := security.IPAbuseAuditMiddleware(rateLimiter)
+	bandwidthMobileApiMiddleware := apisec.MobileIpAbuseAuditMiddleware(rateLimiter, m.Config.Security.RateLimitMobile)
+	iPAbuseAuditMiddleware := security.IPAbuseAuditMiddleware(rateLimiter, m.Config.Security.RateLimitIP)
 
 	publicRouter := router.Group("/")
 	publicRouter.Use(iPAbuseAuditMiddleware)

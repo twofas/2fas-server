@@ -1,18 +1,19 @@
 package security
 
 import (
-	"context"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/rate_limit"
-	"strings"
-	"time"
 )
 
-var mobileApiBandwidthAbuseThreshold = 100
+const defaultMobileApiBandwidthAbuseThreshold = 100
 
-func MobileIpAbuseAuditMiddleware(rateLimiter rate_limit.RateLimiter) gin.HandlerFunc {
+func MobileIpAbuseAuditMiddleware(rateLimiter rate_limit.RateLimiter, rateLimitValue int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		deviceId := c.Param("device_id")
 		extensionId := c.Param("extension_id")
@@ -25,13 +26,16 @@ func MobileIpAbuseAuditMiddleware(rateLimiter rate_limit.RateLimiter) gin.Handle
 			fmt.Sprintf("security.api.mobile.bandwidth.%s.%s", deviceId, extensionId),
 			".",
 		)
-
+		limitValue := rateLimitValue
+		if limitValue == 0 {
+			limitValue = defaultMobileApiBandwidthAbuseThreshold
+		}
 		rate := rate_limit.Rate{
 			TimeUnit: time.Minute,
-			Limit:    mobileApiBandwidthAbuseThreshold,
+			Limit:    limitValue,
 		}
 
-		limitReached := rateLimiter.Test(context.Background(), key, rate)
+		limitReached := rateLimiter.Test(c, key, rate)
 
 		if limitReached {
 			logging.WithFields(logging.Fields{
@@ -40,7 +44,8 @@ func MobileIpAbuseAuditMiddleware(rateLimiter rate_limit.RateLimiter) gin.Handle
 				"device_id":            deviceId,
 				"browser_extension_id": extensionId,
 				"ip":                   c.ClientIP(),
-			}).Warning("API potentially abused at mobile scope")
+			}).Warning("API potentially abused at mobile scope, blocking")
+			c.AbortWithStatus(http.StatusTooManyRequests)
 		}
 	}
 }

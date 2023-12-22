@@ -1,7 +1,6 @@
 package config
 
 import (
-	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -45,23 +44,9 @@ type AppConfig struct {
 }
 
 type SecurityConfig struct {
-	TrustedIP []string `mapstructure:"trusted_ip" json:"trusted_ip"`
-}
-
-func (c *SecurityConfig) IsIpTrusted(ip string) bool {
-	env := os.Getenv("ENV")
-
-	if env == "testing" || env == "development" {
-		return true
-	}
-
-	for _, trustedIp := range c.TrustedIP {
-		if ip == trustedIp {
-			return true
-		}
-	}
-
-	return false
+	RateLimitIP     int `mapstructure:"rate_limit_ip" json:"rate_limit_ip"`
+	RateLimitMobile int `mapstructure:"rate_limit_mobile" json:"rate_limit_mobile"`
+	RateLimitBE     int `mapstructure:"rate_limit_be" json:"rate_limit_be"`
 }
 
 type WebsocketConfig struct {
@@ -111,20 +96,20 @@ func initViper(configFilePath string) {
 	viper.BindEnv("icons.s3_access_key_id", "ICONS_S3_ACCESS_KEY_ID")
 	viper.BindEnv("icons.s3_access_secret_key", "ICONS_S3_ACCESS_SECRET_KEY")
 
+	viper.BindEnv("security.rate_limit_ip", "SECURITY_RATE_LIMIT_IP")
+	viper.BindEnv("security.rate_limit_be", "SECURITY_RATE_LIMIT_BE")
+	viper.BindEnv("security.rate_limit_mobile", "SECURITY_RATE_LIMIT_MOBILE")
+
 	if configFilePath != "" {
 		viper.SetConfigFile(configFilePath)
 	}
 
 	err := viper.ReadInConfig()
-
 	if err != nil {
 		logging.Fatal("failed to read the configuration file: %s", err)
 	}
 
 	err = viper.Unmarshal(&Config)
-
-	Config.Security.TrustedIP = viper.GetStringSlice("security_trusted_ip")
-
 	if err != nil {
 		logging.Fatal("Can not unmarshal configuration", err)
 	}
