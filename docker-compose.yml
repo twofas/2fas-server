@@ -82,6 +82,16 @@ services:
       - shared-volume:/tmp/2fas
     command: chown -R 1000:1000 /tmp/2fas
 
+  pass:
+    build:
+      context: .
+      dockerfile: docker/pass/Dockerfile
+    group_add:
+      - '1000'
+    ports:
+      - "8084:8084"
+    env_file:
+      - .env
 
 volumes:
   go-modules:
