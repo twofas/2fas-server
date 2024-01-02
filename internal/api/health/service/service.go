@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/health/ports"
 )

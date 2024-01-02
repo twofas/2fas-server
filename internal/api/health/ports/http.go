@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/twofas/2fas-server/config"
 	mobile "github.com/twofas/2fas-server/internal/api/mobile/domain"
 	support "github.com/twofas/2fas-server/internal/api/support/domain"
