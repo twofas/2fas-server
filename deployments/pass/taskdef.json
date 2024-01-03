@@ -1,0 +1,40 @@
+{
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/2fas-pass_ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "2fas-pass",
+      "image": "<IMAGE_NAME>",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 8082,
+          "protocol": "tcp",
+          "containerPort": 8082
+        }
+      ],
+      "environmentFiles": [
+        {
+          "value": "arn:aws:s3:::2fas-production-env/pass.env",
+          "type": "s3"
+        }
+      ],
+      "secrets": [
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group" : "/ecs/2fas-pass",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "family": "2fas-pass-api",
+  "cpu": "256",
+  "memory": "512"
+}
