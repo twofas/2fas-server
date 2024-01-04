@@ -2,6 +2,7 @@ package pass
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/recovery"
 )
