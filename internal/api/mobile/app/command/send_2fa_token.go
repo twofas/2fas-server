@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+
 	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
@@ -47,7 +48,6 @@ func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
 	logging.WithFields(logging.Fields{
 		"browser_extension_id": cmd.ExtensionId,
 		"device_id":            cmd.DeviceId,
-		"token":                cmd.Token,
 		"token_request_id":     cmd.TokenRequestId,
 	}).Info("Start command `Send2FaToken`")
 
