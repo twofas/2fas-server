@@ -1,5 +1,5 @@
 {
-  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/2fas-pass_ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/pass-api_ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "2fas-pass",
