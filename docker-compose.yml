@@ -89,7 +89,7 @@ services:
     group_add:
       - '1000'
     ports:
-      - "8084:8084"
+      - "8084:8082"
     env_file:
       - .env
 
