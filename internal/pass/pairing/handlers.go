@@ -15,7 +15,7 @@ func BrowserExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		var req ConfigureBrowserExtensionRequest
 		if err := gCtx.BindJSON(&req); err != nil {
-			gCtx.String(http.StatusBadRequest, "invalid request")
+			gCtx.String(http.StatusBadRequest, err.Error())
 			return
 		}
 		if _, err := uuid.Parse(req.ExtensionID); err != nil {
@@ -38,6 +38,7 @@ func BrowserExtensionWaitForConnHandler(pairingApp *Pairing) gin.HandlerFunc {
 		// TODO: consider moving auth to middleware.
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
+			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
@@ -57,6 +58,7 @@ func BrowserExtensionProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.Hand
 		// TODO: consider moving auth to middleware.
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
+			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
@@ -73,8 +75,7 @@ func BrowserExtensionProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.Hand
 			return
 		}
 		if !pairingInfo.IsPaired() {
-			logging.Info("Pairing is not yet done")
-			gCtx.Status(http.StatusForbidden)
+			gCtx.String(http.StatusForbidden, "Pairing is not yet done")
 			return
 		}
 		proxyApp.ServeExtensionProxyToMobileWS(gCtx.Writer, gCtx.Request, extensionID, pairingInfo.Device.DeviceID)
@@ -86,6 +87,7 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 		// TODO: consider moving auth to middleware.
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
+			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
@@ -97,7 +99,7 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 		}
 		var req ConfirmPairingRequest
 		if err := gCtx.BindJSON(&req); err != nil {
-			gCtx.String(http.StatusBadRequest, "invalid request")
+			gCtx.String(http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -119,6 +121,7 @@ func MobileProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
 		// TODO: consider moving auth to middleware.
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
+			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
@@ -136,8 +139,7 @@ func MobileProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
 			return
 		}
 		if !pairingInfo.IsPaired() {
-			log.Info("Pairing is not yet done")
-			gCtx.Status(http.StatusForbidden)
+			gCtx.String(http.StatusForbidden, "Pairing is not yet done")
 			return
 		}
 		proxyApp.ServeMobileProxyToExtensionWS(gCtx.Writer, gCtx.Request, pairingInfo.Device.DeviceID)

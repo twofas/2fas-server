@@ -12,31 +12,26 @@ import (
 )
 
 type Proxy struct {
-	proxyPool proxyPool
+	proxyPool *proxyPool
 }
 
 func NewProxy() *Proxy {
+	proxyPool := &proxyPool{proxies: map[string]*proxyPair{}}
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		for {
+			<-ticker.C
+			proxyPool.deleteExpiresPairs()
+		}
+	}()
 	return &Proxy{
-		proxyPool: proxyPool{proxies: map[string]*proxyPair{}},
+		proxyPool: proxyPool,
 	}
 }
 
 type proxyPool struct {
 	mu      sync.Mutex
 	proxies map[string]*proxyPair
-}
-
-type proxyPair struct {
-	toMobileDataCh    chan []byte
-	toExtensionDataCh chan []byte
-}
-
-// initProxyPair returns proxyPair and runs loop responsible for proxing data.
-func initProxyPair() *proxyPair {
-	return &proxyPair{
-		toMobileDataCh:    make(chan []byte),
-		toExtensionDataCh: make(chan []byte),
-	}
 }
 
 // registerMobileConn register proxyPair if not existing in pool and returns it.
@@ -51,6 +46,33 @@ func (pp *proxyPool) getOrCreateProxyPair(deviceID string) *proxyPair {
 	}
 	pp.proxies[deviceID] = v
 	return v
+}
+
+func (pp *proxyPool) deleteExpiresPairs() {
+	pp.mu.Lock()
+	defer pp.mu.Unlock()
+
+	for key, pair := range pp.proxies {
+		if time.Now().After(pair.expiresAt) {
+			delete(pp.proxies, key)
+		}
+	}
+}
+
+type proxyPair struct {
+	toMobileDataCh    chan []byte
+	toExtensionDataCh chan []byte
+	expiresAt         time.Time
+}
+
+// initProxyPair returns proxyPair and runs loop responsible for proxing data.
+func initProxyPair() *proxyPair {
+	const proxyTimeout = 3 * time.Minute
+	return &proxyPair{
+		toMobileDataCh:    make(chan []byte),
+		toExtensionDataCh: make(chan []byte),
+		expiresAt:         time.Now().Add(proxyTimeout),
+	}
 }
 
 var (
@@ -103,7 +125,6 @@ func newClient(wsConn *websocket.Conn, send, read chan []byte) *client {
 // reads from this goroutine.
 func (c *client) readPump() {
 	defer func() {
-		// c.proxy.unregisterClient(c)
 		c.conn.Close()
 		close(c.send)
 	}()
@@ -134,7 +155,7 @@ func (c *client) readPump() {
 	}
 }
 
-// writePump pumps messages from the hub to the websocket connection.
+// writePump pumps messages from the read chan to the websocket connection.
 //
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
@@ -161,13 +182,6 @@ func (c *client) writePump() {
 				return
 			}
 			w.Write(message)
-
-			//// Add queued chat messages to the current websocket message.
-			//n := len(c.send)
-			//for i := 0; i < n; i++ {
-			//	w.Write(newline)
-			//	w.Write(<-c.send)
-			//}
 
 			if err := w.Close(); err != nil {
 				return
@@ -209,7 +223,6 @@ func (p *Proxy) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *http.Req
 		<-timeout
 		logging.Info("Connection closed after", disconnectAfter)
 
-		// client.hub.unregisterClient(client)
 		client.conn.Close()
 	})
 }
@@ -241,8 +254,6 @@ func (p *Proxy) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *http.Req
 		<-timeout
 		logging.Info("Connection closed after", disconnectAfter)
 
-		// TODO: implement unregistration.
-		// client.hub.unregisterClient(client)
 		client.conn.Close()
 	})
 }
