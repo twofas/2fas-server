@@ -2,12 +2,13 @@ package pairing
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -40,8 +41,8 @@ type ConfigureBrowserExtensionResponse struct {
 func (p *Pairing) ConfigureBrowserExtension(ctx context.Context, req ConfigureBrowserExtensionRequest) (ConfigureBrowserExtensionResponse, error) {
 	p.store.AddExtension(ctx, req.ExtensionID)
 	// TODO: generate connection token and pairing token.
-	connectionToken := uuid.NewString()
-	pairingToken := uuid.NewString()
+	connectionToken := req.ExtensionID
+	pairingToken := req.ExtensionID
 
 	return ConfigureBrowserExtensionResponse{
 		ConnectionToken:              connectionToken,
@@ -61,17 +62,27 @@ type WaitForConnectionResponse struct {
 }
 
 func (p *Pairing) ServePairingWS(w http.ResponseWriter, r *http.Request, extID string) {
+	log := logging.WithField("extension_id", extID)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logging.Errorf("Failed to upgrade on ServePairingWS: %v", err)
+		log.Errorf("Failed to upgrade on ServePairingWS: %v", err)
 		return
 	}
-	logging.Infof("Starting paring WS for extension: %v", extID)
+	defer conn.Close()
+
+	log.Info("Starting pairing WS")
+
+	if deviceID, pairingDone := p.isExtensionPaired(r.Context(), extID, log); pairingDone {
+		if err := p.sendTokenAndCloseConn(extID, deviceID, conn); err != nil {
+			log.Errorf("Failed to send token: %v", err)
+		}
+		return
+	}
+
 	const (
 		maxWaitTime              = 3 * time.Minute
 		checkIfConnectedInterval = time.Second
 	)
-
 	maxWaitC := time.After(maxWaitTime)
 	// TODO: consider returning event from store on change.
 	connectedCheckTicker := time.NewTicker(checkIfConnectedInterval)
@@ -79,37 +90,44 @@ func (p *Pairing) ServePairingWS(w http.ResponseWriter, r *http.Request, extID s
 	for {
 		select {
 		case <-maxWaitC:
-			logging.Infof("Closing paring ws after timeout: %v", extID)
-			// todo: check if this is graceful
-			conn.Close()
+			log.Info("Closing paring ws after timeout")
 			return
 		case <-connectedCheckTicker.C:
-			pairingInfo, error := p.store.GetPairingInfo(r.Context(), extID)
-			if err != nil {
-				logging.Errorf("Failed to get pairing info: %v, retrying", error)
-				continue
+			if deviceID, pairingDone := p.isExtensionPaired(r.Context(), extID, log); pairingDone {
+				if err := p.sendTokenAndCloseConn(extID, deviceID, conn); err != nil {
+					log.Errorf("Failed to send token: %v", err)
+					return
+				}
+				log.WithField("device_id", deviceID).Infof("Paring ws finished")
+				return
 			}
-			if !pairingInfo.IsPaired() {
-				logging.Errorf("Paring ws device not connected: %v, retrying", extID)
-				continue
-			}
-			if err := conn.WriteJSON(WaitForConnectionResponse{
-				BrowserExtensionProxyToken: "fill",
-				Status:                     "ok",
-				DeviceID:                   pairingInfo.Device.DeviceID,
-			}); err != nil {
-				logging.Errorf("Failed to write to extension: %v, %v", extID, err)
-				continue
-			}
-			logging.Infof("Paring ws finished for ext %v and device %v", extID, pairingInfo.Device.DeviceID)
-			// TODO: write close message.
-			conn.Close()
-			return
 		}
 	}
 }
 
-// GetPairedDevice returns paired device and information if pairing was done.
+func (p *Pairing) isExtensionPaired(ctx context.Context, extID string, log *logrus.Entry) (string, bool) {
+	pairingInfo, err := p.store.GetPairingInfo(ctx, extID)
+	if err != nil {
+		log.Warn("Failed to get pairing info")
+		return "", false
+	}
+	return pairingInfo.Device.DeviceID, pairingInfo.IsPaired()
+}
+
+func (p *Pairing) sendTokenAndCloseConn(extID, deviceID string, conn *websocket.Conn) error {
+	// generate token here
+	if err := conn.WriteJSON(WaitForConnectionResponse{
+		// TODO: replace with real token.
+		BrowserExtensionProxyToken: extID,
+		Status:                     "ok",
+		DeviceID:                   deviceID,
+	}); err != nil {
+		return fmt.Errorf("failed to write to extension: %v", err)
+	}
+	return conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+}
+
+// GetPairingInfo returns paired device and information if pairing was done.
 func (p *Pairing) GetPairingInfo(ctx context.Context, extensionID string) (PairingInfo, error) {
 	return p.store.GetPairingInfo(ctx, extensionID)
 }

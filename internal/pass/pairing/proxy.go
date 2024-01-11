@@ -1,64 +1,217 @@
 package pairing
 
 import (
-	"context"
+	"bytes"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/common/recovery"
 )
 
 type Proxy struct {
-	wsStore wsStore
+	proxyPool proxyPool
 }
 
 func NewProxy() *Proxy {
-	return &Proxy{wsStore: NewWSMemoryStore()}
+	return &Proxy{
+		proxyPool: proxyPool{proxies: map[string]*proxyPair{}},
+	}
 }
 
-type wsStore interface {
-	SetMobileConn(ctx context.Context, deviceID string, conn *websocket.Conn)
-	GetMobileConn(ctx context.Context, deviceID string) (*websocket.Conn, bool)
+type proxyPool struct {
+	mu      sync.Mutex
+	proxies map[string]*proxyPair
+}
+
+type proxyPair struct {
+	toMobileDataCh    chan []byte
+	toExtensionDataCh chan []byte
+}
+
+// initProxyPair returns proxyPair and runs loop responsible for proxing data.
+func initProxyPair() *proxyPair {
+	return &proxyPair{
+		toMobileDataCh:    make(chan []byte),
+		toExtensionDataCh: make(chan []byte),
+	}
+}
+
+// registerMobileConn register proxyPair if not existing in pool and returns it.
+func (pp *proxyPool) getOrCreateProxyPair(deviceID string) *proxyPair {
+	// TODO: handle delete.
+	// TODO: right now two connections to the same WS results in race for messages/ decide if we want multiple conn or not.
+	pp.mu.Lock()
+	defer pp.mu.Unlock()
+	v, ok := pp.proxies[deviceID]
+	if !ok {
+		v = initProxyPair()
+	}
+	pp.proxies[deviceID] = v
+	return v
+}
+
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
+
+	acceptedCloseStatus = []int{
+		websocket.CloseNormalClosure,
+		websocket.CloseGoingAway,
+		websocket.CloseNoStatusReceived,
+		websocket.CloseAbnormalClosure,
+	}
+)
+
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 4 * 1048
+)
+
+// client is a responsible for reading from read chan and sending it over wsConn
+// and reading fom wsChan and sending it over send chan
+type client struct {
+	send chan []byte
+	read chan []byte
+
+	conn *websocket.Conn
+}
+
+func newClient(wsConn *websocket.Conn, send, read chan []byte) *client {
+	return &client{
+		send: send,
+		read: read,
+		conn: wsConn,
+	}
+}
+
+// readPump pumps messages from the websocket connection to send.
+//
+// The application runs readPump in a per-connection goroutine. The application
+// ensures that there is at most one reader on a connection by executing all
+// reads from this goroutine.
+func (c *client) readPump() {
+	defer func() {
+		// c.proxy.unregisterClient(c)
+		c.conn.Close()
+		close(c.send)
+	}()
+
+	c.conn.SetReadLimit(maxMessageSize)
+	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error {
+		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	for {
+		_, message, err := c.conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, acceptedCloseStatus...) {
+				logging.WithFields(logging.Fields{
+					"reason": err.Error(),
+				}).Error("Websocket connection closed unexpected")
+			} else {
+				logging.WithFields(logging.Fields{
+					"reason": err.Error(),
+				}).Info("Connection closed")
+			}
+			break
+		}
+		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		c.send <- message
+	}
+}
+
+// writePump pumps messages from the hub to the websocket connection.
+//
+// A goroutine running writePump is started for each connection. The
+// application ensures that there is at most one writer to a connection by
+// executing all writes from this goroutine.
+func (c *client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.read:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(message)
+
+			//// Add queued chat messages to the current websocket message.
+			//n := len(c.send)
+			//for i := 0; i < n; i++ {
+			//	w.Write(newline)
+			//	w.Write(<-c.send)
+			//}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}
 }
 
 func (p *Proxy) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *http.Request, extID, deviceID string) {
-	extConn, err := upgrader.Upgrade(w, r, nil)
+	log := logging.WithField("extension_id", extID).WithField("device_id", deviceID)
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logging.Errorf("Failed to upgrade on ServeExtensionProxyToMobileWS: %v", err)
+		log.Errorf("Failed to upgrade on ServeExtensionProxyToMobileWS: %v", err)
 		return
 	}
-	logging.Infof("Starting ServeExtensionProxyToMobileWS for extension: %v", extID)
-	const (
-		maxWaitTime = 3 * time.Minute
-	)
-	mobileConn, ok := p.wsStore.GetMobileConn(r.Context(), deviceID)
-	if !ok {
-		logging.Errorf("Could not found ws mobile connection: %v - %v", extID, deviceID)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	// TODO: pong handlers
 
-	defer extConn.Close()
-	defer mobileConn.Close()
+	log.Infof("Starting ServeExtensionProxyToMobileWS")
 
-	go copyLoop(extConn, mobileConn)
-	copyLoop(mobileConn, extConn)
-}
+	proxyPair := p.proxyPool.getOrCreateProxyPair(deviceID)
+	client := newClient(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh)
 
-func copyLoop(dst, src *websocket.Conn) {
-	for {
-		msgT, msg, err := src.ReadMessage()
-		if err != nil {
-			logging.Errorf("read:", err)
-			break
-		}
-		if err := dst.WriteMessage(msgT, msg); err != nil {
-			logging.Errorf("wrote:", err)
-			break
-		}
-	}
+	go recovery.DoNotPanic(func() {
+		client.writePump()
+	})
+
+	go recovery.DoNotPanic(func() {
+		client.readPump()
+	})
+
+	go recovery.DoNotPanic(func() {
+		disconnectAfter := 3 * time.Minute
+		timeout := time.After(disconnectAfter)
+
+		<-timeout
+		logging.Info("Connection closed after", disconnectAfter)
+
+		// client.hub.unregisterClient(client)
+		client.conn.Close()
+	})
 }
 
 func (p *Proxy) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *http.Request, deviceID string) {
@@ -67,10 +220,29 @@ func (p *Proxy) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *http.Req
 		logging.Errorf("Failed to upgrade on ServeMobileProxyToExtensionWS: %v", err)
 		return
 	}
-	logging.Infof("Starting ServeMobileProxyToExtensionWS for dev: %v", deviceID)
-	// TODO: when we need to set timeouts? and close conn.
-	p.wsStore.SetMobileConn(r.Context(), deviceID, conn)
-	// ServeExtensionProxyToMobileWS is responsible for proxing, here we only store ws conn.
 
-	// TODO: what to do if there is 2nd connection to proxy endpoint (on retry)?
+	logging.Infof("Starting ServeMobileProxyToExtensionWS for dev: %v", deviceID)
+	proxyPair := p.proxyPool.getOrCreateProxyPair(deviceID)
+
+	client := newClient(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh)
+
+	go recovery.DoNotPanic(func() {
+		client.writePump()
+	})
+
+	go recovery.DoNotPanic(func() {
+		client.readPump()
+	})
+
+	go recovery.DoNotPanic(func() {
+		disconnectAfter := 3 * time.Minute
+		timeout := time.After(disconnectAfter)
+
+		<-timeout
+		logging.Info("Connection closed after", disconnectAfter)
+
+		// TODO: implement unregistration.
+		// client.hub.unregisterClient(client)
+		client.conn.Close()
+	})
 }

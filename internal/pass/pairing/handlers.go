@@ -128,14 +128,15 @@ func MobileProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
+		log := logging.WithField("extension_id", extensionID)
 		pairingInfo, err := pairingApp.GetPairingInfo(gCtx, extensionID)
 		if err != nil {
-			logging.Errorf("Failed to get pairing info: %v", err)
+			log.Errorf("Failed to get pairing info: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
 		if !pairingInfo.IsPaired() {
-			logging.Info("Pairing is not yet done")
+			log.Info("Pairing is not yet done")
 			gCtx.Status(http.StatusForbidden)
 			return
 		}

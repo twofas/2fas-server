@@ -5,14 +5,11 @@ import (
 	"errors"
 	"sync"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 // MemoryStore keeps in memory pairing between extension and mobile.
 //
-// TODO: move cache to separate package.
-// check ttlcache pkg.
+// TODO: check ttlcache pkg, right now entries are not invalidated.
 type MemoryStore struct {
 	mu            sync.Mutex
 	extensionsMap map[string]Item
@@ -71,31 +68,4 @@ func (s *MemoryStore) getItem(key string) (Item, bool) {
 	defer s.mu.Unlock()
 	v, ok := s.extensionsMap[key]
 	return v, ok
-}
-
-type WSMemoryStore struct {
-	mu          sync.Mutex
-	devicesConn map[string]*websocket.Conn
-}
-
-func NewWSMemoryStore() *WSMemoryStore {
-	return &WSMemoryStore{
-		devicesConn: map[string]*websocket.Conn{},
-	}
-}
-
-func (s *WSMemoryStore) SetMobileConn(ctx context.Context, deviceID string, conn *websocket.Conn) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.devicesConn[deviceID] = conn
-}
-
-func (s *WSMemoryStore) GetMobileConn(ctx context.Context, deviceID string) (*websocket.Conn, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	v, ok := s.devicesConn[deviceID]
-	if !ok {
-		return nil, false
-	}
-	return v, true
 }
