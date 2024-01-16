@@ -13,6 +13,8 @@ var ErrInvalidClaims = errors.New("invalid claims")
 func (s Service) CanI(tokenString string, ct ConnectionType) error {
 	cl := jwt.MapClaims{}
 
+	// In Sign we removed `jwtHeader` from JWT before returning it.
+	// We need to add it again before doing the verification.
 	tokenString = jwtHeader + tokenString
 
 	token, err := jwt.ParseWithClaims(

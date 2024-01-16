@@ -32,7 +32,7 @@ func (e ecdsaSigningMethodWithStaticKey) Alg() string {
 	return jwt.SigningMethodES256.Alg()
 }
 
-func TestKeyEncryptionAndVerificationHappyPath(t *testing.T) {
+func TestSignAndVerifyHappyPath(t *testing.T) {
 	srv := createTestService(t)
 
 	now := time.Now()
@@ -68,7 +68,7 @@ func createTestService(t *testing.T) Service {
 	return srv
 }
 
-func TestKeyEncryptionAndVerification(t *testing.T) {
+func TestSignAndVerify(t *testing.T) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String("us-east-1"),
 		Credentials:      credentials.NewStaticCredentials("test", "test", ""),

@@ -15,7 +15,7 @@ import (
 	"github.com/twofas/2fas-server/internal/pass/sign"
 )
 
-func TestKeyEncryptionAndVerificationHappyPath(t *testing.T) {
+func TestSignAndVerifyHappyPath(t *testing.T) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String("us-east-1"),
 		Credentials:      credentials.NewStaticCredentials("test", "test", ""),
@@ -48,7 +48,7 @@ func TestKeyEncryptionAndVerificationHappyPath(t *testing.T) {
 	}
 }
 
-func TestKeyEncryptionAndVerification(t *testing.T) {
+func TestSignAndVerify(t *testing.T) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String("us-east-1"),
 		Credentials:      credentials.NewStaticCredentials("test", "test", ""),

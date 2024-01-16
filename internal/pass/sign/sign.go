@@ -73,7 +73,8 @@ func (s kmsSigningMethod) Sign(signingString string, key interface{}) ([]byte, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign the message: %w", err)
 	}
-	keySizeInBytes := 258 / 8
+	// We are using encryption method with SHA_256 digest. Hence, key has 256/8=32 bytes.
+	keySizeInBytes := 256 / 8
 	return formatKMSSignatureForJWT(keySizeInBytes, resp.Signature)
 }
 
@@ -84,7 +85,9 @@ func (s kmsSigningMethod) Alg() string {
 
 // formatKMSSignatureForJWT translates asn1 encoded signature (returned by AWS)
 // to format expected by JWT standard.
-// It is an algorithm I found on the internet. It should be tested using e2e tests.
+// It is an algorithm I found on the internet
+// (here: https://github.com/twofas/2fas-server/pull/24/files/4f68cc2e611dca18b9787942e5cf12fc16518dd4#r1452702669 )
+// It should be tested using e2e tests.
 func formatKMSSignatureForJWT(keyBytes int, sig []byte) ([]byte, error) {
 	p := struct {
 		R *big.Int
