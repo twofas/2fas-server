@@ -142,7 +142,7 @@ func TestSignAndVerify(t *testing.T) {
 				token, err := serviceWithAnotherKey.SignAndEncode(Message{
 					ConnectionID:   uuid.New().String(),
 					ExpiresAt:      now.Add(-time.Hour),
-					ConnectionType: ConnectionTypeBrowserExtensionWait,
+					ConnectionType: ConnectionTypeBrowserExtensionProxy,
 				})
 				if err != nil {
 					t.Fatal(err)
