@@ -93,6 +93,18 @@ services:
     env_file:
       - .env
 
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      - DEBUG=1
+    volumes:
+      - "./tests/localstack_init.sh:/etc/localstack/init/ready.d/localstack_init.sh"  # ready hook
+      - "./data/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
 volumes:
   go-modules:
   # shared-volume is used to share volume between api and admin. On producition AWS S3 is used, 
