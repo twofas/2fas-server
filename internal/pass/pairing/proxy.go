@@ -197,6 +197,11 @@ func (c *client) writePump() {
 
 func (p *Proxy) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *http.Request, extID, deviceID string) {
 	log := logging.WithField("extension_id", extID).WithField("device_id", deviceID)
+	upgrader, err := wsUpgraderForProtocol(r)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Errorf("Failed to upgrade on ServeExtensionProxyToMobileWS: %v", err)
@@ -228,6 +233,11 @@ func (p *Proxy) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *http.Req
 }
 
 func (p *Proxy) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *http.Request, deviceID string) {
+	upgrader, err := wsUpgraderForProtocol(r)
+	if err != nil {
+		logging.Error(err)
+		return
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logging.Errorf("Failed to upgrade on ServeMobileProxyToExtensionWS: %v", err)

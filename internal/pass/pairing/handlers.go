@@ -11,7 +11,7 @@ import (
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
-func BrowserExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
+func ExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		var req ConfigureBrowserExtensionRequest
 		if err := gCtx.BindJSON(&req); err != nil {
@@ -33,10 +33,9 @@ func BrowserExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
 	}
 }
 
-func BrowserExtensionWaitForConnHandler(pairingApp *Pairing) gin.HandlerFunc {
+func ExtensionWaitForConnWSHandler(pairingApp *Pairing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		// TODO: consider moving auth to middleware.
-		token, err := tokenFromRequest(gCtx)
+		token, err := tokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -49,14 +48,14 @@ func BrowserExtensionWaitForConnHandler(pairingApp *Pairing) gin.HandlerFunc {
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
+
 		pairingApp.ServePairingWS(gCtx.Writer, gCtx.Request, extensionID)
 	}
 }
 
-func BrowserExtensionProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
+func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		// TODO: consider moving auth to middleware.
-		token, err := tokenFromRequest(gCtx)
+		token, err := tokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -84,7 +83,6 @@ func BrowserExtensionProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.Hand
 
 func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		// TODO: consider moving auth to middleware.
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
@@ -116,10 +114,9 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 	}
 }
 
-func MobileProxyHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
+func MobileProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		// TODO: consider moving auth to middleware.
-		token, err := tokenFromRequest(gCtx)
+		token, err := tokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
