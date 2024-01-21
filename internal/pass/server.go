@@ -27,11 +27,11 @@ func NewServer(addr string) *Server {
 		context.Status(200)
 	})
 
-	router.POST("/browser_extension/configure", pairing.BrowserExtensionConfigureHandler(pairingApp))
-	router.GET("/browser_extension/wait_for_connection", pairing.BrowserExtensionWaitForConnHandler(pairingApp))
-	router.GET("/browser_extension/proxy_to_mobile", pairing.BrowserExtensionProxyHandler(pairingApp, proxyApp))
+	router.POST("/browser_extension/configure", pairing.ExtensionConfigureHandler(pairingApp))
+	router.GET("/browser_extension/wait_for_connection", pairing.ExtensionWaitForConnWSHandler(pairingApp))
+	router.GET("/browser_extension/proxy_to_mobile", pairing.ExtensionProxyWSHandler(pairingApp, proxyApp))
 	router.POST("/mobile/confirm", pairing.MobileConfirmHandler(pairingApp))
-	router.GET("/mobile/proxy_to_browser_extension", pairing.MobileProxyHandler(pairingApp, proxyApp))
+	router.GET("/mobile/proxy_to_browser_extension", pairing.MobileProxyWSHandler(pairingApp, proxyApp))
 
 	return &Server{
 		router: router,

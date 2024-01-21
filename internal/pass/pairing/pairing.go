@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -63,6 +62,11 @@ type WaitForConnectionResponse struct {
 
 func (p *Pairing) ServePairingWS(w http.ResponseWriter, r *http.Request, extID string) {
 	log := logging.WithField("extension_id", extID)
+	upgrader, err := wsUpgraderForProtocol(r)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Errorf("Failed to upgrade on ServePairingWS: %v", err)
@@ -145,18 +149,4 @@ func (p *Pairing) ConfirmPairing(ctx context.Context, req ConfirmPairingRequest,
 		},
 		PairedAt: time.Now().UTC(),
 	})
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  4 * 1024,
-	WriteBufferSize: 4 * 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		allowedOrigin := os.Getenv("WEBSOCKET_ALLOWED_ORIGIN")
-
-		if allowedOrigin != "" {
-			return r.Header.Get("Origin") == allowedOrigin
-		}
-
-		return true
-	},
 }
