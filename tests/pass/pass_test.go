@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -22,10 +24,10 @@ var (
 	wsDialer   = websocket.DefaultDialer
 )
 
-func TestPassHappyFlow(t *testing.T) {
-	const api = "localhost:8082"
+const api = "localhost:8082"
 
-	resp, err := configureBrowserExtension("http://" + api + "/browser_extension/configure")
+func TestPassHappyFlow(t *testing.T) {
+	resp, err := configureBrowserExtension()
 	if err != nil {
 		t.Fatalf("Failed to configure browser extension: %v", err)
 	}
@@ -36,7 +38,7 @@ func TestPassHappyFlow(t *testing.T) {
 	go func() {
 		defer close(browserExtensionDone)
 
-		err := browserExtensionWaitForConfirm("ws://"+api+"/browser_extension/wait_for_connection", resp.BrowserExtensionPairingToken)
+		err := browserExtensionWaitForConfirm(resp.BrowserExtensionPairingToken)
 		if err != nil {
 			t.Errorf("Error when Browser Extension waited for confirm: %v", err)
 			return
@@ -56,7 +58,7 @@ func TestPassHappyFlow(t *testing.T) {
 	go func() {
 		defer close(mobileDone)
 
-		err := confirmMobile("http://"+api+"/mobile/confirm", resp.ConnectionToken)
+		err := confirmMobile(resp.ConnectionToken)
 		if err != nil {
 			t.Errorf("Mobile: confirm failed: %v", err)
 			return
@@ -78,7 +80,9 @@ func TestPassHappyFlow(t *testing.T) {
 	<-mobileDone
 }
 
-func browserExtensionWaitForConfirm(url, token string) error {
+func browserExtensionWaitForConfirm(token string) error {
+	url := "ws://" + api + "/browser_extension/wait_for_connection"
+
 	var resp struct {
 		Status string `json:"status"`
 	}
@@ -104,8 +108,10 @@ func browserExtensionWaitForConfirm(url, token string) error {
 	return nil
 }
 
-func configureBrowserExtension(endpoint string) (ConfigureBrowserExtensionResponse, error) {
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(`{"extension_id":"9317f6c1-0470-41c3-b735-542f2c6b70c3"}`))
+func configureBrowserExtension() (ConfigureBrowserExtensionResponse, error) {
+	url := "http://" + api + "/browser_extension/configure"
+
+	req, err := http.NewRequest("POST", url, bytesPrintf(`{"extension_id":"%s"}`, uuid.New().String()))
 	if err != nil {
 		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("failed to create http request: %w", err)
 	}
@@ -115,17 +121,27 @@ func configureBrowserExtension(endpoint string) (ConfigureBrowserExtensionRespon
 	}
 	defer httpResp.Body.Close()
 
+	bb, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("failed to read body from response: %w", err)
+	}
+
+	if httpResp.StatusCode >= 300 {
+		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("received status %s and body %q", httpResp.Status, string(bb))
+	}
+
 	var resp ConfigureBrowserExtensionResponse
-	m := json.NewDecoder(httpResp.Body)
-	if err := m.Decode(&resp); err != nil {
+	if err := json.Unmarshal(bb, &resp); err != nil {
 		return resp, fmt.Errorf("failed to decode the response: %w", err)
 	}
 
 	return resp, nil
 }
 
-func confirmMobile(endpoint, connectionToken string) error {
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(`{"device_id":"d317f6c1-0470-41c3-b735-542f2c6b70c8"})`))
+func confirmMobile(connectionToken string) error {
+	url := "http://" + api + "/mobile/confirm"
+
+	req, err := http.NewRequest("POST", url, bytesPrintf(`{"device_id":"%s"}`, uuid.New().String()))
 	if err != nil {
 		return fmt.Errorf("failed to prepare the reqest: %w", err)
 	}
@@ -144,8 +160,10 @@ func confirmMobile(endpoint, connectionToken string) error {
 	return nil
 }
 
-func proxyWebSocket(endpoint string, token string, writeMsg, expectedReadMsg string) error {
-	conn, err := dialWS(endpoint, token)
+// proxyWebSocket will dial `endpoint`, using `token` for auth. It will then write exactly one message and
+// read exactly one message (and then check it is `expectedReadMsg`).
+func proxyWebSocket(url, token string, writeMsg, expectedReadMsg string) error {
+	conn, err := dialWS(url, token)
 	if err != nil {
 		return nil
 	}
@@ -189,4 +207,9 @@ func dialWS(url, auth string) (*websocket.Conn, error) {
 		return nil, fmt.Errorf("failed to dial ws %q: %v", url, err)
 	}
 	return conn, nil
+}
+
+func bytesPrintf(format string, ii ...interface{}) io.Reader {
+	s := fmt.Sprintf(format, ii...)
+	return bytes.NewBufferString(s)
 }
