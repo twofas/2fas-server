@@ -90,8 +90,14 @@ services:
       - '1000'
     ports:
       - "8084:8082"
+    environment:
+      # overwrite AWS_ENDPOINT from .env file. One in env is used to running app from local also.
+      AWS_ENDPOINT: http://localstack-main:4566
     env_file:
       - .env
+    depends_on:
+      localstack:
+        condition: service_healthy
 
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
@@ -100,6 +106,12 @@ services:
       - "127.0.0.1:4566:4566"
     environment:
       - DEBUG=1
+    healthcheck:
+      test: >-
+        curl -s localhost:4566/_localstack/health | grep -q '"kms": "running"'
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - "./tests/localstack_init.sh:/etc/localstack/init/ready.d/localstack_init.sh"  # ready hook
       - "./data/localstack:/var/lib/localstack"

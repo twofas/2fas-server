@@ -17,7 +17,7 @@ func main() {
 		logging.Fatal(err.Error())
 	}
 
-	server := pass.NewServer(cfg.Addr)
+	server := pass.NewServer(cfg)
 
 	if err := server.Run(); err != nil {
 		logging.Fatal(err.Error())

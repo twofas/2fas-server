@@ -61,7 +61,7 @@ func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFu
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
-		extensionID, err := pairingApp.VerifyProxyToken(gCtx, token)
+		extensionID, err := pairingApp.VerifyExtProxyToken(gCtx, token)
 		if err != nil {
 			logging.Errorf("Failed to verify proxy token: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
@@ -106,11 +106,13 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 			return
 		}
 
-		if err := pairingApp.ConfirmPairing(gCtx, req, extensionID); err != nil {
+		resp, err := pairingApp.ConfirmPairing(gCtx, req, extensionID)
+		if err != nil {
 			logging.Errorf("Failed to ConfirmPairing: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
+		gCtx.JSON(http.StatusOK, resp)
 	}
 }
 
@@ -122,7 +124,7 @@ func MobileProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc 
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
-		extensionID, err := pairingApp.VerifyConnectionToken(gCtx, token)
+		extensionID, err := pairingApp.VerifyMobileProxyToken(gCtx, token)
 		if err != nil {
 			logging.Errorf("Failed to verify connection token: %v", err)
 			gCtx.Status(http.StatusInternalServerError)

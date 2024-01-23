@@ -43,9 +43,11 @@ func TestSignAndVerifyHappyPath(t *testing.T) {
 	t.Log(token)
 	t.Log("Length of the token is", len(token))
 
-	if err := srv.CanI(token, sign.ConnectionTypeBrowserExtensionProxy); err != nil {
+	extensionID, err := srv.CanI(token, sign.ConnectionTypeBrowserExtensionProxy)
+	if err != nil {
 		t.Fatal(err)
 	}
+	t.Log(extensionID)
 }
 
 func TestSignAndVerify(t *testing.T) {
@@ -139,7 +141,7 @@ func TestSignAndVerify(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			token := tc.tokenFn()
-			err := srv.CanI(token, sign.ConnectionTypeBrowserExtensionProxy)
+			_, err := srv.CanI(token, sign.ConnectionTypeBrowserExtensionProxy)
 			if err == nil {
 				t.Fatalf("Expected error %v, got nil", tc.expectedError)
 			}

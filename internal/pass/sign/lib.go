@@ -59,4 +59,5 @@ const (
 	ConnectionTypeBrowserExtensionWait  ConnectionType = "be/wait"
 	ConnectionTypeBrowserExtensionProxy ConnectionType = "be/proxy"
 	ConnectionTypeMobileProxy           ConnectionType = "mobile/proxy"
+	ConnectionTypeMobileConfirm         ConnectionType = "mobile/confirm"
 )

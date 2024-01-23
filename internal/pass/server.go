@@ -1,7 +1,15 @@
 package pass
 
 import (
+	"log"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/internal/pass/sign"
+
+	"github.com/twofas/2fas-server/config"
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/recovery"
 	"github.com/twofas/2fas-server/internal/pass/pairing"
@@ -12,8 +20,27 @@ type Server struct {
 	addr   string
 }
 
-func NewServer(addr string) *Server {
-	pairingApp := pairing.NewPairingApp()
+func NewServer(cfg config.PassConfig) *Server {
+	var awsEndpoint *string
+	if cfg.AWSEndpoint != "" {
+		awsEndpoint = aws.String(cfg.AWSEndpoint)
+	}
+	sess, err := session.NewSession(&aws.Config{
+		Region:           aws.String("us-east-1"),
+		S3ForcePathStyle: aws.Bool(true),
+		Endpoint:         awsEndpoint,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	kmsClient := kms.New(sess)
+
+	signSvc, err := sign.NewService(cfg.KMSKeyID, kmsClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pairingApp := pairing.NewPairingApp(signSvc)
 	proxyApp := pairing.NewProxy()
 
 	router := gin.New()
@@ -35,7 +62,7 @@ func NewServer(addr string) *Server {
 
 	return &Server{
 		router: router,
-		addr:   addr,
+		addr:   cfg.Addr,
 	}
 }
 
