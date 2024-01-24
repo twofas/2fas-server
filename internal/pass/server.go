@@ -25,8 +25,12 @@ func NewServer(cfg config.PassConfig) *Server {
 	if cfg.AWSEndpoint != "" {
 		awsEndpoint = aws.String(cfg.AWSEndpoint)
 	}
+	region := cfg.AWSRegion
+	if region == "" {
+		region = "us-east-1"
+	}
 	sess, err := session.NewSession(&aws.Config{
-		Region:           aws.String("us-east-1"),
+		Region:           aws.String(region),
 		S3ForcePathStyle: aws.Bool(true),
 		Endpoint:         awsEndpoint,
 	})
