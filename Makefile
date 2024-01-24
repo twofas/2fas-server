@@ -32,6 +32,7 @@ tests-e2e: ## run end to end tests
 	go test ./tests/mobile/... -count=1
 	go test ./tests/support/... -count=1
 	go test ./tests/system/... -count=1
+	go test ./tests/pass/... -count=1
 
 
 vendor-licenses: ## report vendor licenses

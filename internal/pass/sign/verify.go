@@ -3,15 +3,22 @@ package sign
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 var ErrInvalidClaims = errors.New("invalid claims")
 
+type customClaims struct {
+	ConnectionID string `json:"c_id"`
+	jwt.RegisteredClaims
+}
+
 // CanI establish connection with type tp given claims in token.
-func (s Service) CanI(tokenString string, ct ConnectionType) error {
-	cl := jwt.MapClaims{}
+// Returns extension_id from claims if token is valid for given type.
+func (s Service) CanI(tokenString string, ct ConnectionType) (string, error) {
+	cl := customClaims{}
 
 	// In Sign we removed `jwtHeader` from JWT before returning it.
 	// We need to add it again before doing the verification.
@@ -27,19 +34,19 @@ func (s Service) CanI(tokenString string, ct ConnectionType) error {
 		jwt.WithExpirationRequired(),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to parse token: %w", err)
+		return "", fmt.Errorf("failed to parse token: %w", err)
 	}
 
-	claims, err := token.Claims.GetAudience()
+	audClaims, err := token.Claims.GetAudience()
 	if err != nil {
-		return fmt.Errorf("failed to get claims: %w", err)
+		return "", fmt.Errorf("failed to get claims: %w", err)
 	}
-
-	for _, aud := range claims {
-		if aud == string(ct) {
-			return nil
-		}
+	if !slices.Contains(audClaims, string(ct)) {
+		return "", fmt.Errorf("%w: claim %q not found in claims", ErrInvalidClaims, ct)
 	}
-
-	return fmt.Errorf("%w: claim %q not found in claims", ErrInvalidClaims, ct)
+	if cl.ConnectionID == "" {
+		return "", fmt.Errorf("%w: claim %q not found in claims", ErrInvalidClaims, "c_id")
+	}
+	// TODO: rename connectionID to extensionID.
+	return cl.ConnectionID, nil
 }

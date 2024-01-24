@@ -9,10 +9,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/pass/sign"
 )
 
 type Pairing struct {
-	store store
+	store   store
+	signSvc *sign.Service
 }
 
 type store interface {
@@ -22,11 +24,16 @@ type store interface {
 	SetPairingInfo(ctx context.Context, extensionID string, pi PairingInfo) error
 }
 
-func NewPairingApp() *Pairing {
+func NewPairingApp(signService *sign.Service) *Pairing {
 	return &Pairing{
-		store: NewMemoryStore(),
+		store:   NewMemoryStore(),
+		signSvc: signService,
 	}
 }
+
+const (
+	pairingTokenValidityDuration = 3 * time.Minute
+)
 
 type ConfigureBrowserExtensionRequest struct {
 	ExtensionID string `json:"extension_id"`
@@ -39,12 +46,26 @@ type ConfigureBrowserExtensionResponse struct {
 
 func (p *Pairing) ConfigureBrowserExtension(ctx context.Context, req ConfigureBrowserExtensionRequest) (ConfigureBrowserExtensionResponse, error) {
 	p.store.AddExtension(ctx, req.ExtensionID)
-	// TODO: generate connection token and pairing token.
-	connectionToken := req.ExtensionID
-	pairingToken := req.ExtensionID
 
+	pairingToken, err := p.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   req.ExtensionID,
+		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeBrowserExtensionWait,
+	})
+	if err != nil {
+		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("failed to generate pairing token: %v", err)
+	}
+
+	mobileToken, err := p.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   req.ExtensionID,
+		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeMobileConfirm,
+	})
+	if err != nil {
+		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("Failed to generate mobile confirm token: %v", err)
+	}
 	return ConfigureBrowserExtensionResponse{
-		ConnectionToken:              connectionToken,
+		ConnectionToken:              mobileToken,
 		BrowserExtensionPairingToken: pairingToken,
 	}, nil
 }
@@ -119,10 +140,17 @@ func (p *Pairing) isExtensionPaired(ctx context.Context, extID string, log *logr
 }
 
 func (p *Pairing) sendTokenAndCloseConn(extID, deviceID string, conn *websocket.Conn) error {
-	// generate token here
+	extProxyToken, err := p.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   extID,
+		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeBrowserExtensionProxy,
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to generate ext proxy token: %v", err)
+	}
+
 	if err := conn.WriteJSON(WaitForConnectionResponse{
-		// TODO: replace with real token.
-		BrowserExtensionProxyToken: extID,
+		BrowserExtensionProxyToken: extProxyToken,
 		Status:                     "ok",
 		DeviceID:                   deviceID,
 	}); err != nil {
@@ -141,12 +169,27 @@ type ConfirmPairingRequest struct {
 	DeviceID string `json:"device_id"`
 }
 
-func (p *Pairing) ConfirmPairing(ctx context.Context, req ConfirmPairingRequest, extensionID string) error {
-	return p.store.SetPairingInfo(ctx, extensionID, PairingInfo{
+type ConfirmPairingResponse struct {
+	ProxyToken string `json:"proxy_token"`
+}
+
+func (p *Pairing) ConfirmPairing(ctx context.Context, req ConfirmPairingRequest, extensionID string) (ConfirmPairingResponse, error) {
+	mobileProxyToken, err := p.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   extensionID,
+		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeMobileProxy,
+	})
+	if err != nil {
+		return ConfirmPairingResponse{}, fmt.Errorf("Failed to generate ext proxy token: %v", err)
+	}
+	if err := p.store.SetPairingInfo(ctx, extensionID, PairingInfo{
 		Device: MobileDevice{
 			DeviceID: req.DeviceID,
 			FCMToken: req.FCMToken,
 		},
 		PairedAt: time.Now().UTC(),
-	})
+	}); err != nil {
+		return ConfirmPairingResponse{}, err
+	}
+	return ConfirmPairingResponse{ProxyToken: mobileProxyToken}, nil
 }
