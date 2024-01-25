@@ -34,7 +34,7 @@
     "FARGATE"
   ],
   "networkMode": "awsvpc",
-  "family": "2fas-pass-api",
+  "family": "2fas-pass",
   "cpu": "256",
   "memory": "512"
 }
