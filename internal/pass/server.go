@@ -29,11 +29,15 @@ func NewServer(cfg config.PassConfig) *Server {
 	if region == "" {
 		region = "us-east-1"
 	}
-	sess, err := session.NewSession(&aws.Config{
-		Region:           aws.String(region),
-		S3ForcePathStyle: aws.Bool(true),
-		Endpoint:         awsEndpoint,
-	})
+	sess, err := session.NewSessionWithOptions(
+		session.Options{
+			Config: aws.Config{
+				Region:           aws.String(region),
+				S3ForcePathStyle: aws.Bool(true),
+				Endpoint:         awsEndpoint,
+			},
+			SharedConfigState: session.SharedConfigEnable,
+		})
 	if err != nil {
 		log.Fatal(err)
 	}
