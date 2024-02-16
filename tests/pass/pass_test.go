@@ -25,7 +25,23 @@ var (
 	wsDialer   = websocket.DefaultDialer
 )
 
-func getAPIURL() string {
+func getApiURL() string {
+	apiURL := os.Getenv("API_URL")
+	if apiURL != "" {
+		return apiURL
+	}
+	return "http://" + getPassAddr()
+}
+
+func getWsURL() string {
+	wsURL := os.Getenv("WS_URL")
+	if wsURL != "" {
+		return wsURL
+	}
+	return "ws://" + getPassAddr()
+}
+
+func getPassAddr() string {
 	addr := os.Getenv("PASS_ADDR")
 	if addr != "" {
 		return addr
@@ -52,7 +68,7 @@ func TestPassHappyFlow(t *testing.T) {
 		}
 
 		err = proxyWebSocket(
-			"ws://"+getAPIURL()+"/browser_extension/proxy_to_mobile",
+			getWsURL()+"/browser_extension/proxy_to_mobile",
 			extProxyToken,
 			"sent from browser extension",
 			"sent from mobile")
@@ -72,7 +88,7 @@ func TestPassHappyFlow(t *testing.T) {
 		}
 
 		err = proxyWebSocket(
-			"ws://"+getAPIURL()+"/mobile/proxy_to_browser_extension",
+			getWsURL()+"/mobile/proxy_to_browser_extension",
 			mobileProxyToken,
 			"sent from mobile",
 			"sent from browser extension",
@@ -87,7 +103,7 @@ func TestPassHappyFlow(t *testing.T) {
 }
 
 func browserExtensionWaitForConfirm(token string) (string, error) {
-	url := "ws://" + getAPIURL() + "/browser_extension/wait_for_connection"
+	url := getWsURL() + "/browser_extension/wait_for_connection"
 
 	var resp struct {
 		BrowserExtensionProxyToken string `json:"browser_extension_proxy_token"`
@@ -117,9 +133,14 @@ func browserExtensionWaitForConfirm(token string) (string, error) {
 }
 
 func configureBrowserExtension() (ConfigureBrowserExtensionResponse, error) {
-	url := "http://" + getAPIURL() + "/browser_extension/configure"
+	url := getApiURL() + "/browser_extension/configure"
 
-	req, err := http.NewRequest("POST", url, bytesPrintf(`{"extension_id":"%s"}`, uuid.New().String()))
+	extensionID := uuid.NewString()
+	if extensionIDFromEnv := os.Getenv("TEST_EXTENSION_ID"); extensionIDFromEnv != "" {
+		extensionID = extensionIDFromEnv
+	}
+
+	req, err := http.NewRequest("POST", url, bytesPrintf(`{"extension_id":"%s"}`, extensionID))
 	if err != nil {
 		return ConfigureBrowserExtensionResponse{}, fmt.Errorf("failed to create http request: %w", err)
 	}
@@ -148,9 +169,14 @@ func configureBrowserExtension() (ConfigureBrowserExtensionResponse, error) {
 
 // confirmMobile confirms pairing and returns mobile proxy token.
 func confirmMobile(connectionToken string) (string, error) {
-	url := "http://" + getAPIURL() + "/mobile/confirm"
+	url := getApiURL() + "/mobile/confirm"
 
-	req, err := http.NewRequest("POST", url, bytesPrintf(`{"device_id":"%s"}`, uuid.New().String()))
+	deviceID := uuid.NewString()
+	if deviceIDFromEnv := os.Getenv("TEST_DEVICE_ID"); deviceIDFromEnv != "" {
+		deviceID = deviceIDFromEnv
+	}
+
+	req, err := http.NewRequest("POST", url, bytesPrintf(`{"device_id":"%s"}`, deviceID))
 	if err != nil {
 		return "", fmt.Errorf("failed to prepare the reqest: %w", err)
 	}
