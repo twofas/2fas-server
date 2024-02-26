@@ -1,7 +1,9 @@
 package command
 
 import (
+	"context"
 	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
@@ -18,7 +20,7 @@ type StoreLogEventHandler struct {
 	BrowserExtensionsRepository domain.BrowserExtensionRepository
 }
 
-func (h *StoreLogEventHandler) Handle(cmd *StoreLogEvent) {
+func (h *StoreLogEventHandler) Handle(ctx context.Context, cmd *StoreLogEvent) {
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
 	_, err := h.BrowserExtensionsRepository.FindById(extId)
@@ -35,12 +37,12 @@ func (h *StoreLogEventHandler) Handle(cmd *StoreLogEvent) {
 
 	switch cmd.Level {
 	case "info":
-		logging.WithFields(context).Info(cmd.Message)
+		logging.FromContext(ctx).WithFields(context).Info(cmd.Message)
 	case "warning":
-		logging.WithFields(context).Warning(cmd.Message)
+		logging.FromContext(ctx).WithFields(context).Warning(cmd.Message)
 	case "error":
-		logging.WithFields(context).Error(cmd.Message)
+		logging.FromContext(ctx).WithFields(context).Error(cmd.Message)
 	case "debug":
-		logging.WithFields(context).Debug(cmd.Message)
+		logging.FromContext(ctx).WithFields(context).Debug(cmd.Message)
 	}
 }

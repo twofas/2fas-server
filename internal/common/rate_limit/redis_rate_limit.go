@@ -38,7 +38,7 @@ func (r *RedisRateLimit) Test(ctx context.Context, key string, rate Rate) bool {
 		Period: rate.TimeUnit,
 	})
 	if err != nil {
-		logging.WithFields(logging.Fields{
+		logging.FromContext(ctx).WithFields(logging.Fields{
 			"type": "security",
 		}).Warnf("Could not check rate limit: %v", err)
 

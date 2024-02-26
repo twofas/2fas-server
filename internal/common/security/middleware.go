@@ -30,7 +30,7 @@ func IPAbuseAuditMiddleware(rateLimiter rate_limit.RateLimiter, rateLimitValue i
 		limitReached := rateLimiter.Test(c, key, rate)
 
 		if limitReached {
-			logging.WithFields(logging.Fields{
+			logging.FromContext(c.Request.Context()).WithFields(logging.Fields{
 				"type": "security",
 				"uri":  c.Request.URL.String(),
 				"ip":   c.ClientIP(),

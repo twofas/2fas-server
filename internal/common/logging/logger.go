@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"sync"
@@ -8,111 +9,92 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: do not log reuse on every request.
-type Fields map[string]interface{}
+type Fields = logrus.Fields
 
-var (
-	customLogger       = New()
-	defaultFields      = logrus.Fields{}
-	defaultFieldsMutex = sync.RWMutex{}
-)
-
-func New() *logrus.Logger {
-	logger := logrus.New()
-
-	logger.SetFormatter(&logrus.JSONFormatter{
-		FieldMap: logrus.FieldMap{
-			logrus.FieldKeyTime:  "timestamp",
-			logrus.FieldKeyLevel: "level",
-			logrus.FieldKeyMsg:   "message",
-		},
-	})
-
-	logger.SetLevel(logrus.InfoLevel)
-
-	return logger
+type FieldLogger interface {
+	logrus.FieldLogger
 }
 
-func WithDefaultField(key, value string) *logrus.Logger {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
+var (
+	log  logrus.FieldLogger
+	once sync.Once
+)
 
-	defaultFields[key] = value
+// Init initialize global instance of logging library.
+func Init(fields Fields) FieldLogger {
+	once.Do(func() {
+		logger := logrus.New()
 
-	return customLogger
+		logger.SetFormatter(&logrus.JSONFormatter{
+			FieldMap: logrus.FieldMap{
+				logrus.FieldKeyTime:  "timestamp",
+				logrus.FieldKeyLevel: "level",
+				logrus.FieldKeyMsg:   "message",
+			},
+		})
+
+		logger.SetLevel(logrus.InfoLevel)
+
+		log = logger.WithFields(fields)
+	})
+	return log
+}
+
+type ctxKey int
+
+const (
+	loggerKey ctxKey = iota
+)
+
+func AddToContext(ctx context.Context, log FieldLogger) context.Context {
+	return context.WithValue(ctx, loggerKey, log)
+}
+
+func FromContext(ctx context.Context) FieldLogger {
+	log, ok := ctx.Value(loggerKey).(FieldLogger)
+	if ok {
+		return log
+	}
+	return log
+}
+
+func WithFields(fields Fields) FieldLogger {
+	return log.WithFields(fields)
+}
+
+func WithField(key string, value any) FieldLogger {
+	return log.WithField(key, value)
 }
 
 func Info(args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Info(args...)
+	log.Info(args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Infof(format, args...)
+	log.Infof(format, args...)
 }
 
 func Error(args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Error(args...)
+	log.Error(args...)
 }
 
 func Errorf(format string, args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Errorf(format, args...)
+	log.Errorf(format, args...)
 }
 
 func Warning(args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Warning(args...)
+	log.Warning(args...)
 }
 
 func Fatal(args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Fatal(args...)
+	log.Fatal(args...)
 }
 
 func Fatalf(format string, args ...interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	customLogger.WithFields(defaultFields).Fatalf(format, args...)
-}
-
-func WithField(key string, value interface{}) *logrus.Entry {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	return customLogger.
-		WithFields(defaultFields).
-		WithField(key, value)
-}
-
-func WithFields(fields Fields) *logrus.Entry {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
-	return customLogger.
-		WithFields(logrus.Fields(fields)).
-		WithFields(defaultFields)
+	log.Fatalf(format, args...)
 }
 
 func LogCommand(command interface{}) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
 	context, _ := json.Marshal(command)
 
 	commandName := reflect.TypeOf(command).Elem().Name()
@@ -120,8 +102,7 @@ func LogCommand(command interface{}) {
 	var commandAsFields logrus.Fields
 	json.Unmarshal(context, &commandAsFields)
 
-	customLogger.
-		WithFields(defaultFields).
+	log.
 		WithFields(logrus.Fields{
 			"command_name": commandName,
 			"command":      commandAsFields,
@@ -129,13 +110,8 @@ func LogCommand(command interface{}) {
 }
 
 func LogCommandFailed(command interface{}, err error) {
-	defaultFieldsMutex.Lock()
-	defer defaultFieldsMutex.Unlock()
-
 	commandName := reflect.TypeOf(command).Elem().Name()
-
-	customLogger.
-		WithFields(defaultFields).
+	log.
 		WithFields(logrus.Fields{
 			"reason": err.Error(),
 		}).Info("Command failed" + commandName)
