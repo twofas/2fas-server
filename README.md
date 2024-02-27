@@ -16,7 +16,7 @@ This is the official server-side API for the Open Source 2FAS project.
 
 ## Bug Reporting
 
-We use GitHub for bug reports. Please visit the [2FAS Server API issues page](https://github.com/twofas/2fas-api/issues) to search for and report any bugs you may have found. Before adding a new issue, please search for existing issues to avoid duplicates.
+We use GitHub for bug reports. Please visit the [2FAS Server API issues page](https://github.com/twofas/2fas-server/issues) to search for and report any bugs you may have found. Before adding a new issue, please search for existing issues to avoid duplicates.
 
 For reporting security issues only, please send a detailed description of the vulnerability to security@2fas.com. Do not use this address for general inquiries or bug reports unrelated to security concerns.
 
@@ -28,7 +28,7 @@ We welcome contributions to the Open Source 2FAS project. If you would like to c
 2. Create a new branch for your changes.
 3. Make your changes.
 4. Commit your changes and push them to your fork.
-5. Create a new pull request from your fork to the `master` branch of the main repository.
+5. Create a new pull request from your fork to the `develop/pass` branch of the main repository.
 
 We will review your pull request and, if it is approved, merge it into the main codebase.
 
