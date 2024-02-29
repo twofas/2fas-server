@@ -26,7 +26,7 @@ func TestSignAndVerifyHappyPath(t *testing.T) {
 		t.Fatal(err)
 	}
 	kmsClient := kms.New(sess)
-	srv, err := sign.NewService("alias/pass_service", kmsClient)
+	srv, err := sign.NewService("alias/pass_service_signing_key", kmsClient)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestSignAndVerify(t *testing.T) {
 		t.Fatal(err)
 	}
 	kmsClient := kms.New(sess)
-	srv, err := sign.NewService("alias/pass_service", kmsClient)
+	srv, err := sign.NewService("alias/pass_service_signing_key", kmsClient)
 	if err != nil {
 		t.Fatal(err)
 	}

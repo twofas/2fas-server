@@ -56,8 +56,12 @@ func NewService(keyID string, client *kms.KMS) (*Service, error) {
 type ConnectionType string
 
 const (
-	ConnectionTypeBrowserExtensionWait  ConnectionType = "be/wait"
-	ConnectionTypeBrowserExtensionProxy ConnectionType = "be/proxy"
-	ConnectionTypeMobileProxy           ConnectionType = "mobile/proxy"
-	ConnectionTypeMobileConfirm         ConnectionType = "mobile/confirm"
+	ConnectionTypeBrowserExtensionWait        ConnectionType = "be/wait"
+	ConnectionTypeBrowserExtensionProxy       ConnectionType = "be/proxy"
+	ConnectionTypeBrowserExtensionSyncRequest ConnectionType = "be/sync/request"
+	ConnectionTypeBrowserExtensionSync        ConnectionType = "be/sync/proxy"
+	ConnectionTypeMobileProxy                 ConnectionType = "mobile/proxy"
+	ConnectionTypeMobileConfirm               ConnectionType = "mobile/confirm"
+	ConnectionTypeMobileSyncConfirm           ConnectionType = "mobile/sync/confirm"
+	ConnectionTypeMobileSyncProxy             ConnectionType = "mobile/sync/proxy"
 )

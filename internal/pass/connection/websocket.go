@@ -1,4 +1,4 @@
-package pairing
+package connection
 
 import (
 	"encoding/base64"
@@ -18,16 +18,16 @@ const bearerProtocolPrefix = "base64url.bearer.authorization.2pass.io."
 
 var protocolHeader = textproto.CanonicalMIMEHeaderKey("Sec-WebSocket-Protocol")
 
-// tokenFromWSProtocol returns authorization token from 'Sec-WebSocket-Protocol' request header.
+// TokenFromWSProtocol returns authorization token from 'Sec-WebSocket-Protocol' request header.
 // It is used because websocket API in browser does not allow to pass headers.
 // https://github.com/kubernetes/kubernetes/commit/714f97d7baf4975ad3aa47735a868a81a984d1f0
 //
 // Client provides a bearer token as a subprotocol in the format
 // "base64url.bearer.authorization.2pass.io.<base64url-without-padding(bearer-token)>".
 // This function also modified request header by removing authorization header.
-// Server according to spec must return at least 1 protocol to client, so this fn checks
+// Server according to spec must return at least 1 protocol to proxy, so this fn checks
 // if at least 1 protocol is sent, beside authorization header.
-func tokenFromWSProtocol(req *http.Request) (string, error) {
+func TokenFromWSProtocol(req *http.Request) (string, error) {
 	token := ""
 	sawTokenProtocol := false
 	filteredProtocols := []string{}
@@ -62,7 +62,7 @@ func tokenFromWSProtocol(req *http.Request) (string, error) {
 	}
 
 	// Must pass at least one other subprotocol so that we can remove the one containing the bearer token,
-	// and there is at least one to echo back to the client
+	// and there is at least one to echo back to the proxy
 	if len(filteredProtocols) == 0 {
 		return "", errors.New("missing additional subprotocol")
 	}
@@ -91,10 +91,14 @@ var upgrader2pass = websocket.Upgrader{
 	Subprotocols: []string{supportedProtocol2pass},
 }
 
-func wsUpgraderForProtocol(req *http.Request) (websocket.Upgrader, error) {
+func Upgrade(w http.ResponseWriter, req *http.Request) (*websocket.Conn, error) {
 	protocols := strings.Split(req.Header.Get(protocolHeader), ",")
-	if slices.Contains(protocols, supportedProtocol2pass) {
-		return upgrader2pass, nil
+	if !slices.Contains(protocols, supportedProtocol2pass) {
+		return nil, fmt.Errorf("upgrader not available for protocols: %v", protocols)
 	}
-	return websocket.Upgrader{}, fmt.Errorf("upgrader not available for protocols: %v", protocols)
+	conn, err := upgrader2pass.Upgrade(w, req, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upgrade connection: %w", err)
+	}
+	return conn, nil
 }

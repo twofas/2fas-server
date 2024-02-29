@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/pass/connection"
 )
 
 func ExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
@@ -35,7 +36,7 @@ func ExtensionConfigureHandler(pairingApp *Pairing) gin.HandlerFunc {
 
 func ExtensionWaitForConnWSHandler(pairingApp *Pairing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		token, err := tokenFromWSProtocol(gCtx.Request)
+		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -45,17 +46,21 @@ func ExtensionWaitForConnWSHandler(pairingApp *Pairing) gin.HandlerFunc {
 		extensionID, err := pairingApp.VerifyPairingToken(gCtx, token)
 		if err != nil {
 			logging.Errorf("Failed to verify pairing token: %v", err)
-			gCtx.Status(http.StatusInternalServerError)
+			gCtx.Status(http.StatusUnauthorized)
 			return
 		}
 
-		pairingApp.ServePairingWS(gCtx.Writer, gCtx.Request, extensionID)
+		if err := pairingApp.ServePairingWS(gCtx.Writer, gCtx.Request, extensionID); err != nil {
+			logging.Errorf("Failed serve ws: %v", err)
+			gCtx.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
-func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
+func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *connection.Proxy) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		token, err := tokenFromWSProtocol(gCtx.Request)
+		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -77,7 +82,11 @@ func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFu
 			gCtx.String(http.StatusForbidden, "Pairing is not yet done")
 			return
 		}
-		proxyApp.ServeExtensionProxyToMobileWS(gCtx.Writer, gCtx.Request, extensionID, pairingInfo.Device.DeviceID)
+		if err := proxyApp.ServeExtensionProxyToMobileWS(gCtx.Writer, gCtx.Request, pairingInfo.Device.DeviceID); err != nil {
+			logging.Errorf("Failed to serve ws: %v", err)
+			gCtx.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -116,9 +125,9 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 	}
 }
 
-func MobileProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc {
+func MobileProxyWSHandler(pairingApp *Pairing, proxy *connection.Proxy) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		token, err := tokenFromWSProtocol(gCtx.Request)
+		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -141,7 +150,11 @@ func MobileProxyWSHandler(pairingApp *Pairing, proxyApp *Proxy) gin.HandlerFunc 
 			gCtx.String(http.StatusForbidden, "Pairing is not yet done")
 			return
 		}
-		proxyApp.ServeMobileProxyToExtensionWS(gCtx.Writer, gCtx.Request, pairingInfo.Device.DeviceID)
+		if err := proxy.ServeMobileProxyToExtensionWS(gCtx.Writer, gCtx.Request, pairingInfo.Device.DeviceID); err != nil {
+			log.Errorf("Failed to serve ws: %w", err)
+			gCtx.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
