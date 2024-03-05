@@ -51,11 +51,11 @@ func NewServer(cfg config.PassConfig) *Server {
 		log.Fatal(err)
 	}
 
-	pairingApp := pairing.NewPairingApp(signSvc)
-	proxyPairingApp := connection.NewProxy("fcm_token")
+	pairingApp := pairing.NewApp(signSvc, cfg.PairingRequestTokenValidityDuration)
+	proxyPairingApp := connection.NewProxyServer("device_id")
 
-	syncApp := sync.NewPairingApp(signSvc, cfg.FakeMobilePush)
-	proxySyncApp := connection.NewProxy("device_id")
+	syncApp := sync.NewApp(signSvc, cfg.FakeMobilePush)
+	proxySyncApp := connection.NewProxyServer("fcm_token")
 
 	router := gin.New()
 	router.Use(recovery.RecoveryMiddleware())
@@ -68,11 +68,14 @@ func NewServer(cfg config.PassConfig) *Server {
 		context.Status(200)
 	})
 
-	router.POST("/browser_extension/configure", pairing.ExtensionConfigureHandler(pairingApp))
+	// Deprecated paths start here.
 	router.GET("/browser_extension/wait_for_connection", pairing.ExtensionWaitForConnWSHandler(pairingApp))
 	router.GET("/browser_extension/proxy_to_mobile", pairing.ExtensionProxyWSHandler(pairingApp, proxyPairingApp))
 	router.POST("/mobile/confirm", pairing.MobileConfirmHandler(pairingApp))
 	router.GET("/mobile/proxy_to_browser_extension", pairing.MobileProxyWSHandler(pairingApp, proxyPairingApp))
+	// Deprecated paths end here.
+
+	router.POST("/browser_extension/configure", pairing.ExtensionConfigureHandler(pairingApp))
 
 	router.GET("/browser_extension/pairing/wait", pairing.ExtensionWaitForConnWSHandler(pairingApp))
 	router.GET("/browser_extension/pairing/proxy", pairing.ExtensionProxyWSHandler(pairingApp, proxyPairingApp))

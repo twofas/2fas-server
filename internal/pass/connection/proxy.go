@@ -45,7 +45,7 @@ type proxy struct {
 	conn *websocket.Conn
 }
 
-func StartProxy(wsConn *websocket.Conn, send, read chan []byte) {
+func startProxy(wsConn *websocket.Conn, send, read chan []byte) {
 	proxy := &proxy{
 		send: send,
 		read: read,
@@ -71,10 +71,10 @@ func StartProxy(wsConn *websocket.Conn, send, read chan []byte) {
 	})
 }
 
-// readPump pumps messages from the websocket connection to send.
+// readPump pumps messages from the websocket proxy to send.
 //
-// The application runs readPump in a per-connection goroutine. The application
-// ensures that there is at most one reader on a connection by executing all
+// The application runs readPump in a per-proxy goroutine. The application
+// ensures that there is at most one reader on a proxy by executing all
 // reads from this goroutine.
 func (p *proxy) readPump() {
 	defer func() {
@@ -95,7 +95,7 @@ func (p *proxy) readPump() {
 			if websocket.IsUnexpectedCloseError(err, acceptedCloseStatus...) {
 				logging.WithFields(logging.Fields{
 					"reason": err.Error(),
-				}).Error("Websocket connection closed unexpected")
+				}).Error("Websocket proxy closed unexpected")
 			} else {
 				logging.WithFields(logging.Fields{
 					"reason": err.Error(),
@@ -108,10 +108,10 @@ func (p *proxy) readPump() {
 	}
 }
 
-// writePump pumps messages from the read chan to the websocket connection.
+// writePump pumps messages from the read chan to the websocket proxy.
 //
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
+// A goroutine running writePump is started for each proxy. The
+// application ensures that there is at most one writer to a proxy by
 // executing all writes from this goroutine.
 func (p *proxy) writePump() {
 	ticker := time.NewTicker(pingPeriod)

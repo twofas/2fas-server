@@ -34,7 +34,7 @@ func ExtensionRequestSync(syncingApp *Syncing) gin.HandlerFunc {
 	}
 }
 
-func ExtensionProxyWSHandler(syncingApp *Syncing, proxy *connection.Proxy) gin.HandlerFunc {
+func ExtensionProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
@@ -78,6 +78,7 @@ func MobileConfirmHandler(syncApp *Syncing) gin.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, noSyncRequestErr) {
 				gCtx.String(http.StatusBadRequest, "no sync request was created for this token")
+				return
 			}
 			logging.Errorf("Failed to ConfirmPairing: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
@@ -87,7 +88,7 @@ func MobileConfirmHandler(syncApp *Syncing) gin.HandlerFunc {
 	}
 }
 
-func MobileProxyWSHandler(syncingApp *Syncing, proxy *connection.Proxy) gin.HandlerFunc {
+func MobileProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {

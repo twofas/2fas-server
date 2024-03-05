@@ -1,34 +1,9 @@
 package connection
 
 import (
-	"fmt"
-	"net/http"
 	"sync"
 	"time"
-
-	"github.com/twofas/2fas-server/internal/common/logging"
 )
-
-// Proxy between Browser Extension and Mobile.
-type Proxy struct {
-	proxyPool *proxyPool
-	idLabel   string
-}
-
-func NewProxy(idLabel string) *Proxy {
-	proxyPool := &proxyPool{proxies: map[string]*proxyPair{}}
-	go func() {
-		ticker := time.NewTicker(30 * time.Second)
-		for {
-			<-ticker.C
-			proxyPool.deleteExpiresPairs()
-		}
-	}()
-	return &Proxy{
-		proxyPool: proxyPool,
-		idLabel:   idLabel,
-	}
-}
 
 type proxyPool struct {
 	mu      sync.Mutex
@@ -72,32 +47,4 @@ func initProxyPair() *proxyPair {
 		toExtensionDataCh: make(chan []byte),
 		expiresAt:         time.Now().Add(proxyTimeout),
 	}
-}
-
-func (p *Proxy) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *http.Request, id string) error {
-	log := logging.WithField(p.idLabel, id)
-	conn, err := Upgrade(w, r)
-	if err != nil {
-		return fmt.Errorf("failed to upgrade connection: %w", err)
-	}
-
-	log.Infof("Starting ServeExtensionProxyToMobileWS")
-
-	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
-	StartProxy(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh)
-	return nil
-}
-
-func (p *Proxy) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *http.Request, id string) error {
-	conn, err := Upgrade(w, r)
-	if err != nil {
-		return fmt.Errorf("failed to upgrade connection: %w", err)
-	}
-
-	logging.Infof("Starting ServeMobileProxyToExtensionWS for dev: %v", id)
-	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
-
-	StartProxy(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh)
-
-	return nil
 }

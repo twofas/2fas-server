@@ -15,8 +15,9 @@ import (
 )
 
 type Pairing struct {
-	store   store
-	signSvc *sign.Service
+	store                               store
+	signSvc                             *sign.Service
+	pairingRequestTokenValidityDuration time.Duration
 }
 
 type store interface {
@@ -26,10 +27,11 @@ type store interface {
 	SetPairingInfo(ctx context.Context, extensionID string, pi PairingInfo) error
 }
 
-func NewPairingApp(signService *sign.Service) *Pairing {
+func NewApp(signService *sign.Service, pairingRequestTokenValidityDuration time.Duration) *Pairing {
 	return &Pairing{
-		store:   NewMemoryStore(),
-		signSvc: signService,
+		store:                               NewMemoryStore(),
+		signSvc:                             signService,
+		pairingRequestTokenValidityDuration: pairingRequestTokenValidityDuration,
 	}
 }
 
@@ -142,15 +144,19 @@ func (p *Pairing) sendTokenAndCloseConn(extID string, pairingInfo PairingInfo, c
 		ConnectionType: sign.ConnectionTypeBrowserExtensionProxy,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to generate ext proxy token: %v", err)
+		return fmt.Errorf("failed to generate ext proxy token: %v", err)
 	}
 	var syncToken string
 	if pairingInfo.Device.FCMToken != "" {
 		syncToken, err = p.signSvc.SignAndEncode(sign.Message{
 			ConnectionID:   pairingInfo.Device.FCMToken,
-			ExpiresAt:      time.Now().AddDate(1, 0, 0),
+			ExpiresAt:      time.Now().Add(p.pairingRequestTokenValidityDuration),
 			ConnectionType: sign.ConnectionTypeBrowserExtensionSyncRequest,
 		})
+		if err != nil {
+			return fmt.Errorf("failed to generate proxy sync request token: %v", err)
+		}
+
 	}
 
 	if err := conn.WriteJSON(WaitForConnectionResponse{

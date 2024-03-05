@@ -98,7 +98,7 @@ func Upgrade(w http.ResponseWriter, req *http.Request) (*websocket.Conn, error) 
 	}
 	conn, err := upgrader2pass.Upgrade(w, req, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upgrade connection: %w", err)
+		return nil, fmt.Errorf("failed to upgrade proxy: %w", err)
 	}
 	return conn, nil
 }

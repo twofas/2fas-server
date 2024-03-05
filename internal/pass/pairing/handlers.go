@@ -39,7 +39,7 @@ func ExtensionWaitForConnWSHandler(pairingApp *Pairing) gin.HandlerFunc {
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
-			gCtx.Status(http.StatusForbidden)
+			gCtx.Status(http.StatusUnauthorized)
 			return
 		}
 
@@ -58,7 +58,7 @@ func ExtensionWaitForConnWSHandler(pairingApp *Pairing) gin.HandlerFunc {
 	}
 }
 
-func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *connection.Proxy) gin.HandlerFunc {
+func ExtensionProxyWSHandler(pairingApp *Pairing, proxyApp *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
@@ -125,7 +125,7 @@ func MobileConfirmHandler(pairingApp *Pairing) gin.HandlerFunc {
 	}
 }
 
-func MobileProxyWSHandler(pairingApp *Pairing, proxy *connection.Proxy) gin.HandlerFunc {
+func MobileProxyWSHandler(pairingApp *Pairing, proxy *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {

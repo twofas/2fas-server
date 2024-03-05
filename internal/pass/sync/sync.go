@@ -26,7 +26,7 @@ type store interface {
 	IsSyncCofirmed(fmtToken string) bool
 }
 
-func NewPairingApp(signService *sign.Service, fakeMobilePush bool) *Syncing {
+func NewApp(signService *sign.Service, fakeMobilePush bool) *Syncing {
 	return &Syncing{
 		store:   NewMemoryStore(),
 		signSvc: signService,
@@ -34,7 +34,7 @@ func NewPairingApp(signService *sign.Service, fakeMobilePush bool) *Syncing {
 }
 
 const (
-	pairingTokenValidityDuration = 3 * time.Minute
+	syncTokenValidityDuration = 3 * time.Minute
 )
 
 type ConfigureBrowserExtensionRequest struct {
@@ -60,7 +60,7 @@ type MobileSyncPayload struct {
 	MobileSyncToken string `json:"mobile_sync_token"`
 }
 
-func (p *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, fcmToken string) error {
+func (s *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, fcmToken string) error {
 	log := logging.WithField("fcm_token", fcmToken)
 	conn, err := connection.Upgrade(w, r)
 	if err != nil {
@@ -69,10 +69,10 @@ func (p *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 	defer conn.Close()
 
 	log.Infof("Starting sync request WS for %q", fcmToken)
-	p.requestSync(r.Context(), fcmToken)
+	s.requestSync(r.Context(), fcmToken)
 
-	if syncDone := p.isSyncConfirmed(r.Context(), fcmToken); syncDone {
-		if err := p.sendTokenAndCloseConn(fcmToken, conn); err != nil {
+	if syncDone := s.isSyncConfirmed(r.Context(), fcmToken); syncDone {
+		if err := s.sendTokenAndCloseConn(fcmToken, conn); err != nil {
 			log.Errorf("Failed to send token: %v", err)
 		}
 		log.Infof("Paring ws finished")
@@ -92,8 +92,8 @@ func (p *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 			log.Info("Closing paring ws after timeout")
 			return nil
 		case <-connectedCheckTicker.C:
-			if syncConfirmed := p.isSyncConfirmed(r.Context(), fcmToken); syncConfirmed {
-				if err := p.sendTokenAndCloseConn(fcmToken, conn); err != nil {
+			if syncConfirmed := s.isSyncConfirmed(r.Context(), fcmToken); syncConfirmed {
+				if err := s.sendTokenAndCloseConn(fcmToken, conn); err != nil {
 					log.Errorf("Failed to send token: %v", err)
 					return nil
 				}
@@ -104,18 +104,18 @@ func (p *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-func (p *Syncing) isSyncConfirmed(ctx context.Context, fcmToken string) bool {
-	return p.store.IsSyncCofirmed(fcmToken)
+func (s *Syncing) isSyncConfirmed(ctx context.Context, fcmToken string) bool {
+	return s.store.IsSyncCofirmed(fcmToken)
 }
 
-func (p *Syncing) requestSync(ctx context.Context, fcmToken string) {
-	p.store.RequestSync(fcmToken)
+func (s *Syncing) requestSync(ctx context.Context, fcmToken string) {
+	s.store.RequestSync(fcmToken)
 }
 
-func (p *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) error {
-	extProxyToken, err := p.signSvc.SignAndEncode(sign.Message{
+func (s *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) error {
+	extProxyToken, err := s.signSvc.SignAndEncode(sign.Message{
 		ConnectionID:   fcmToken,
-		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
 		ConnectionType: sign.ConnectionTypeBrowserExtensionSync,
 	})
 	if err != nil {
@@ -131,10 +131,10 @@ func (p *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) e
 	return conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 }
 
-func (p *Syncing) sendMobileToken(fcmToken string, resp http.ResponseWriter) error {
-	extProxyToken, err := p.signSvc.SignAndEncode(sign.Message{
+func (s *Syncing) sendMobileToken(fcmToken string, resp http.ResponseWriter) error {
+	extProxyToken, err := s.signSvc.SignAndEncode(sign.Message{
 		ConnectionID:   fcmToken,
-		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
 		ConnectionType: sign.ConnectionTypeMobileSyncConfirm,
 	})
 	if err != nil {
@@ -147,9 +147,11 @@ func (p *Syncing) sendMobileToken(fcmToken string, resp http.ResponseWriter) err
 		MobileSyncConfirmToken: extProxyToken,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to write to extension: %v", err)
+		return fmt.Errorf("failed to marshal the response: %v", err)
 	}
-	resp.Write(bb)
+	if _, err := resp.Write(bb); err != nil {
+		return fmt.Errorf("failed to write the response: %v", err)
+	}
 	return nil
 }
 
@@ -159,18 +161,18 @@ type ConfirmSyncResponse struct {
 
 var noSyncRequestErr = errors.New("sync request was not created")
 
-func (p *Syncing) confirmSync(ctx context.Context, fcmToken string) (ConfirmSyncResponse, error) {
+func (s *Syncing) confirmSync(ctx context.Context, fcmToken string) (ConfirmSyncResponse, error) {
 	logging.Infof("Starting sync confirm for %q", fcmToken)
 
-	mobileProxyToken, err := p.signSvc.SignAndEncode(sign.Message{
+	mobileProxyToken, err := s.signSvc.SignAndEncode(sign.Message{
 		ConnectionID:   fcmToken,
-		ExpiresAt:      time.Now().Add(pairingTokenValidityDuration),
+		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
 		ConnectionType: sign.ConnectionTypeMobileSyncConfirm,
 	})
 	if err != nil {
 		return ConfirmSyncResponse{}, fmt.Errorf("failed to generate ext proxy token: %v", err)
 	}
-	if ok := p.store.ConfirmSync(fcmToken); !ok {
+	if ok := s.store.ConfirmSync(fcmToken); !ok {
 		return ConfirmSyncResponse{}, noSyncRequestErr
 	}
 
