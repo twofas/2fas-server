@@ -28,7 +28,7 @@ We welcome contributions to the Open Source 2FAS project. If you would like to c
 2. Create a new branch for your changes.
 3. Make your changes.
 4. Commit your changes and push them to your fork.
-5. Create a new pull request from your fork to the `develop/pass` branch of the main repository.
+5. Create a new pull request from your fork to the `main` branch of the main repository.
 
 We will review your pull request and, if it is approved, merge it into the main codebase.
 

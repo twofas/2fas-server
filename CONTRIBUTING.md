@@ -22,7 +22,7 @@ We welcome code contributions to the 2FAS API Server project. If you are interes
 3. Create a new branch for your changes (e.g. `feature/new-login-endpoint`)
 4. Make your changes and commit them to your branch
 5. Push your branch to your fork on GitHub
-6. Open a pull request from your branch to the `develop/pass` branch of this repository
+6. Open a pull request from your branch to the `main` branch of this repository
 
 Please make sure your pull request includes the following:
 
