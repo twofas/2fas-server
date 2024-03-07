@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/e2e-tests"
 	"github.com/twofas/2fas-server/internal/common/crypto"
-	"github.com/twofas/2fas-server/tests"
 )
 
 func TestBrowserExtensionTestSuite(t *testing.T) {
@@ -21,7 +21,7 @@ type BrowserExtensionTestSuite struct {
 }
 
 func (s *BrowserExtensionTestSuite) SetupTest() {
-	tests.RemoveAllBrowserExtensions(s.T())
+	e2e_tests.RemoveAllBrowserExtensions(s.T())
 }
 
 func (s *BrowserExtensionTestSuite) TestCreateBrowserExtension() {
@@ -47,13 +47,13 @@ func (s *BrowserExtensionTestSuite) TestCreateBrowserExtension() {
 }
 
 func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtension() {
-	browserExt := tests.CreateBrowserExtension(s.T(), "go-test")
+	browserExt := e2e_tests.CreateBrowserExtension(s.T(), "go-test")
 
 	payload := []byte(`{"name": "updated-extension-name"}`)
-	tests.DoAPISuccessPut(s.T(), "/browser_extensions/"+browserExt.Id, payload, nil)
+	e2e_tests.DoAPISuccessPut(s.T(), "/browser_extensions/"+browserExt.Id, payload, nil)
 
-	var browserExtension *tests.BrowserExtensionResponse
-	tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+browserExt.Id, &browserExtension)
+	var browserExtension *e2e_tests.BrowserExtensionResponse
+	e2e_tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+browserExt.Id, &browserExtension)
 
 	assert.Equal(s.T(), "updated-extension-name", browserExtension.Name)
 }
@@ -62,16 +62,16 @@ func (s *BrowserExtensionTestSuite) TestUpdateNotExistingBrowserExtension() {
 	id := uuid.New()
 
 	payload := []byte(`{"name": "updated-extension-name"}`)
-	response := tests.DoAPIRequest(s.T(), "/browser_extensions/"+id.String(), http.MethodPut, payload, nil)
+	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+id.String(), http.MethodPut, payload, nil)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
 func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtensionSetEmptyName() {
-	browserExt := tests.CreateBrowserExtension(s.T(), "go-test")
+	browserExt := e2e_tests.CreateBrowserExtension(s.T(), "go-test")
 
 	payload := []byte(`{"name": ""}`)
-	response := tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id, http.MethodPut, payload, nil)
+	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id, http.MethodPut, payload, nil)
 
 	assert.Equal(s.T(), 400, response.StatusCode)
 }
@@ -79,8 +79,8 @@ func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtensionSetEmptyName() {
 func (s *BrowserExtensionTestSuite) TestDoNotFindNotExistingExtension() {
 	notExistingId := uuid.New()
 
-	var browserExtension *tests.BrowserExtensionResponse
-	response := tests.DoAPIGet(s.T(), "/browser_extensions/"+notExistingId.String(), &browserExtension)
+	var browserExtension *e2e_tests.BrowserExtensionResponse
+	response := e2e_tests.DoAPIGet(s.T(), "/browser_extensions/"+notExistingId.String(), &browserExtension)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
@@ -92,6 +92,6 @@ func createBrowserExtension(t *testing.T, name string) *http.Response {
 
 	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, pubKey))
 
-	return tests.DoAPIRequest(t, "/browser_extensions", http.MethodPost, payload, nil)
+	return e2e_tests.DoAPIRequest(t, "/browser_extensions", http.MethodPost, payload, nil)
 
 }

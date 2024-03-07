@@ -84,6 +84,13 @@ func Fatal(args ...interface{}) {
 	customLogger.WithFields(defaultFields).Fatal(args...)
 }
 
+func Fatalf(format string, args ...interface{}) {
+	defaultFieldsMutex.Lock()
+	defer defaultFieldsMutex.Unlock()
+
+	customLogger.WithFields(defaultFields).Fatalf(format, args...)
+}
+
 func WithField(key string, value interface{}) *logrus.Entry {
 	defaultFieldsMutex.Lock()
 	defer defaultFieldsMutex.Unlock()

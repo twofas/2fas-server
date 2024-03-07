@@ -21,8 +21,8 @@ up: ## run all applications in stack
 	docker compose up -d
 
 
-test: ## run unit tests
-	go test ./internal/...
+unit-tests: ## run unit tests without e2e-tests directory..
+	go test -race -count=1 `go list ./... | grep -v e2e-tests`
 
 
 tests-e2e: ## run end to end tests
