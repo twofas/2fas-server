@@ -4,7 +4,7 @@ Thank you for considering contributing to the 2FAS open source project. Your sup
 
 ## Reporting Bugs
 
-Before you submit a bug report, please search the [existing issues](https://github.com/twofas/2fas-api/issues) to see if the problem has already been reported. If it has, please add any additional information you have to the existing issue.
+Before you submit a bug report, please search the [existing issues](https://github.com/twofas/2fas-server/issues) to see if the problem has already been reported. If it has, please add any additional information you have to the existing issue.
 
 If you can't find an existing issue for your problem, please open a new issue and include the following information:
 
@@ -22,7 +22,7 @@ We welcome code contributions to the 2FAS API Server project. If you are interes
 3. Create a new branch for your changes (e.g. `feature/new-login-endpoint`)
 4. Make your changes and commit them to your branch
 5. Push your branch to your fork on GitHub
-6. Open a pull request from your branch to the `develop` branch of this repository
+6. Open a pull request from your branch to the `main` branch of this repository
 
 Please make sure your pull request includes the following:
 
