@@ -3,7 +3,7 @@
 apt install --assume-yes jq
 
 AWS_REGION=us-east-1
-KEY_ALIAS=pass_service
+KEY_ALIAS=pass_service_signing_key
 
 response=$(awslocal kms create-key \
   --region $AWS_REGION \

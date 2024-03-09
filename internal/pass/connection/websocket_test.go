@@ -1,4 +1,4 @@
-package pairing
+package connection
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_tokenFromWSProtocol(t *testing.T) {
+func Test_TokenFromWSProtocol(t *testing.T) {
 	tests := []struct {
 		name           string
 		protocolHeader string
@@ -56,7 +56,7 @@ func Test_tokenFromWSProtocol(t *testing.T) {
 			if protocolHeader != "" {
 				req.Header.Set(protocolHeader, tt.protocolHeader)
 			}
-			got, err := tokenFromWSProtocol(req)
+			got, err := TokenFromWSProtocol(req)
 			tt.assertFn(t, got, err)
 		})
 	}
