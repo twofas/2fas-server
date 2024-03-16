@@ -2,6 +2,7 @@ package ports
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -289,7 +290,7 @@ func (r *RoutesHandler) Send2FaToken(c *gin.Context) {
 		return
 	}
 
-	err = r.cqrs.Commands.Send2FaToken.Handle(cmd)
+	err = r.cqrs.Commands.Send2FaToken.Handle(c.Request.Context(), cmd)
 
 	if err != nil {
 		c.JSON(500, api.NewInternalServerError(err))

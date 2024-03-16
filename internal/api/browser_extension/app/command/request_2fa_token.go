@@ -58,7 +58,8 @@ type Request2FaTokenHandler struct {
 	Pusher                               push.Pusher
 }
 
-func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
+func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToken) error {
+	log := logging.FromContext(ctx)
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
 	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
@@ -87,7 +88,7 @@ func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
 
 	for _, device := range pairedDevices {
 		if device.FcmToken == "" {
-			logging.WithFields(logging.Fields{
+			log.WithFields(logging.Fields{
 				"extension_id":     extId.String(),
 				"device_id":        device.Id.String(),
 				"token_request_id": cmd.Id,
@@ -117,7 +118,7 @@ func (h *Request2FaTokenHandler) Handle(cmd *Request2FaToken) error {
 		)
 
 		if err != nil && !messaging.IsUnregistered(err) {
-			logging.WithFields(logging.Fields{
+			log.WithFields(logging.Fields{
 				"extension_id":     extId.String(),
 				"device_id":        device.Id.String(),
 				"token_request_id": cmd.Id,

@@ -33,7 +33,7 @@ func BrowserExtensionBandwidthAuditMiddleware(rateLimiter rate_limit.RateLimiter
 		limitReached := rateLimiter.Test(c, key, rate)
 
 		if limitReached {
-			logging.WithFields(logging.Fields{
+			logging.FromContext(c.Request.Context()).WithFields(logging.Fields{
 				"type":                 "security",
 				"uri":                  c.Request.URL.String(),
 				"browser_extension_id": extensionId,

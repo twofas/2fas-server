@@ -43,7 +43,7 @@ func (r *RoutesHandler) Log(c *gin.Context) {
 		return
 	}
 
-	r.cqrs.Commands.StoreLogEvent.Handle(cmd)
+	r.cqrs.Commands.StoreLogEvent.Handle(c.Request.Context(), cmd)
 
 	c.JSON(200, api.NewOk("Log has been stored"))
 }
@@ -311,7 +311,7 @@ func (r *RoutesHandler) Request2FaToken(c *gin.Context) {
 		return
 	}
 
-	err = r.cqrs.Commands.Request2FaToken.Handle(cmd)
+	err = r.cqrs.Commands.Request2FaToken.Handle(c.Request.Context(), cmd)
 
 	if err != nil {
 		c.JSON(500, api.NewInternalServerError(err))

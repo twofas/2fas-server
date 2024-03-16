@@ -2,12 +2,13 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
-	app_http "github.com/twofas/2fas-server/internal/common/http"
-	"github.com/twofas/2fas-server/internal/common/logging"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/gorilla/websocket"
+	app_http "github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 type WebsocketApiClient struct {

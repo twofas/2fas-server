@@ -50,7 +50,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) readPump(log logging.FieldLogger) {
 	defer func() {
 		c.hub.unregisterClient(c)
 		c.conn.Close()
@@ -69,11 +69,11 @@ func (c *Client) readPump() {
 
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, acceptedCloseStatus...) {
-				logging.WithFields(logging.Fields{
+				log.WithFields(logging.Fields{
 					"reason": err.Error(),
 				}).Error("Websocket connection closed unexpected")
 			} else {
-				logging.WithFields(logging.Fields{
+				log.WithFields(logging.Fields{
 					"reason": err.Error(),
 				}).Info("Connection closed")
 			}

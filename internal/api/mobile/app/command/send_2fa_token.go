@@ -1,6 +1,7 @@
 package command
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/avast/retry-go/v4"
@@ -42,10 +43,11 @@ type Send2FaTokenHandler struct {
 	WebsocketClient                    *websocket.WebsocketApiClient
 }
 
-func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
+func (h *Send2FaTokenHandler) Handle(ctx context.Context, cmd *Send2FaToken) error {
 	extId, _ := uuid.Parse(cmd.ExtensionId)
+	log := logging.FromContext(ctx)
 
-	logging.WithFields(logging.Fields{
+	log.WithFields(logging.Fields{
 		"browser_extension_id": cmd.ExtensionId,
 		"device_id":            cmd.DeviceId,
 		"token_request_id":     cmd.TokenRequestId,
@@ -70,7 +72,7 @@ func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
 	)
 
 	if err != nil {
-		logging.WithFields(logging.Fields{
+		log.WithFields(logging.Fields{
 			"error":   err.Error(),
 			"message": message,
 		}).Error("Cannot send websocket message")
