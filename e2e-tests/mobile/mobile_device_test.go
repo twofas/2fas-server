@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestMobileDeviceTestSuite(t *testing.T) {
@@ -19,7 +19,7 @@ type MobileDeviceTestSuite struct {
 }
 
 func (s *MobileDeviceTestSuite) SetupTest() {
-	tests.RemoveAllMobileDevices(s.T())
+	e2e_tests.RemoveAllMobileDevices(s.T())
 }
 
 func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
@@ -49,5 +49,5 @@ func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
 
 func createDevice(t *testing.T, name, fcmToken string) *http.Response {
 	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
-	return tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
+	return e2e_tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
 }

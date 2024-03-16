@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/e2e-tests"
 	query "github.com/twofas/2fas-server/internal/api/support/app/queries"
-	"github.com/twofas/2fas-server/tests"
 )
 
 func TestDebugLogsAuditTestSuite(t *testing.T) {
@@ -25,7 +25,7 @@ type DebugLogsAuditTestSuite struct {
 }
 
 func (s *DebugLogsAuditTestSuite) SetupTest() {
-	tests.DoAdminSuccessDelete(s.T(), "mobile/support/debug_logs/audit")
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/support/debug_logs/audit")
 }
 
 func (s *DebugLogsAuditTestSuite) TestCreateDebugLogsAuditClaim() {
@@ -33,7 +33,7 @@ func (s *DebugLogsAuditTestSuite) TestCreateDebugLogsAuditClaim() {
 
 	auditClaim := new(query.DebugLogsAuditPresenter)
 
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/support/debug_logs/audit/claim", payload, auditClaim)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/support/debug_logs/audit/claim", payload, auditClaim)
 
 	assert.Equal(s.T(), "app-user", auditClaim.Username)
 	assert.Equal(s.T(), "some description", auditClaim.Description)
@@ -44,7 +44,7 @@ func (s *DebugLogsAuditTestSuite) TestUpdateDebugLogsAuditClaim() {
 
 	var updatedAuditClaim *query.DebugLogsAuditPresenter
 	updatePayload := []byte(`{"username": "app-user-1", "description": "another description"}`)
-	tests.DoAdminSuccessPut(s.T(), "mobile/support/debug_logs/audit/claim/"+auditClaim.Id, updatePayload, &updatedAuditClaim)
+	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/support/debug_logs/audit/claim/"+auditClaim.Id, updatePayload, &updatedAuditClaim)
 
 	assert.Equal(s.T(), "app-user-1", updatedAuditClaim.Username)
 	assert.Equal(s.T(), "another description", updatedAuditClaim.Description)
@@ -121,7 +121,7 @@ func (s *DebugLogsAuditTestSuite) TestGetDebugLogsAudit() {
 	auditClaim := createDebugLogsAuditClaim(s.T(), "user1", "desc1")
 
 	audit := new(query.DebugLogsAuditPresenter)
-	tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, audit)
+	e2e_tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, audit)
 
 	assert.Equal(s.T(), auditClaim.Id, audit.Id)
 	assert.Equal(s.T(), "user1", audit.Username)
@@ -131,9 +131,9 @@ func (s *DebugLogsAuditTestSuite) TestGetDebugLogsAudit() {
 func (s *DebugLogsAuditTestSuite) TestDeleteDebugLogsAudit() {
 	auditClaim := createDebugLogsAuditClaim(s.T(), "user1", "desc1")
 
-	tests.DoAdminSuccessDelete(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id)
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id)
 
-	response := tests.DoAPIGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, nil)
+	response := e2e_tests.DoAPIGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -142,7 +142,7 @@ func (s *DebugLogsAuditTestSuite) TestFindAllDebugLogsAudit() {
 	createDebugLogsAuditClaim(s.T(), "user2", "desc2")
 
 	var audits []*query.DebugLogsAuditPresenter
-	tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit", &audits)
+	e2e_tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit", &audits)
 
 	assert.Len(s.T(), audits, 2)
 }
@@ -151,7 +151,7 @@ func createDebugLogsAuditClaim(t *testing.T, username, description string) *quer
 	payload := []byte(`{"username": "` + username + `", "description": "` + description + `"}`)
 
 	auditClaim := new(query.DebugLogsAuditPresenter)
-	tests.DoAdminAPISuccessPost(t, "mobile/support/debug_logs/audit/claim", payload, auditClaim)
+	e2e_tests.DoAdminAPISuccessPost(t, "mobile/support/debug_logs/audit/claim", payload, auditClaim)
 
 	return auditClaim
 }

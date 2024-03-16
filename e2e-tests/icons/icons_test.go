@@ -8,8 +8,8 @@ import (
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/e2e-tests"
 	query "github.com/twofas/2fas-server/internal/api/icons/app/queries"
-	"github.com/twofas/2fas-server/tests"
 )
 
 func createIcon(t *testing.T) *query.IconPresenter {
@@ -34,7 +34,7 @@ func createIcon(t *testing.T) *query.IconPresenter {
 
 	var icon *query.IconPresenter
 
-	tests.DoAdminAPISuccessPost(t, "mobile/icons", payload, &icon)
+	e2e_tests.DoAdminAPISuccessPost(t, "mobile/icons", payload, &icon)
 
 	return icon
 }
@@ -48,7 +48,7 @@ type IconsTestSuite struct {
 }
 
 func (s *IconsTestSuite) SetupTest() {
-	tests.DoAdminSuccessDelete(s.T(), "mobile/icons")
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons")
 }
 
 func (s *IconsTestSuite) TestCreateIcon() {
@@ -67,7 +67,7 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 	`)
 
 	var updatedIcon *query.IconPresenter
-	tests.DoAdminSuccessPut(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
+	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
 
 	assert.Equal(s.T(), "meta", updatedIcon.Name)
 }
@@ -75,9 +75,9 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 func (s *IconsTestSuite) TestDeleteIcon() {
 	icon := createIcon(s.T())
 
-	tests.DoAdminSuccessDelete(s.T(), "mobile/icons/"+icon.Id)
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons/"+icon.Id)
 
-	response := tests.DoAPIGet(s.T(), "mobile/icons/"+icon.Id, nil)
+	response := e2e_tests.DoAPIGet(s.T(), "mobile/icons/"+icon.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -86,7 +86,7 @@ func (s *IconsTestSuite) TestFindAllIcons() {
 	createIcon(s.T())
 
 	var Icons []*query.IconPresenter
-	tests.DoAPISuccessGet(s.T(), "mobile/icons", &Icons)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons", &Icons)
 
 	assert.Len(s.T(), Icons, 2)
 }
@@ -95,7 +95,7 @@ func (s *IconsTestSuite) TestFindIcon() {
 	icon := createIcon(s.T())
 
 	var searchResult *query.IconPresenter
-	tests.DoAPISuccessGet(s.T(), "mobile/icons/"+icon.Id, &searchResult)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/"+icon.Id, &searchResult)
 
 	assert.Equal(s.T(), "facebook", searchResult.Name)
 }

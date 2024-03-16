@@ -106,7 +106,7 @@ func initViper(configFilePath string) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logging.Fatal("failed to read the configuration file: %s", err)
+		logging.Fatalf("failed to read the configuration file: %s", err)
 	}
 
 	err = viper.Unmarshal(&Config)

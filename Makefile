@@ -15,23 +15,28 @@ migration: ## create database migrations file
 migration-up: ## apply all available migrations
 	docker compose run -u ${USERID}:${USERID} --rm api migrate up
 
-
+.PHONY: up
 up: ## run all applications in stack
 	docker compose build
 	docker compose up -d
 
+.PHONY: unit-tests
+unit-tests: ## run unit tests without e2e-tests directory..
+	go test -race -count=1 `go list ./... | grep -v e2e-tests`
 
-test: ## run unit tests
-	go test ./internal/...
+.PHONY: ci-e2e
+ci-e2e: up
+	go run ./e2e-tests/scripts/wait-ready/main.go -addr=':80;:8081;:8082'
+	@$(MAKE) tests-e2e
 
-
+.PHONY: tests-e2e
 tests-e2e: ## run end to end tests
     ## There is some race condition when running tests as go test -count=1 ./tests/... Come back at some point and fix it
-	go test ./tests/browser_extension/... -count=1
-	go test ./tests/icons/... -count=1
-	go test ./tests/mobile/... -count=1
-	go test ./tests/support/... -count=1
-	go test ./tests/system/... -count=1
+	go test ./e2e-tests/browser_extension/... -count=1
+	go test ./e2e-tests/icons/... -count=1
+	go test ./e2e-tests/mobile/... -count=1
+	go test ./e2e-tests/support/... -count=1
+	go test ./e2e-tests/system/... -count=1
 
 
 vendor-licenses: ## report vendor licenses

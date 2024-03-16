@@ -1,4 +1,4 @@
-package tests
+package e2e_tests
 
 type DeviceResponse struct {
 	Id        string `json:"id"`

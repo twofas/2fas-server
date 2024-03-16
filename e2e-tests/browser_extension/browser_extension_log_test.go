@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 )
 
 func Test_BrowserExtensionLogging(t *testing.T) {
-	browserExtension := tests.CreateBrowserExtension(t, "go-ext")
+	browserExtension := e2e_tests.CreateBrowserExtension(t, "go-ext")
 
 	log := &struct {
 		Level   string `json:"level"`
@@ -20,7 +20,7 @@ func Test_BrowserExtensionLogging(t *testing.T) {
 	}
 
 	payload, _ := json.Marshal(log)
-	tests.DoAPISuccessPost(t, "/browser_extensions/"+browserExtension.Id+"/commands/store_log", payload, nil)
+	e2e_tests.DoAPISuccessPost(t, "/browser_extensions/"+browserExtension.Id+"/commands/store_log", payload, nil)
 }
 
 func Test_NotExistingBrowserExtensionLogging(t *testing.T) {
@@ -35,5 +35,5 @@ func Test_NotExistingBrowserExtensionLogging(t *testing.T) {
 	}
 
 	payload, _ := json.Marshal(log)
-	tests.DoAPISuccessPost(t, "/browser_extensions/"+someId.String()+"/commands/store_log", payload, nil)
+	e2e_tests.DoAPISuccessPost(t, "/browser_extensions/"+someId.String()+"/commands/store_log", payload, nil)
 }

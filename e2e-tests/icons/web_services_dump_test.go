@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestWebServicesDumpTestSuite(t *testing.T) {
@@ -19,16 +19,16 @@ type WebServicesDumpTestSuite struct {
 }
 
 func (s *WebServicesDumpTestSuite) SetupTest() {
-	tests.RemoveAllMobileIcons(s.T())
-	tests.RemoveAllMobileIconsCollections(s.T())
-	tests.RemoveAllMobileWebServices(s.T())
+	e2e_tests.RemoveAllMobileIcons(s.T())
+	e2e_tests.RemoveAllMobileIconsCollections(s.T())
+	e2e_tests.RemoveAllMobileWebServices(s.T())
 }
 
 func (s *WebServicesDumpTestSuite) TestWebServicesDump() {
 	createWebService(s.T())
 	createWebService(s.T())
 
-	response := tests.DoAPIGet(s.T(), "mobile/web_services/dump", nil)
+	response := e2e_tests.DoAPIGet(s.T(), "mobile/web_services/dump", nil)
 
 	assert.Equal(s.T(), 200, response.StatusCode)
 }
@@ -48,7 +48,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 
 	var webService *webServiceResponse
 
-	tests.DoAdminAPISuccessPost(t, "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(t, "mobile/web_services", payload, &webService)
 
 	return webService
 }
@@ -66,7 +66,7 @@ func createIconsCollection(t *testing.T) *iconsCollectionResponse {
 
 	var createdIconsCollection *iconsCollectionResponse
 
-	tests.DoAdminAPISuccessPost(t, "mobile/icons/collections", payload, &createdIconsCollection)
+	e2e_tests.DoAdminAPISuccessPost(t, "mobile/icons/collections", payload, &createdIconsCollection)
 
 	return createdIconsCollection
 }
