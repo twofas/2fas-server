@@ -46,9 +46,7 @@ type Send2FaTokenHandler struct {
 
 func (h *Send2FaTokenHandler) Handle(ctx context.Context, cmd *Send2FaToken) error {
 	extId, _ := uuid.Parse(cmd.ExtensionId)
-	log := logging.FromContext(ctx)
-
-	log = log.WithFields(logging.Fields{
+	log := logging.FromContext(ctx).WithFields(logging.Fields{
 		"browser_extension_id": cmd.ExtensionId,
 		"device_id":            cmd.DeviceId,
 		"token_request_id":     cmd.TokenRequestId,
