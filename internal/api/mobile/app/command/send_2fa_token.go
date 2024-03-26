@@ -6,6 +6,7 @@ import (
 
 	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"github.com/twofas/2fas-server/internal/common/logging"
@@ -45,13 +46,12 @@ type Send2FaTokenHandler struct {
 
 func (h *Send2FaTokenHandler) Handle(ctx context.Context, cmd *Send2FaToken) error {
 	extId, _ := uuid.Parse(cmd.ExtensionId)
-	log := logging.FromContext(ctx)
-
-	log.WithFields(logging.Fields{
+	log := logging.FromContext(ctx).WithFields(logging.Fields{
 		"browser_extension_id": cmd.ExtensionId,
 		"device_id":            cmd.DeviceId,
 		"token_request_id":     cmd.TokenRequestId,
-	}).Info("Start command `Send2FaToken`")
+	})
+	log.Info("Start command `Send2FaToken`")
 
 	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
 
@@ -73,8 +73,8 @@ func (h *Send2FaTokenHandler) Handle(ctx context.Context, cmd *Send2FaToken) err
 
 	if err != nil {
 		log.WithFields(logging.Fields{
-			"error":   err.Error(),
-			"message": message,
+			"error":             err.Error(),
+			"websocket_message": message,
 		}).Error("Cannot send websocket message")
 	}
 
