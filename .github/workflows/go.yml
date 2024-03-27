@@ -19,7 +19,7 @@ jobs:
           go-version: '1.22'
 
       - name: Unit Test
-        run: make unit-tests
+        run: make unit-tests-ci
 
       - name: e2e Test
         run: make ci-e2e
