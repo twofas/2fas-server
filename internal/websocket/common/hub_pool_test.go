@@ -54,10 +54,15 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 	hubs := &sync.Map{}
 
 	wg := sync.WaitGroup{}
-	wg.Add(channelsNo * clientsPerChannel)
+	// First we create `channelsNo` goroutines. Each of them creates `clientsPerChannel` sub-goroutines.
+	// This gives us `channelsNo*clientsPerChannel` sub go-routines and `channelsNo` parent goroutines.
+	// Each of them will call `wg.Done() once and we can't progress until all of them are done.
+	wg.Add(channelsNo*clientsPerChannel + channelsNo)
+
 	for i := 0; i < channelsNo; i++ {
 		channelID := fmt.Sprintf("channel-%d", i)
 		go func() {
+			defer wg.Done()
 			for j := 0; j < clientsPerChannel; j++ {
 				c, h := hp.registerClient(channelID, &websocket.Conn{})
 				hubs.Store(h, struct{}{})
@@ -70,7 +75,6 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 			hubs.Store(h, struct{}{})
 		}()
 	}
-
 	wg.Wait()
 
 	for c, hub := range hp.hubs {

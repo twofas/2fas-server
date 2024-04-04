@@ -21,8 +21,12 @@ up: ## run all applications in stack
 	docker compose up -d
 
 .PHONY: unit-tests
-unit-tests: ## run unit tests without e2e-tests directory..
+unit-tests: ## run unit tests without e2e-tests directory.
 	go test -race -count=1 `go list ./... | grep -v e2e-tests`
+
+.PHONY: unit-tests-ci
+unit-tests-ci: ## run unit tests without e2e-tests directory (multiple times to find race conditions).
+	go test -race -count=50 -failfast `go list ./... | grep -v e2e-tests`
 
 .PHONY: ci-e2e
 ci-e2e: up
