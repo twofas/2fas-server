@@ -7,12 +7,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gin-gonic/gin"
-	"github.com/twofas/2fas-server/internal/pass/sign"
 
 	"github.com/twofas/2fas-server/config"
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/recovery"
+	"github.com/twofas/2fas-server/internal/pass/connection"
 	"github.com/twofas/2fas-server/internal/pass/pairing"
+	"github.com/twofas/2fas-server/internal/pass/sign"
+	"github.com/twofas/2fas-server/internal/pass/sync"
 )
 
 type Server struct {
@@ -48,8 +51,11 @@ func NewServer(cfg config.PassConfig) *Server {
 		log.Fatal(err)
 	}
 
-	pairingApp := pairing.NewPairingApp(signSvc)
-	proxyApp := pairing.NewProxy()
+	pairingApp := pairing.NewApp(signSvc, cfg.PairingRequestTokenValidityDuration)
+	proxyPairingApp := connection.NewProxyServer("device_id")
+
+	syncApp := sync.NewApp(signSvc, cfg.FakeMobilePush)
+	proxySyncApp := connection.NewProxyServer("fcm_token")
 
 	router := gin.New()
 	router.Use(recovery.RecoveryMiddleware())
@@ -62,11 +68,29 @@ func NewServer(cfg config.PassConfig) *Server {
 		context.Status(200)
 	})
 
-	router.POST("/browser_extension/configure", pairing.ExtensionConfigureHandler(pairingApp))
+	// Deprecated paths start here.
 	router.GET("/browser_extension/wait_for_connection", pairing.ExtensionWaitForConnWSHandler(pairingApp))
-	router.GET("/browser_extension/proxy_to_mobile", pairing.ExtensionProxyWSHandler(pairingApp, proxyApp))
+	router.GET("/browser_extension/proxy_to_mobile", pairing.ExtensionProxyWSHandler(pairingApp, proxyPairingApp))
 	router.POST("/mobile/confirm", pairing.MobileConfirmHandler(pairingApp))
-	router.GET("/mobile/proxy_to_browser_extension", pairing.MobileProxyWSHandler(pairingApp, proxyApp))
+	router.GET("/mobile/proxy_to_browser_extension", pairing.MobileProxyWSHandler(pairingApp, proxyPairingApp))
+	// Deprecated paths end here.
+
+	router.POST("/browser_extension/configure", pairing.ExtensionConfigureHandler(pairingApp))
+
+	router.GET("/browser_extension/pairing/wait", pairing.ExtensionWaitForConnWSHandler(pairingApp))
+	router.GET("/browser_extension/pairing/proxy", pairing.ExtensionProxyWSHandler(pairingApp, proxyPairingApp))
+	router.POST("/mobile/pairing/confirm", pairing.MobileConfirmHandler(pairingApp))
+	router.GET("/mobile/pairing/proxy", pairing.MobileProxyWSHandler(pairingApp, proxyPairingApp))
+
+	router.GET("/browser_extension/sync/request", sync.ExtensionRequestSync(syncApp))
+	router.GET("/browser_extension/sync/proxy", sync.ExtensionProxyWSHandler(syncApp, proxySyncApp))
+	router.POST("/mobile/sync/confirm", sync.MobileConfirmHandler(syncApp))
+	router.GET("/mobile/sync/proxy", sync.MobileProxyWSHandler(syncApp, proxySyncApp))
+
+	if cfg.FakeMobilePush {
+		logging.Info("Enabled '/mobile/sync/:fcm/token' endpoint. This should happen in test env only!")
+		router.GET("/mobile/sync/:fcm/token", sync.MobileGenerateSyncToken(syncApp))
+	}
 
 	return &Server{
 		router: router,
