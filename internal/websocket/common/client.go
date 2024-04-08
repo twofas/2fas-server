@@ -2,9 +2,11 @@ package common
 
 import (
 	"bytes"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -43,6 +45,8 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	sendMtx *sync.Mutex
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -132,4 +136,28 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+func (c *Client) sendMsg(bb []byte) bool {
+	c.sendMtx.Lock()
+	defer c.sendMtx.Unlock()
+
+	if c.send == nil {
+		return false
+	}
+
+	c.send <- bb
+	return true
+}
+
+func (c *Client) close() {
+	c.sendMtx.Lock()
+	defer c.sendMtx.Unlock()
+
+	if c.send == nil {
+		return
+	}
+
+	close(c.send)
+	c.send = nil
 }
