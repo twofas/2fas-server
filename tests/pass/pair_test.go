@@ -6,6 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
+func msgOfSize(size int, c byte) string {
+	msg := make([]byte, size)
+
+	for i := range msg {
+		msg[i] = c
+	}
+
+	return string(msg)
+}
+
 func TestPairHappyFlow(t *testing.T) {
 	resp, err := configureBrowserExtension()
 	if err != nil {
@@ -14,6 +24,8 @@ func TestPairHappyFlow(t *testing.T) {
 
 	browserExtensionDone := make(chan struct{})
 	mobileDone := make(chan struct{})
+
+	const messageSize = 1024 * 1024
 
 	go func() {
 		defer close(browserExtensionDone)
@@ -27,8 +39,9 @@ func TestPairHappyFlow(t *testing.T) {
 		err = proxyWebSocket(
 			getWsURL()+"/browser_extension/proxy_to_mobile",
 			extProxyToken,
-			"sent from browser extension",
-			"sent from mobile")
+			msgOfSize(messageSize, 'b'),
+			msgOfSize(messageSize, 'm'),
+		)
 		if err != nil {
 			t.Errorf("Browser Extension: proxy failed: %v", err)
 			return
@@ -47,8 +60,8 @@ func TestPairHappyFlow(t *testing.T) {
 		err = proxyWebSocket(
 			getWsURL()+"/mobile/proxy_to_browser_extension",
 			mobileProxyToken,
-			"sent from mobile",
-			"sent from browser extension",
+			msgOfSize(messageSize, 'm'),
+			msgOfSize(messageSize, 'b'),
 		)
 		if err != nil {
 			t.Errorf("Mobile: proxy failed: %v", err)

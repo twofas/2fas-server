@@ -21,7 +21,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 4 * 1048
+	maxMessageSize = 10 * (2 << 20)
 )
 
 var (
@@ -39,13 +39,13 @@ var (
 // proxy is a responsible for reading from read chan and sending it over wsConn
 // and reading fom wsChan and sending it over send chan
 type proxy struct {
-	send chan []byte
+	send *safeChannel
 	read chan []byte
 
 	conn *websocket.Conn
 }
 
-func startProxy(wsConn *websocket.Conn, send, read chan []byte) {
+func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 	proxy := &proxy{
 		send: send,
 		read: read,
@@ -79,7 +79,7 @@ func startProxy(wsConn *websocket.Conn, send, read chan []byte) {
 func (p *proxy) readPump() {
 	defer func() {
 		p.conn.Close()
-		close(p.send)
+		p.send.close()
 	}()
 
 	p.conn.SetReadLimit(maxMessageSize)
@@ -104,7 +104,7 @@ func (p *proxy) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		p.send <- message
+		p.send.write(message)
 	}
 }
 
