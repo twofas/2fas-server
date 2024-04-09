@@ -29,7 +29,7 @@ func (h *hubPool) registerClient(channel string, conn *websocket.Conn) (*Client,
 	defer h.mtx.Unlock()
 
 	hub := h.getOrCreateHub(channel)
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), sendMtx: &sync.Mutex{}}
 	hub.registerClient(client)
 
 	// handler (caller of this method) isn't really interested in hub,
