@@ -39,7 +39,7 @@ func (p *ProxyServer) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *ht
 	log.Infof("Starting ServeExtensionProxyToMobileWS")
 
 	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
-	startProxy(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh)
+	startProxy(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh.channel)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func (p *ProxyServer) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *ht
 	logging.Infof("Starting ServeMobileProxyToExtensionWS for dev: %v", id)
 	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
 
-	startProxy(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh)
+	startProxy(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh.channel)
 
 	return nil
 }

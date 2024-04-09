@@ -34,8 +34,8 @@ func (pp *proxyPool) deleteExpiresPairs() {
 }
 
 type proxyPair struct {
-	toMobileDataCh    chan []byte
-	toExtensionDataCh chan []byte
+	toMobileDataCh    *safeChannel
+	toExtensionDataCh *safeChannel
 	expiresAt         time.Time
 }
 
@@ -43,8 +43,43 @@ type proxyPair struct {
 func initProxyPair() *proxyPair {
 	const proxyTimeout = 3 * time.Minute
 	return &proxyPair{
-		toMobileDataCh:    make(chan []byte),
-		toExtensionDataCh: make(chan []byte),
+		toMobileDataCh:    newSafeChannel(),
+		toExtensionDataCh: newSafeChannel(),
 		expiresAt:         time.Now().Add(proxyTimeout),
 	}
+}
+
+type safeChannel struct {
+	channel chan []byte
+	mu      *sync.Mutex
+}
+
+func newSafeChannel() *safeChannel {
+	return &safeChannel{
+		channel: make(chan []byte),
+		mu:      &sync.Mutex{},
+	}
+}
+
+func (sc *safeChannel) write(data []byte) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	if sc.channel == nil {
+		return
+	}
+
+	sc.channel <- data
+}
+
+func (sc *safeChannel) close() {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	if sc.channel == nil {
+		return
+	}
+
+	close(sc.channel)
+	sc.channel = nil
 }
