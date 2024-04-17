@@ -57,12 +57,7 @@ func configureBrowserExtension() (ConfigureBrowserExtensionResponse, error) {
 }
 
 // confirmMobile confirms pairing and returns mobile proxy token.
-func confirmMobile(connectionToken, fcm string) (string, error) {
-	deviceID := uuid.NewString()
-	if deviceIDFromEnv := os.Getenv("TEST_DEVICE_ID"); deviceIDFromEnv != "" {
-		deviceID = deviceIDFromEnv
-	}
-
+func confirmMobile(connectionToken, deviceID, fcm string) (string, error) {
 	req := struct {
 		DeviceID string `json:"device_id"`
 		FCMToken string `json:"fcm_token"`

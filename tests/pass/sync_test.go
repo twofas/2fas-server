@@ -16,6 +16,7 @@ func TestSyncHappyFlow(t *testing.T) {
 	mobileParingDone := make(chan struct{})
 
 	fcm := uuid.NewString()
+	deviceID := getDeviceID()
 
 	go func() {
 		defer close(browserExtensionDone)
@@ -44,7 +45,7 @@ func TestSyncHappyFlow(t *testing.T) {
 	go func() {
 		defer close(mobileParingDone)
 
-		_, err := confirmMobile(resp.ConnectionToken, fcm)
+		_, err := confirmMobile(resp.ConnectionToken, deviceID, fcm)
 		if err != nil {
 			t.Errorf("Mobile: confirm failed: %v", err)
 			return
