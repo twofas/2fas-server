@@ -21,6 +21,23 @@ func TestPairHappyFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to configure browser extension: %v", err)
 	}
+	testPairing(t, resp)
+}
+
+func TestPairMultipleTimes(t *testing.T) {
+	resp, err := configureBrowserExtension()
+	if err != nil {
+		t.Fatalf("Failed to configure browser extension: %v", err)
+	}
+	const messageSize = 1024 * 1024
+
+	for i := 0; i < 10; i++ {
+		testPairing(t, resp)
+	}
+}
+
+func testPairing(t *testing.T, resp ConfigureBrowserExtensionResponse) {
+	t.Helper()
 
 	browserExtensionDone := make(chan struct{})
 	mobileDone := make(chan struct{})
