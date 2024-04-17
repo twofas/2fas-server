@@ -2,7 +2,6 @@ package connection
 
 import (
 	"bytes"
-	"fmt"
 	"sync"
 	"time"
 
@@ -59,17 +58,12 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 
 	go recovery.DoNotPanic(func() {
 		defer wg.Done()
-		fmt.Println("writePump start")
 		proxy.writePump()
-		fmt.Println("writePump end")
 	})
 
 	go recovery.DoNotPanic(func() {
-		fmt.Println("readPump start")
-
 		defer wg.Done()
 		proxy.readPump()
-		fmt.Println("readPump end")
 	})
 
 	go recovery.DoNotPanic(func() {
