@@ -2,6 +2,8 @@ package connection
 
 import (
 	"bytes"
+	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -52,12 +54,22 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 		conn: wsConn,
 	}
 
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
 	go recovery.DoNotPanic(func() {
+		defer wg.Done()
+		fmt.Println("writePump start")
 		proxy.writePump()
+		fmt.Println("writePump end")
 	})
 
 	go recovery.DoNotPanic(func() {
+		fmt.Println("readPump start")
+
+		defer wg.Done()
 		proxy.readPump()
+		fmt.Println("readPump end")
 	})
 
 	go recovery.DoNotPanic(func() {
@@ -69,6 +81,8 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 
 		proxy.conn.Close()
 	})
+
+	wg.Wait()
 }
 
 // readPump pumps messages from the websocket proxy to send.
