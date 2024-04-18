@@ -22,6 +22,28 @@ func TestPairHappyFlow(t *testing.T) {
 		t.Fatalf("Failed to configure browser extension: %v", err)
 	}
 
+	deviceID := getDeviceID()
+	testPairing(t, deviceID, resp)
+}
+
+func TestPairMultipleTimes(t *testing.T) {
+	resp, err := configureBrowserExtension()
+	if err != nil {
+		t.Fatalf("Failed to configure browser extension: %v", err)
+	}
+
+	deviceID := getDeviceID()
+	for i := 0; i < 10; i++ {
+		testPairing(t, deviceID, resp)
+		if t.Failed() {
+			break
+		}
+	}
+}
+
+func testPairing(t *testing.T, deviceID string, resp ConfigureBrowserExtensionResponse) {
+	t.Helper()
+
 	browserExtensionDone := make(chan struct{})
 	mobileDone := make(chan struct{})
 
@@ -51,7 +73,7 @@ func TestPairHappyFlow(t *testing.T) {
 	go func() {
 		defer close(mobileDone)
 
-		mobileProxyToken, err := confirmMobile(resp.ConnectionToken, uuid.NewString())
+		mobileProxyToken, err := confirmMobile(resp.ConnectionToken, deviceID, uuid.NewString())
 		if err != nil {
 			t.Errorf("Mobile: confirm failed: %v", err)
 			return

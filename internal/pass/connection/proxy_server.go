@@ -40,6 +40,8 @@ func (p *ProxyServer) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *ht
 
 	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
 	startProxy(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh.channel)
+
+	p.proxyPool.deleteProxyPair(id)
 	return nil
 }
 
@@ -54,5 +56,6 @@ func (p *ProxyServer) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *ht
 
 	startProxy(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh.channel)
 
+	p.proxyPool.deleteProxyPair(id)
 	return nil
 }

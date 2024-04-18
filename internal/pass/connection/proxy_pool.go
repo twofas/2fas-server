@@ -33,6 +33,14 @@ func (pp *proxyPool) deleteExpiresPairs() {
 	}
 }
 
+func (pp *proxyPool) deleteProxyPair(id string) {
+	pp.mu.Lock()
+	defer pp.mu.Unlock()
+
+	// Channels inside proxyPair are closed in proxy.readPump and proxy.writePump.
+	delete(pp.proxies, id)
+}
+
 type proxyPair struct {
 	toMobileDataCh    *safeChannel
 	toExtensionDataCh *safeChannel
