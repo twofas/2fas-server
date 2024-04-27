@@ -1,9 +1,12 @@
 package command
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"github.com/twofas/2fas-server/internal/common/logging"
@@ -41,15 +44,14 @@ type Send2FaTokenHandler struct {
 	WebsocketClient                    *websocket.WebsocketApiClient
 }
 
-func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
+func (h *Send2FaTokenHandler) Handle(ctx context.Context, cmd *Send2FaToken) error {
 	extId, _ := uuid.Parse(cmd.ExtensionId)
-
-	logging.WithFields(logging.Fields{
+	log := logging.FromContext(ctx).WithFields(logging.Fields{
 		"browser_extension_id": cmd.ExtensionId,
 		"device_id":            cmd.DeviceId,
-		"token":                cmd.Token,
 		"token_request_id":     cmd.TokenRequestId,
-	}).Info("Start command `Send2FaToken`")
+	})
+	log.Info("Start command `Send2FaToken`")
 
 	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
 
@@ -70,9 +72,9 @@ func (h *Send2FaTokenHandler) Handle(cmd *Send2FaToken) error {
 	)
 
 	if err != nil {
-		logging.WithFields(logging.Fields{
-			"error":   err.Error(),
-			"message": message,
+		log.WithFields(logging.Fields{
+			"error":             err.Error(),
+			"websocket_message": message,
 		}).Error("Cannot send websocket message")
 	}
 

@@ -1,4 +1,4 @@
-package tests
+package e2e_tests
 
 import (
 	"github.com/gorilla/websocket"

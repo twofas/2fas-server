@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 )
 
 type iconsCollectionResponse struct {
@@ -26,7 +26,7 @@ type IconsCollectionsTestSuite struct {
 }
 
 func (s *IconsCollectionsTestSuite) SetupTest() {
-	tests.RemoveAllMobileIconsCollections(s.T())
+	e2e_tests.RemoveAllMobileIconsCollections(s.T())
 }
 
 func (s *IconsCollectionsTestSuite) TestCreateIconsCollection() {
@@ -39,7 +39,7 @@ func (s *IconsCollectionsTestSuite) TestCreateIconsCollection() {
 	`)
 
 	var IconsCollection *iconsCollectionResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &IconsCollection)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &IconsCollection)
 
 	assert.Equal(s.T(), "facebook", IconsCollection.Name)
 	assert.Equal(s.T(), "desc", IconsCollection.Description)
@@ -55,7 +55,7 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 		}
 	`)
 	var iconsCollection *iconsCollectionResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
 
 	updatePayload := []byte(`
 		{
@@ -65,7 +65,7 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 	`)
 
 	var updatedIconsCollection *iconsCollectionResponse
-	tests.DoAdminSuccessPut(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
+	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
 
 	assert.Equal(s.T(), "meta", updatedIconsCollection.Name)
 	assert.Equal(s.T(), []string{"icon-1", "icon-2"}, updatedIconsCollection.Icons)
@@ -79,11 +79,11 @@ func (s *IconsCollectionsTestSuite) TestDeleteIconsCollection() {
 		}
 	`)
 	var iconsCollection *iconsCollectionResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &iconsCollection)
 
-	tests.DoAdminSuccessDelete(s.T(), "mobile/icons/collections/"+iconsCollection.Id)
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons/collections/"+iconsCollection.Id)
 
-	response := tests.DoAPIGet(s.T(), "mobile/icons/collections/"+iconsCollection.Id, nil)
+	response := e2e_tests.DoAPIGet(s.T(), "mobile/icons/collections/"+iconsCollection.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -94,7 +94,7 @@ func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
 			"icons":["icon-1", "icon-2"]
 		}
 	`)
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, nil)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, nil)
 
 	payload2 := []byte(`
 		{
@@ -103,10 +103,10 @@ func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
 			"icons":["123e4567-e89b-12d3-a456-426614174000"]
 		}
 	`)
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload2, nil)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload2, nil)
 
 	var IconsCollections []*iconsCollectionResponse
-	tests.DoAPISuccessGet(s.T(), "mobile/icons/collections", &IconsCollections)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/collections", &IconsCollections)
 	assert.Len(s.T(), IconsCollections, 2)
 }
 
@@ -119,10 +119,10 @@ func (s *IconsCollectionsTestSuite) TestFindIconsCollection() {
 		}
 	`)
 	var createdIconsCollection *iconsCollectionResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &createdIconsCollection)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &createdIconsCollection)
 
 	var IconsCollection *iconsCollectionResponse
-	tests.DoAPISuccessGet(s.T(), "mobile/icons/collections/"+createdIconsCollection.Id, &IconsCollection)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/collections/"+createdIconsCollection.Id, &IconsCollection)
 
 	assert.Equal(s.T(), "just-one", IconsCollection.Name)
 }

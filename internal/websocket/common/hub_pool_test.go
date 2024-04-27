@@ -50,27 +50,44 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 	hp := newHubPool()
 	const channelsNo = 100
 	const clientsPerChannel = 1000
+	const messagesSentToEachHub = 100
 
 	hubs := &sync.Map{}
 
 	wg := sync.WaitGroup{}
+	// First we create `channelsNo` goroutines. Each of them creates `clientsPerChannel` sub-goroutines.
+	// This gives us `channelsNo*clientsPerChannel` sub go-routines and `channelsNo` parent goroutines.
+	// Each of them will call `wg.Done() once and we can't progress until all of them are done.
+	wg.Add(channelsNo*clientsPerChannel + channelsNo)
+	// We will close `channelsNo*clientsPerChannel + channelsNo` clients. We create fakeReadPump for each of them and
+	// wait for it to finish.
 	wg.Add(channelsNo * clientsPerChannel)
+
 	for i := 0; i < channelsNo; i++ {
 		channelID := fmt.Sprintf("channel-%d", i)
+
+		c, h := hp.registerClient(channelID, &websocket.Conn{})
+		hubs.Store(h, struct{}{})
+		go fakeReadPump(c.send, &wg)
 		go func() {
+			for i := 0; i < messagesSentToEachHub; i++ {
+				h.broadcastMsg([]byte("test"))
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
 			for j := 0; j < clientsPerChannel; j++ {
 				c, h := hp.registerClient(channelID, &websocket.Conn{})
-				hubs.Store(h, struct{}{})
+				go fakeReadPump(c.send, &wg)
+
 				go func() {
 					h.unregisterClient(c)
 					wg.Done()
 				}()
 			}
-			_, h := hp.registerClient(channelID, &websocket.Conn{})
-			hubs.Store(h, struct{}{})
 		}()
 	}
-
 	wg.Wait()
 
 	for c, hub := range hp.hubs {
@@ -88,4 +105,10 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 		}
 		return true
 	})
+}
+
+func fakeReadPump(c chan []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for range c {
+	}
 }

@@ -9,8 +9,7 @@ func RunHttpServer(addr string, init func(engine *gin.Engine)) {
 
 	router.Use(gin.Recovery())
 	router.Use(corsMiddleware())
-	router.Use(RequestIdMiddleware())
-	router.Use(CorrelationIdMiddleware())
+	router.Use(LoggingMiddleware())
 	router.Use(RequestJsonLogger())
 
 	init(router)

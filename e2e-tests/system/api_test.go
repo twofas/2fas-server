@@ -6,11 +6,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 )
 
 func Test_Default404Response(t *testing.T) {
-	response := tests.DoAPIGet(t, "some/not/existing/endpoint", nil)
+	response := e2e_tests.DoAPIGet(t, "some/not/existing/endpoint", nil)
 
 	rawBody, err := io.ReadAll(response.Body)
 	require.NoError(t, err)

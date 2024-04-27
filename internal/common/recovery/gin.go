@@ -3,10 +3,11 @@ package recovery
 import (
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/twofas/2fas-server/internal/common/logging"
 	"io/ioutil"
 	"runtime"
+
+	"github.com/gin-gonic/gin"
+	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
 func RecoveryMiddleware() gin.HandlerFunc {

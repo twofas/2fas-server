@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/twofas/2fas-server/tests"
+	"github.com/twofas/2fas-server/e2e-tests"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -21,7 +21,7 @@ func Test_MobileApiBandwidthAbuse(t *testing.T) {
 	eg.SetLimit(noOfWorkers)
 	for i := 0; i < noOfRequest; i++ {
 		eg.Go(func() error {
-			resp := tests.DoAPIGet(t, "/mobile/devices/"+someId.String()+"/browser_extensions", nil)
+			resp := e2e_tests.DoAPIGet(t, "/mobile/devices/"+someId.String()+"/browser_extensions", nil)
 
 			responseCh <- resp.StatusCode
 
@@ -59,7 +59,7 @@ func Test_BrowserExtensionApiBandwidthAbuse(t *testing.T) {
 	eg.SetLimit(noOfWorkers)
 	for i := 0; i < noOfRequest; i++ {
 		eg.Go(func() error {
-			resp := tests.DoAPIGet(t, "/browser_extensions/"+someId.String(), nil)
+			resp := e2e_tests.DoAPIGet(t, "/browser_extensions/"+someId.String(), nil)
 
 			responseCh <- resp.StatusCode
 

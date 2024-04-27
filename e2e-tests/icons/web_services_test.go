@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/twofas/2fas-server/e2e-tests"
 	"github.com/twofas/2fas-server/internal/api/icons/app/command"
-	"github.com/twofas/2fas-server/tests"
 )
 
 type webServiceResponse struct {
@@ -30,7 +30,7 @@ type WebServicesTestSuite struct {
 }
 
 func (s *WebServicesTestSuite) SetupTest() {
-	tests.RemoveAllMobileWebServices(s.T())
+	e2e_tests.RemoveAllMobileWebServices(s.T())
 }
 
 func (s *WebServicesTestSuite) TestCreateWebService() {
@@ -45,7 +45,7 @@ func (s *WebServicesTestSuite) TestCreateWebService() {
 	`)
 
 	var webService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
 	assert.Equal(s.T(), "facebook", webService.Name)
 	assert.Equal(s.T(), "desc", webService.Description)
@@ -65,8 +65,8 @@ func (s *WebServicesTestSuite) TestCreateWebServiceWithAlreadyExistingName() {
 		}
 	`)
 
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, nil)
-	tests.DoAdminPostAndAssertCode(s.T(), 409, "mobile/web_services", payload, nil)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, nil)
+	e2e_tests.DoAdminPostAndAssertCode(s.T(), 409, "mobile/web_services", payload, nil)
 }
 
 func (s *WebServicesTestSuite) TestCreateWebServiceWithMatchRules() {
@@ -80,7 +80,7 @@ func (s *WebServicesTestSuite) TestCreateWebServiceWithMatchRules() {
 	`)
 
 	var webService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
 	assert.Equal(s.T(), []*command.MatchRule{{
 		Field:      "label",
@@ -101,7 +101,7 @@ func (s *WebServicesTestSuite) TestUpdateWebService() {
 		}
 	`)
 	var webService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
 	updatePayload := []byte(`{
 			"name":"meta",
@@ -112,7 +112,7 @@ func (s *WebServicesTestSuite) TestUpdateWebService() {
 	`)
 
 	var updatedWebService *webServiceResponse
-	tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
+	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
 
 	assert.Equal(s.T(), "meta", updatedWebService.Name)
 	assert.Equal(s.T(), []string{"meta", "facebook"}, updatedWebService.Issuers)
@@ -130,7 +130,7 @@ func (s *WebServicesTestSuite) TestUpdateWebServiceMatchRule() {
 		}
 	`)
 	var webService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
 	updatePayload := []byte(`{
 			"name":"meta",
@@ -141,7 +141,7 @@ func (s *WebServicesTestSuite) TestUpdateWebServiceMatchRule() {
 	`)
 
 	var updatedWebService *webServiceResponse
-	tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
+	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
 
 	assert.Equal(s.T(), "issuer", updatedWebService.MatchRules[0].Field)
 	assert.Equal(s.T(), "facebook.pl", updatedWebService.MatchRules[0].Text)
@@ -160,11 +160,11 @@ func (s *WebServicesTestSuite) TestDeleteWebService() {
 		}
 	`)
 	var webService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
-	tests.DoAdminSuccessDelete(s.T(), "mobile/web_services/"+webService.Id)
+	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/web_services/"+webService.Id)
 
-	response := tests.DoAPIGet(s.T(), "mobile/web_services/"+webService.Id, nil)
+	response := e2e_tests.DoAPIGet(s.T(), "mobile/web_services/"+webService.Id, nil)
 	assert.Equal(s.T(), 404, response.StatusCode)
 }
 
@@ -178,7 +178,7 @@ func (s *WebServicesTestSuite) TestFindAllWebServices() {
 			"icons_collections":["123e4567-e89b-12d3-a456-426614174000"]
 		}
 	`)
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, nil)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, nil)
 
 	payload2 := []byte(`
 		{
@@ -189,10 +189,10 @@ func (s *WebServicesTestSuite) TestFindAllWebServices() {
 			"icons_collections":["123e4567-e89b-12d3-a456-426614174000"]
 		}
 	`)
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload2, nil)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload2, nil)
 
 	var webServices []*webServiceResponse
-	tests.DoAPISuccessGet(s.T(), "mobile/web_services", &webServices)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/web_services", &webServices)
 	assert.Len(s.T(), webServices, 2)
 }
 
@@ -207,10 +207,10 @@ func (s *WebServicesTestSuite) TestFindWebService() {
 		}
 	`)
 	var createdWebService *webServiceResponse
-	tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &createdWebService)
+	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &createdWebService)
 
 	var webService *webServiceResponse
-	tests.DoAPISuccessGet(s.T(), "mobile/web_services/"+createdWebService.Id, &webService)
+	e2e_tests.DoAPISuccessGet(s.T(), "mobile/web_services/"+createdWebService.Id, &webService)
 
 	assert.Equal(s.T(), "just-one", webService.Name)
 }

@@ -2,9 +2,11 @@ package common
 
 import (
 	"bytes"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -43,6 +45,8 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	sendMtx *sync.Mutex
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -50,7 +54,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) readPump(log logging.FieldLogger) {
 	defer func() {
 		c.hub.unregisterClient(c)
 		c.conn.Close()
@@ -69,11 +73,11 @@ func (c *Client) readPump() {
 
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, acceptedCloseStatus...) {
-				logging.WithFields(logging.Fields{
+				log.WithFields(logging.Fields{
 					"reason": err.Error(),
 				}).Error("Websocket connection closed unexpected")
 			} else {
-				logging.WithFields(logging.Fields{
+				log.WithFields(logging.Fields{
 					"reason": err.Error(),
 				}).Info("Connection closed")
 			}
@@ -132,4 +136,28 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+func (c *Client) sendMsg(bb []byte) bool {
+	c.sendMtx.Lock()
+	defer c.sendMtx.Unlock()
+
+	if c.send == nil {
+		return false
+	}
+
+	c.send <- bb
+	return true
+}
+
+func (c *Client) close() {
+	c.sendMtx.Lock()
+	defer c.sendMtx.Unlock()
+
+	if c.send == nil {
+		return
+	}
+
+	close(c.send)
+	c.send = nil
 }

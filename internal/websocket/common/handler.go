@@ -42,18 +42,18 @@ func (h *ConnectionHandler) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		channel := c.Request.URL.Path
 
-		logging.WithDefaultField("channel", channel)
+		log := logging.FromContext(c.Request.Context()).WithField("channel", channel)
 
-		logging.Info("New channel subscriber")
+		log.Info("New channel subscriber")
 
-		h.serveWs(c.Writer, c.Request, channel)
+		h.serveWs(c.Writer, c.Request, channel, log)
 	}
 }
 
-func (h *ConnectionHandler) serveWs(w http.ResponseWriter, r *http.Request, channel string) {
+func (h *ConnectionHandler) serveWs(w http.ResponseWriter, r *http.Request, channel string, log logging.FieldLogger) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logging.Errorf("Failed to upgrade connection: %v", err)
+		log.Errorf("Failed to upgrade connection: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -65,7 +65,7 @@ func (h *ConnectionHandler) serveWs(w http.ResponseWriter, r *http.Request, chan
 	})
 
 	go recovery.DoNotPanic(func() {
-		client.readPump()
+		client.readPump(log)
 	})
 
 	go recovery.DoNotPanic(func() {
@@ -73,7 +73,7 @@ func (h *ConnectionHandler) serveWs(w http.ResponseWriter, r *http.Request, chan
 		timeout := time.After(disconnectAfter)
 
 		<-timeout
-		logging.Info("Connection closed after", disconnectAfter)
+		log.Info("Connection closed after", disconnectAfter)
 
 		client.hub.unregisterClient(client)
 		client.conn.Close()
