@@ -89,10 +89,11 @@ services:
     group_add:
       - '1000'
     ports:
-      - "8084:8082"
+      - "8088:8082"
     environment:
       # overwrite AWS_ENDPOINT from .env file. One in env is used to running app from local also.
       AWS_ENDPOINT: http://localstack-main:4566
+      AWS_REGION: us-east-1
     env_file:
       - .env
     depends_on:
@@ -113,7 +114,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - "./tests/localstack_init.sh:/etc/localstack/init/ready.d/localstack_init.sh"  # ready hook
+      - "./e2e-tests/localstack_init.sh:/etc/localstack/init/ready.d/localstack_init.sh"  # ready hook
       - "./data/localstack:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 

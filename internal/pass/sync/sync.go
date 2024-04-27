@@ -75,7 +75,7 @@ func (s *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 		if err := s.sendTokenAndCloseConn(fcmToken, conn); err != nil {
 			log.Errorf("Failed to send token: %v", err)
 		}
-		log.Infof("Paring ws finished")
+		log.Infof("Sync ws finished")
 		return nil
 	}
 
@@ -89,7 +89,7 @@ func (s *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 	for {
 		select {
 		case <-maxWaitC:
-			log.Info("Closing paring ws after timeout")
+			log.Info("Closing sync ws after timeout")
 			return nil
 		case <-connectedCheckTicker.C:
 			if syncConfirmed := s.isSyncConfirmed(r.Context(), fcmToken); syncConfirmed {
@@ -97,7 +97,7 @@ func (s *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 					log.Errorf("Failed to send token: %v", err)
 					return nil
 				}
-				log.Infof("Paring ws finished")
+				log.Infof("Sync ws finished")
 				return nil
 			}
 		}

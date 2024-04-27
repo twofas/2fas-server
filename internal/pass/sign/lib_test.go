@@ -8,10 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -70,16 +66,6 @@ func createTestService(t *testing.T) Service {
 }
 
 func TestSignAndVerify(t *testing.T) {
-	sess, err := session.NewSession(&aws.Config{
-		Region:           aws.String("us-east-1"),
-		Credentials:      credentials.NewStaticCredentials("test", "test", ""),
-		S3ForcePathStyle: aws.Bool(true),
-		Endpoint:         aws.String("http://localhost:4566"),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	kmsClient := kms.New(sess)
 	srv := createTestService(t)
 	now := time.Now()
 
@@ -128,18 +114,7 @@ func TestSignAndVerify(t *testing.T) {
 		{
 			name: "invalid signature",
 			tokenFn: func() string {
-				resp, err := kmsClient.CreateKey(&kms.CreateKeyInput{
-					KeySpec:  aws.String("ECC_NIST_P256"),
-					KeyUsage: aws.String("SIGN_VERIFY"),
-				})
-				if err != nil {
-					t.Fatal(err)
-				}
-				serviceWithAnotherKey, err := NewService(*resp.KeyMetadata.KeyId, kmsClient)
-				if err != nil {
-					t.Fatal(err)
-				}
-
+				serviceWithAnotherKey := createTestService(t)
 				token, err := serviceWithAnotherKey.SignAndEncode(Message{
 					ConnectionID:   uuid.New().String(),
 					ExpiresAt:      now.Add(-time.Hour),

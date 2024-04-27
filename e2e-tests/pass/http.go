@@ -106,7 +106,7 @@ func getMobileToken(fcm string) (string, error) {
 		MobileSyncConfirmToken string `json:"mobile_sync_confirm_token"`
 	}
 	if err := request("GET", fmt.Sprintf("/mobile/sync/%s/token", fcm), "", nil, &resp); err != nil {
-		return "", fmt.Errorf("failed to get mobile token")
+		return "", fmt.Errorf("failed to get mobile token: %w", err)
 	}
 
 	return resp.MobileSyncConfirmToken, nil

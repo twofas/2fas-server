@@ -41,7 +41,7 @@ tests-e2e: ## run end to end tests
 	go test ./e2e-tests/mobile/... -count=1
 	go test ./e2e-tests/support/... -count=1
 	go test ./e2e-tests/system/... -count=1
-	go test ./e2e-tests/pass/... -count=1
+	PASS_ADDR="localhost:8088" go test ./e2e-tests/pass/... -count=1
 
 vendor-licenses: ## report vendor licenses
 	go-licenses report ./cmd/api --template licenses.tpl > licenses.json 2> licenses-errors

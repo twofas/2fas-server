@@ -59,9 +59,7 @@ func NewServer(cfg config.PassConfig) *Server {
 
 	router := gin.New()
 	router.Use(recovery.RecoveryMiddleware())
-	router.Use(httphelpers.RequestIdMiddleware())
-	router.Use(httphelpers.CorrelationIdMiddleware())
-	// TODO: don't log auth headers.
+	router.Use(httphelpers.LoggingMiddleware())
 	router.Use(httphelpers.RequestJsonLogger())
 
 	router.GET("/health", func(context *gin.Context) {
