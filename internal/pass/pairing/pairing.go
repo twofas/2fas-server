@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
-
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/pass/connection"
 	"github.com/twofas/2fas-server/internal/pass/sign"
@@ -128,7 +126,7 @@ func (p *Pairing) ServePairingWS(w http.ResponseWriter, r *http.Request, extID s
 	}
 }
 
-func (p *Pairing) isExtensionPaired(ctx context.Context, extID string, log *logrus.Entry) (PairingInfo, bool) {
+func (p *Pairing) isExtensionPaired(ctx context.Context, extID string, log logging.FieldLogger) (PairingInfo, bool) {
 	pairingInfo, err := p.store.GetPairingInfo(ctx, extID)
 	if err != nil {
 		log.Warn("Failed to get pairing info")

@@ -19,8 +19,7 @@ func NewServer(addr string) *Server {
 	router := gin.New()
 
 	router.Use(recovery.RecoveryMiddleware())
-	router.Use(http.RequestIdMiddleware())
-	router.Use(http.CorrelationIdMiddleware())
+	router.Use(http.LoggingMiddleware())
 	router.Use(http.RequestJsonLogger())
 
 	connectionHandler := common.NewConnectionHandler()

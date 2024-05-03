@@ -28,7 +28,7 @@ func (h *Hub) unregisterClient(c *Client) {
 	if !ok {
 		return
 	}
-	close(c.send)
+	c.close()
 	if h.isEmpty() {
 		h.onHubHasNoClients(h.id)
 	}
@@ -39,9 +39,8 @@ func (h *Hub) sendToClient(c *Client, msg []byte) {
 	if !ok {
 		return
 	}
-	select {
-	case c.send <- msg:
-	default:
+	ok = c.sendMsg(msg)
+	if !ok {
 		h.unregisterClient(c)
 	}
 }

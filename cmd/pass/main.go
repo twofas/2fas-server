@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	logging.WithDefaultField("service_name", "pass")
+	logging.Init(logging.Fields{"service_name": "pass"})
 
 	var cfg config.PassConfig
 	err := envconfig.Process("", &cfg)

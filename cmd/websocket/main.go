@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	logging.WithDefaultField("service_name", "websocket_api")
+	logging.Init(logging.Fields{"service_name": "websocket_api"})
 
 	config.LoadConfiguration()
 

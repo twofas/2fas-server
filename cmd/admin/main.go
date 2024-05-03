@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	logging.WithDefaultField("service_name", "admin_api")
+	logging.Init(logging.Fields{"service_name": "admin_api"})
 
 	config.LoadConfiguration()
 
