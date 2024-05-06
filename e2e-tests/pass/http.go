@@ -101,17 +101,6 @@ func confirmSyncMobileRequest(connectionToken string) (string, error) {
 	return resp.ProxyToken, nil
 }
 
-func getMobileToken(fcm string) (string, error) {
-	var resp struct {
-		MobileSyncConfirmToken string `json:"mobile_sync_confirm_token"`
-	}
-	if err := request("GET", fmt.Sprintf("/mobile/sync/%s/token", fcm), "", nil, &resp); err != nil {
-		return "", fmt.Errorf("failed to get mobile token: %w", err)
-	}
-
-	return resp.MobileSyncConfirmToken, nil
-}
-
 func request(method, path, auth string, req, resp interface{}) error {
 	url := getApiURL() + path
 	var body io.Reader
@@ -147,6 +136,35 @@ func request(method, path, auth string, req, resp interface{}) error {
 	}
 	if err := json.Unmarshal(bb, &resp); err != nil {
 		return fmt.Errorf("failed to decode the response: %w", err)
+	}
+
+	return nil
+}
+
+type RequestSyncResponse struct {
+	BrowserExtensionWaitToken string `json:"browser_extension_wait_token"`
+	MobileConfirmToken        string `json:"mobile_confirm_token"`
+}
+
+func browserExtensionRequestSync(token string) (RequestSyncResponse, error) {
+	var resp RequestSyncResponse
+
+	if err := request("POST", "/browser_extension/sync/request", token, nil, &resp); err != nil {
+		return resp, fmt.Errorf("failed to configure browser: %w", err)
+	}
+
+	return resp, nil
+}
+
+func browserExtensionPushToMobile(token string) error {
+	req := struct {
+		Body string `json:"push_body"`
+	}{
+		Body: "sent from browser extension",
+	}
+	resp := struct{}{}
+	if err := request("POST", "/browser_extension/sync/push", token, req, &resp); err != nil {
+		return fmt.Errorf("failed to configure browser: %w", err)
 	}
 
 	return nil

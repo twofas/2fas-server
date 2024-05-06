@@ -13,7 +13,7 @@ import (
 
 func ExtensionRequestSync(syncingApp *Syncing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
-		token, err := connection.TokenFromWSProtocol(gCtx.Request)
+		token, err := tokenFromRequest(gCtx)
 		if err != nil {
 			logging.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
@@ -26,8 +26,67 @@ func ExtensionRequestSync(syncingApp *Syncing) gin.HandlerFunc {
 			return
 		}
 
+		resp, err := syncingApp.RequestSync(gCtx, fcmToken)
+		if err != nil {
+			logging.Errorf("Failed to request sync: %v", err)
+			gCtx.Status(http.StatusInternalServerError)
+			return
+		}
+		gCtx.JSON(http.StatusOK, resp)
+	}
+}
+
+type PushToMobileRequest struct {
+	Body string `json:"push_body"`
+}
+
+func ExtensionRequestPush(syncingApp *Syncing) gin.HandlerFunc {
+	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
+		token, err := tokenFromRequest(gCtx)
+		if err != nil {
+			log.Errorf("Failed to get token from request: %v", err)
+			gCtx.Status(http.StatusForbidden)
+			return
+		}
+		fcmToken, err := syncingApp.VerifyExtWaitForSyncToken(gCtx, token)
+		if err != nil {
+			log.Errorf("Failed to verify proxy token: %v", err)
+			gCtx.String(http.StatusUnauthorized, "Invalid auth token")
+			return
+		}
+		var req PushToMobileRequest
+		if err := gCtx.BindJSON(&req); err != nil {
+			gCtx.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		log.Infof("Send push to mobile %q: %q", fcmToken, req.Body)
+
+		gCtx.Status(http.StatusOK)
+	}
+}
+
+func ExtensionRequestWait(syncingApp *Syncing) gin.HandlerFunc {
+	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
+		token, err := connection.TokenFromWSProtocol(gCtx.Request)
+		if err != nil {
+			log.Errorf("Failed to get token from request: %v", err)
+			gCtx.Status(http.StatusForbidden)
+			return
+		}
+		fcmToken, err := syncingApp.VerifyExtWaitForSyncToken(gCtx, token)
+		if err != nil {
+			log.Errorf("Failed to verify proxy token: %v", err)
+			gCtx.String(http.StatusUnauthorized, "Invalid auth token")
+			return
+		}
+
 		if err := syncingApp.ServeSyncingRequestWS(gCtx.Writer, gCtx.Request, fcmToken); err != nil {
-			logging.Errorf("Failed to verify proxy token: %v", err)
+			log.Errorf("Failed to verify proxy token: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
@@ -109,20 +168,6 @@ func MobileProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gi
 		}
 		if err := proxy.ServeMobileProxyToExtensionWS(gCtx.Writer, gCtx.Request, fcmToken); err != nil {
 			logging.Errorf("Failed to serve ws: %v", err)
-			gCtx.Status(http.StatusInternalServerError)
-		}
-	}
-}
-
-func MobileGenerateSyncToken(syncingApp *Syncing) gin.HandlerFunc {
-	return func(gCtx *gin.Context) {
-		fcm := gCtx.Param("fcm")
-		if fcm == "" {
-			gCtx.Status(http.StatusBadRequest)
-			return
-		}
-		if err := syncingApp.sendMobileToken(fcm, gCtx.Writer); err != nil {
-			logging.Errorf("Failed to send mobile token: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 		}
 	}

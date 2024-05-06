@@ -14,6 +14,7 @@ func TestSyncHappyFlow(t *testing.T) {
 
 	browserExtensionDone := make(chan struct{})
 	mobileParingDone := make(chan struct{})
+	confirmMobileChannel := make(chan string)
 
 	fcm := uuid.NewString()
 	deviceID := getDeviceID()
@@ -26,7 +27,15 @@ func TestSyncHappyFlow(t *testing.T) {
 			return
 		}
 
-		proxyToken, err := browserExtensionWaitForSyncConfirm(syncToken)
+		requestSyncResp, err := browserExtensionRequestSync(syncToken)
+		if err != nil {
+			t.Errorf("Error when Browser Extension requested sync confirm: %v", err)
+			return
+		}
+
+		confirmMobileChannel <- requestSyncResp.MobileConfirmToken
+
+		proxyToken, err := browserExtensionWaitForSyncConfirm(requestSyncResp.BrowserExtensionWaitToken)
 		if err != nil {
 			t.Errorf("Error when Browser Extension waited for sync confirm: %v", err)
 			return
@@ -51,11 +60,7 @@ func TestSyncHappyFlow(t *testing.T) {
 			return
 		}
 
-		confirmToken, err := getMobileToken(fcm)
-		if err != nil {
-			t.Errorf("Failed to fetch mobile token: %v", err)
-			return
-		}
+		confirmToken := <-confirmMobileChannel
 
 		proxyToken, err := confirmSyncMobile(confirmToken)
 		if err != nil {

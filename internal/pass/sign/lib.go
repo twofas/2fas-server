@@ -59,6 +59,7 @@ const (
 	ConnectionTypeBrowserExtensionWait        ConnectionType = "be/wait"
 	ConnectionTypeBrowserExtensionProxy       ConnectionType = "be/proxy"
 	ConnectionTypeBrowserExtensionSyncRequest ConnectionType = "be/sync/request"
+	ConnectionTypeBrowserExtensionSyncWait    ConnectionType = "be/sync/wait"
 	ConnectionTypeBrowserExtensionSync        ConnectionType = "be/sync/proxy"
 	ConnectionTypeMobileProxy                 ConnectionType = "mobile/proxy"
 	ConnectionTypeMobileConfirm               ConnectionType = "mobile/confirm"

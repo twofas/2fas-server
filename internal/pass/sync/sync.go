@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
 	"github.com/twofas/2fas-server/internal/common/logging"
@@ -37,10 +38,6 @@ const (
 	syncTokenValidityDuration = 3 * time.Minute
 )
 
-type ConfigureBrowserExtensionRequest struct {
-	ExtensionID string `json:"extension_id"`
-}
-
 type ConfigureBrowserExtensionResponse struct {
 	BrowserExtensionPairingToken string `json:"browser_extension_pairing_token"`
 	ConnectionToken              string `json:"connection_token"`
@@ -49,11 +46,6 @@ type ConfigureBrowserExtensionResponse struct {
 type ExtensionWaitForConnectionInput struct {
 	ResponseWriter http.ResponseWriter
 	HttpReq        *http.Request
-}
-
-type RequestSyncResponse struct {
-	BrowserExtensionProxyToken string `json:"browser_extension_proxy_token"`
-	Status                     string `json:"status"`
 }
 
 type MobileSyncPayload struct {
@@ -112,6 +104,11 @@ func (s *Syncing) requestSync(ctx context.Context, fcmToken string) {
 	s.store.RequestSync(fcmToken)
 }
 
+type WaitForSyncResponse struct {
+	BrowserExtensionProxyToken string `json:"browser_extension_proxy_token"`
+	Status                     string `json:"status"`
+}
+
 func (s *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) error {
 	extProxyToken, err := s.signSvc.SignAndEncode(sign.Message{
 		ConnectionID:   fcmToken,
@@ -122,7 +119,7 @@ func (s *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) e
 		return fmt.Errorf("failed to generate ext proxy token: %v", err)
 	}
 
-	if err := conn.WriteJSON(RequestSyncResponse{
+	if err := conn.WriteJSON(WaitForSyncResponse{
 		BrowserExtensionProxyToken: extProxyToken,
 		Status:                     "ok",
 	}); err != nil {
@@ -177,4 +174,32 @@ func (s *Syncing) confirmSync(ctx context.Context, fcmToken string) (ConfirmSync
 	}
 
 	return ConfirmSyncResponse{ProxyToken: mobileProxyToken}, nil
+}
+
+type RequestSyncResponse struct {
+	BrowserExtensionWaitToken string `json:"browser_extension_wait_token"`
+	MobileConfirmToken        string `json:"mobile_confirm_token"`
+}
+
+func (s *Syncing) RequestSync(ctx *gin.Context, token string) (RequestSyncResponse, error) {
+	mobileConfirmToken, err := s.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   token,
+		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeMobileSyncConfirm,
+	})
+	if err != nil {
+		return RequestSyncResponse{}, fmt.Errorf("failed to generate mobile confirm token: %v", err)
+	}
+	browserExtensionWaitToken, err := s.signSvc.SignAndEncode(sign.Message{
+		ConnectionID:   token,
+		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
+		ConnectionType: sign.ConnectionTypeBrowserExtensionSyncWait,
+	})
+	if err != nil {
+		return RequestSyncResponse{}, fmt.Errorf("failed to generate browser extension wait token: %v", err)
+	}
+	return RequestSyncResponse{
+		BrowserExtensionWaitToken: browserExtensionWaitToken,
+		MobileConfirmToken:        mobileConfirmToken,
+	}, nil
 }
