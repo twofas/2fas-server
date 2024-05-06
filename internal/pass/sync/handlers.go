@@ -13,22 +13,24 @@ import (
 
 func ExtensionRequestSync(syncingApp *Syncing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
-			logging.Errorf("Failed to get token from request: %v", err)
+			log.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
 		fcmToken, err := syncingApp.VerifyExtRequestSyncToken(gCtx, token)
 		if err != nil {
-			logging.Errorf("Failed to verify proxy token: %v", err)
+			log.Errorf("Failed to verify proxy token: %v", err)
 			gCtx.String(http.StatusUnauthorized, "Invalid auth token")
 			return
 		}
 
 		resp, err := syncingApp.RequestSync(gCtx, fcmToken)
 		if err != nil {
-			logging.Errorf("Failed to request sync: %v", err)
+			log.Errorf("Failed to request sync: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
@@ -95,15 +97,17 @@ func ExtensionRequestWait(syncingApp *Syncing) gin.HandlerFunc {
 
 func ExtensionProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
-			logging.Errorf("Failed to get token from request: %v", err)
+			log.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
 		fcmToken, err := syncingApp.VerifyExtSyncToken(gCtx, token)
 		if err != nil {
-			logging.Errorf("Failed to verify proxy token: %v", err)
+			log.Errorf("Failed to verify proxy token: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
@@ -113,7 +117,7 @@ func ExtensionProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer)
 			return
 		}
 		if err := proxy.ServeExtensionProxyToMobileWS(gCtx.Writer, gCtx.Request, fcmToken); err != nil {
-			logging.Errorf("Failed to serve ws: %v", err)
+			log.Errorf("Failed to serve ws: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 		}
 	}
@@ -121,15 +125,17 @@ func ExtensionProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer)
 
 func MobileConfirmHandler(syncApp *Syncing) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
 		token, err := tokenFromRequest(gCtx)
 		if err != nil {
-			logging.Errorf("Failed to get token from request: %v", err)
+			log.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
 		fcmToken, err := syncApp.VerifyMobileSyncConfirmToken(gCtx, token)
 		if err != nil {
-			logging.Errorf("Failed to verify connection token: %v", err)
+			log.Errorf("Failed to verify connection token: %v", err)
 			gCtx.Status(http.StatusUnauthorized)
 			return
 		}
@@ -139,7 +145,7 @@ func MobileConfirmHandler(syncApp *Syncing) gin.HandlerFunc {
 				gCtx.String(http.StatusBadRequest, "no sync request was created for this token")
 				return
 			}
-			logging.Errorf("Failed to ConfirmPairing: %v", err)
+			log.Errorf("Failed to ConfirmPairing: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 			return
 		}
@@ -149,15 +155,17 @@ func MobileConfirmHandler(syncApp *Syncing) gin.HandlerFunc {
 
 func MobileProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gin.HandlerFunc {
 	return func(gCtx *gin.Context) {
+		log := logging.FromContext(gCtx.Request.Context())
+
 		token, err := connection.TokenFromWSProtocol(gCtx.Request)
 		if err != nil {
-			logging.Errorf("Failed to get token from request: %v", err)
+			log.Errorf("Failed to get token from request: %v", err)
 			gCtx.Status(http.StatusForbidden)
 			return
 		}
 		fcmToken, err := syncingApp.VerifyMobileSyncConfirmToken(gCtx, token)
 		if err != nil {
-			logging.Errorf("Invalid connection token: %v", err)
+			log.Errorf("Invalid connection token: %v", err)
 			gCtx.Status(http.StatusUnauthorized)
 			return
 		}
@@ -167,7 +175,7 @@ func MobileProxyWSHandler(syncingApp *Syncing, proxy *connection.ProxyServer) gi
 			return
 		}
 		if err := proxy.ServeMobileProxyToExtensionWS(gCtx.Writer, gCtx.Request, fcmToken); err != nil {
-			logging.Errorf("Failed to serve ws: %v", err)
+			log.Errorf("Failed to serve ws: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
 		}
 	}
