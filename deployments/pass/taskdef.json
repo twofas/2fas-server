@@ -20,6 +20,10 @@
         }
       ],
       "secrets": [
+        {
+          "name": "FIREBASE_SA",
+          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/pass-8pVN76:pass_firebase_sa::"
+        }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",

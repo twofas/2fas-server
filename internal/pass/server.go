@@ -1,12 +1,16 @@
 package pass
 
 import (
+	"context"
 	"log"
 
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/api/option"
 
 	"github.com/twofas/2fas-server/config"
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
@@ -50,6 +54,22 @@ func NewServer(cfg config.PassConfig) *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ctx := context.Background()
+	var fcmClient *messaging.Client
+	if cfg.FirebaseServiceAccount != "" {
+		opt := option.WithCredentialsJSON([]byte(cfg.FirebaseServiceAccount))
+		app, err := firebase.NewApp(ctx, nil, opt)
+		if err != nil {
+			log.Fatalf("Error initializing FCM App: %v", err)
+		}
+		fcmClient, err = app.Messaging(ctx)
+		if err != nil {
+			log.Fatalf("Error initializing Messaging Client: %v", err)
+		}
+	}
+	// TODO: use client in later phase.
+	_ = fcmClient
 
 	pairingApp := pairing.NewApp(signSvc, cfg.PairingRequestTokenValidityDuration)
 	proxyPairingApp := connection.NewProxyServer("device_id")
