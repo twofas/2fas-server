@@ -2,7 +2,6 @@ package sync
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -126,30 +125,6 @@ func (s *Syncing) sendTokenAndCloseConn(fcmToken string, conn *websocket.Conn) e
 		return fmt.Errorf("failed to write to extension: %v", err)
 	}
 	return conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-}
-
-func (s *Syncing) sendMobileToken(fcmToken string, resp http.ResponseWriter) error {
-	extProxyToken, err := s.signSvc.SignAndEncode(sign.Message{
-		ConnectionID:   fcmToken,
-		ExpiresAt:      time.Now().Add(syncTokenValidityDuration),
-		ConnectionType: sign.ConnectionTypeMobileSyncConfirm,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to generate ext proxy token: %v", err)
-	}
-
-	bb, err := json.Marshal(struct {
-		MobileSyncConfirmToken string `json:"mobile_sync_confirm_token"`
-	}{
-		MobileSyncConfirmToken: extProxyToken,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal the response: %v", err)
-	}
-	if _, err := resp.Write(bb); err != nil {
-		return fmt.Errorf("failed to write the response: %v", err)
-	}
-	return nil
 }
 
 type ConfirmSyncResponse struct {
