@@ -14,7 +14,6 @@ import (
 
 	"github.com/twofas/2fas-server/config"
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
-	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/recovery"
 	"github.com/twofas/2fas-server/internal/pass/connection"
 	"github.com/twofas/2fas-server/internal/pass/pairing"
@@ -100,15 +99,13 @@ func NewServer(cfg config.PassConfig) *Server {
 	router.POST("/mobile/pairing/confirm", pairing.MobileConfirmHandler(pairingApp))
 	router.GET("/mobile/pairing/proxy", pairing.MobileProxyWSHandler(pairingApp, proxyPairingApp))
 
-	router.GET("/browser_extension/sync/request", sync.ExtensionRequestSync(syncApp))
+	router.POST("/browser_extension/sync/request", sync.ExtensionRequestSync(syncApp))
+	router.POST("/browser_extension/sync/push", sync.ExtensionRequestPush(syncApp))
+	router.GET("/browser_extension/sync/wait", sync.ExtensionRequestWait(syncApp))
+
 	router.GET("/browser_extension/sync/proxy", sync.ExtensionProxyWSHandler(syncApp, proxySyncApp))
 	router.POST("/mobile/sync/confirm", sync.MobileConfirmHandler(syncApp))
 	router.GET("/mobile/sync/proxy", sync.MobileProxyWSHandler(syncApp, proxySyncApp))
-
-	if cfg.FakeMobilePush {
-		logging.Info("Enabled '/mobile/sync/:fcm/token' endpoint. This should happen in test env only!")
-		router.GET("/mobile/sync/:fcm/token", sync.MobileGenerateSyncToken(syncApp))
-	}
 
 	return &Server{
 		router: router,

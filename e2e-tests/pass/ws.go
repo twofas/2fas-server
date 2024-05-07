@@ -24,7 +24,7 @@ func getWsURL() string {
 }
 
 func browserExtensionWaitForSyncConfirm(token string) (string, error) {
-	url := getWsURL() + "/browser_extension/sync/request"
+	url := getWsURL() + "/browser_extension/sync/wait"
 
 	var resp struct {
 		BrowserExtensionSyncToken string `json:"browser_extension_proxy_token"`
