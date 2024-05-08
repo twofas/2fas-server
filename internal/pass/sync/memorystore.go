@@ -39,7 +39,7 @@ func (s *MemoryStore) ConfirmSync(fcmToken string) bool {
 	return true
 }
 
-func (s *MemoryStore) IsSyncCofirmed(fcmToken string) bool {
+func (s *MemoryStore) IsSyncConfirmed(fcmToken string) bool {
 	v, ok := s.getItem(fcmToken)
 	if !ok {
 		return false

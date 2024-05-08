@@ -4,18 +4,16 @@ import (
 	"context"
 	"log"
 
-	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/messaging"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/api/option"
 
 	"github.com/twofas/2fas-server/config"
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/recovery"
 	"github.com/twofas/2fas-server/internal/pass/connection"
+	"github.com/twofas/2fas-server/internal/pass/fcm"
 	"github.com/twofas/2fas-server/internal/pass/pairing"
 	"github.com/twofas/2fas-server/internal/pass/sign"
 	"github.com/twofas/2fas-server/internal/pass/sync"
@@ -55,25 +53,20 @@ func NewServer(cfg config.PassConfig) *Server {
 	}
 
 	ctx := context.Background()
-	var fcmClient *messaging.Client
+	var fcmClient fcm.Client
 	if cfg.FirebaseServiceAccount != "" {
-		opt := option.WithCredentialsJSON([]byte(cfg.FirebaseServiceAccount))
-		app, err := firebase.NewApp(ctx, nil, opt)
-		if err != nil {
-			log.Fatalf("Error initializing FCM App: %v", err)
-		}
-		fcmClient, err = app.Messaging(ctx)
+		fcmClient, err = fcm.NewClient(ctx, cfg.FirebaseServiceAccount)
 		if err != nil {
 			log.Fatalf("Error initializing Messaging Client: %v", err)
 		}
+	} else {
+		fcmClient = fcm.NewFakePushClient()
 	}
-	// TODO: use client in later phase.
-	_ = fcmClient
 
 	pairingApp := pairing.NewApp(signSvc, cfg.PairingRequestTokenValidityDuration)
 	proxyPairingApp := connection.NewProxyServer("device_id")
 
-	syncApp := sync.NewApp(signSvc, cfg.FakeMobilePush)
+	syncApp := sync.NewApp(signSvc, fcmClient)
 	proxySyncApp := connection.NewProxyServer("fcm_token")
 
 	router := gin.New()

@@ -156,16 +156,19 @@ func browserExtensionRequestSync(token string) (RequestSyncResponse, error) {
 	return resp, nil
 }
 
-func browserExtensionPushToMobile(token string) error {
+func browserExtensionPush(token, body string) (string, error) {
+	var resp struct {
+		Response string `json:"response"`
+	}
 	req := struct {
 		Body string `json:"push_body"`
 	}{
-		Body: "sent from browser extension",
-	}
-	resp := struct{}{}
-	if err := request("POST", "/browser_extension/sync/push", token, req, &resp); err != nil {
-		return fmt.Errorf("failed to configure browser: %w", err)
+		Body: body,
 	}
 
-	return nil
+	if err := request("POST", "/browser_extension/sync/push", token, req, &resp); err != nil {
+		return "", fmt.Errorf("failed to send push notification: %w", err)
+	}
+
+	return resp.Response, nil
 }
