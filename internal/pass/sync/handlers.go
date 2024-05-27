@@ -68,6 +68,7 @@ func ExtensionRequestPush(syncingApp *Syncing) gin.HandlerFunc {
 		if err != nil {
 			log.Errorf("Failed to send push message: %v", err)
 			gCtx.Status(http.StatusInternalServerError)
+			return
 		}
 
 		gCtx.JSON(http.StatusOK, map[string]string{
