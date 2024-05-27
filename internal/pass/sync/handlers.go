@@ -64,9 +64,16 @@ func ExtensionRequestPush(syncingApp *Syncing) gin.HandlerFunc {
 			return
 		}
 
-		log.Infof("Send push to mobile %q: %q", fcmToken, req.Body)
+		resp, err := syncingApp.SendPush(gCtx, fcmToken, req.Body)
+		if err != nil {
+			log.Errorf("Failed to send push message: %v", err)
+			gCtx.Status(http.StatusInternalServerError)
+			return
+		}
 
-		gCtx.Status(http.StatusOK)
+		gCtx.JSON(http.StatusOK, map[string]string{
+			"response": string(resp),
+		})
 	}
 }
 

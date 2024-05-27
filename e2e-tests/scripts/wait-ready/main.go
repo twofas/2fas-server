@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	addrFlag := flag.String("addr", ":80;:8081;:8082", "list of addresses to check sep by ;")
+	addrFlag := flag.String("addr", ":80;:8081;:8082;:8088", "list of addresses to check sep by ;")
 	flag.Parse()
 
 	addresses := strings.Split(*addrFlag, ";")

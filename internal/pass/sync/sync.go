@@ -7,29 +7,33 @@ import (
 	"net/http"
 	"time"
 
+	"firebase.google.com/go/v4/messaging"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/pass/connection"
+	"github.com/twofas/2fas-server/internal/pass/fcm"
 	"github.com/twofas/2fas-server/internal/pass/sign"
 )
 
 type Syncing struct {
-	store   store
-	signSvc *sign.Service
+	store     store
+	signSvc   *sign.Service
+	fcmClient fcm.Client
 }
 
 type store interface {
-	RequestSync(fmtToken string)
-	ConfirmSync(fmtToken string) bool
-	IsSyncCofirmed(fmtToken string) bool
+	RequestSync(fcmToken string)
+	ConfirmSync(fcmToken string) bool
+	IsSyncConfirmed(fcmToken string) bool
 }
 
-func NewApp(signService *sign.Service, fakeMobilePush bool) *Syncing {
+func NewApp(signService *sign.Service, fcmClient fcm.Client) *Syncing {
 	return &Syncing{
-		store:   NewMemoryStore(),
-		signSvc: signService,
+		store:     NewMemoryStore(),
+		signSvc:   signService,
+		fcmClient: fcmClient,
 	}
 }
 
@@ -96,7 +100,7 @@ func (s *Syncing) ServeSyncingRequestWS(w http.ResponseWriter, r *http.Request, 
 }
 
 func (s *Syncing) isSyncConfirmed(ctx context.Context, fcmToken string) bool {
-	return s.store.IsSyncCofirmed(fcmToken)
+	return s.store.IsSyncConfirmed(fcmToken)
 }
 
 func (s *Syncing) requestSync(ctx context.Context, fcmToken string) {
@@ -177,4 +181,19 @@ func (s *Syncing) RequestSync(ctx *gin.Context, token string) (RequestSyncRespon
 		BrowserExtensionWaitToken: browserExtensionWaitToken,
 		MobileConfirmToken:        mobileConfirmToken,
 	}, nil
+}
+
+func (s *Syncing) SendPush(ctx *gin.Context, token string, body string) (fcm.Response, error) {
+	msg := &messaging.Message{
+		Token: token,
+		Android: &messaging.AndroidConfig{
+			Notification: &messaging.AndroidNotification{
+				Title: "2pass push request",
+			},
+			Data: map[string]string{
+				"data": body,
+			},
+		},
+	}
+	return s.fcmClient.Send(ctx, msg)
 }
