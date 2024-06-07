@@ -156,14 +156,14 @@ func browserExtensionRequestSync(token string) (RequestSyncResponse, error) {
 	return resp, nil
 }
 
-func browserExtensionPush(token, body string) (string, error) {
+func browserExtensionPush(token string, data map[string]string) (string, error) {
 	var resp struct {
 		Response string `json:"response"`
 	}
 	req := struct {
-		Body string `json:"push_body"`
+		Data map[string]string `json:"data"`
 	}{
-		Body: body,
+		Data: data,
 	}
 
 	if err := request("POST", "/browser_extension/sync/push", token, req, &resp); err != nil {

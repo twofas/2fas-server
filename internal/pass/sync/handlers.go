@@ -39,7 +39,7 @@ func ExtensionRequestSync(syncingApp *Syncing) gin.HandlerFunc {
 }
 
 type PushToMobileRequest struct {
-	Body string `json:"push_body"`
+	DataMessage map[string]string `json:"data_message"`
 }
 
 func ExtensionRequestPush(syncingApp *Syncing) gin.HandlerFunc {
@@ -64,7 +64,7 @@ func ExtensionRequestPush(syncingApp *Syncing) gin.HandlerFunc {
 			return
 		}
 
-		resp, err := syncingApp.SendPush(gCtx, fcmToken, req.Body)
+		resp, err := syncingApp.SendPush(gCtx, fcmToken, req.DataMessage)
 		if err != nil {
 			log.Errorf("Failed to send push message: %v", err)
 			gCtx.Status(http.StatusInternalServerError)

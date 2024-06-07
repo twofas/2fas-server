@@ -33,7 +33,7 @@ func TestSyncHappyFlow(t *testing.T) {
 			return
 		}
 
-		pushResp, err := browserExtensionPush(requestSyncResp.BrowserExtensionWaitToken, "body")
+		pushResp, err := browserExtensionPush(requestSyncResp.BrowserExtensionWaitToken, map[string]string{"hello": "world!"})
 		if err != nil {
 			t.Errorf("Error when Browser Extension tried to send push notification: %v", err)
 			return

@@ -183,16 +183,11 @@ func (s *Syncing) RequestSync(ctx *gin.Context, token string) (RequestSyncRespon
 	}, nil
 }
 
-func (s *Syncing) SendPush(ctx *gin.Context, token string, body string) (fcm.Response, error) {
+func (s *Syncing) SendPush(ctx *gin.Context, token string, body map[string]string) (fcm.Response, error) {
 	msg := &messaging.Message{
 		Token: token,
 		Android: &messaging.AndroidConfig{
-			Notification: &messaging.AndroidNotification{
-				Title: "2pass push request",
-			},
-			Data: map[string]string{
-				"data": body,
-			},
+			Data: body,
 		},
 	}
 	return s.fcmClient.Send(ctx, msg)
