@@ -118,7 +118,7 @@ func proxyWebSocket(url, token string, writeMsg, expectedReadMsg string, sleepBe
 		defer close(doneReading)
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			doneReading <- fmt.Errorf("faile to read message: %w", err)
+			doneReading <- fmt.Errorf("failed to read message: %w", err)
 		}
 		if string(message) != expectedReadMsg {
 			doneReading <- fmt.Errorf("expected to read %q, read %q", expectedReadMsg, string(message))
