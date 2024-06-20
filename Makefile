@@ -30,7 +30,7 @@ unit-tests-ci: ## run unit tests without e2e-tests directory (multiple times to 
 
 .PHONY: ci-e2e
 ci-e2e: up
-	go run ./e2e-tests/scripts/wait-ready/main.go -addr=':80;:8081;:8082'
+	go run -v -count=2 ./e2e-tests/scripts/wait-ready/main.go -addr=':80;:8081;:8082'
 	@$(MAKE) tests-e2e
 
 .PHONY: tests-e2e
