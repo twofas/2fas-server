@@ -25,15 +25,15 @@ func TestDelayedCommunication(t *testing.T) {
 
 	t.Run("BE sleeps before sending a message", func(t *testing.T) {
 		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, time.Minute, 0)
+		testPairing(t, deviceID, resp, 21*time.Second, 0)
 	})
 	t.Run("Mobile sleeps before sending a message", func(t *testing.T) {
 		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, 0, time.Minute)
+		testPairing(t, deviceID, resp, 0, 21*time.Second)
 	})
 	t.Run("Both sleep before sending a message", func(t *testing.T) {
 		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, time.Minute, time.Minute)
+		testPairing(t, deviceID, resp, 21*time.Second, 21*time.Second)
 	})
 }
 

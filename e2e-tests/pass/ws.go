@@ -102,7 +102,7 @@ func dialWS(url, auth string) (*websocket.Conn, error) {
 // proxyWebSocket will dial `endpoint`, using `token` for auth. It will then write exactly one message and
 // read exactly one message (and then check it is `expectedReadMsg`).
 func proxyWebSocket(url, token string, writeMsg, expectedReadMsg string, sleepBeforeSend time.Duration) error {
-	const wsPingFrequency = 10 * time.Second // how often server send pings
+	const wsPingFrequency = 5 * time.Second // how often server send pings
 
 	conn, err := dialWS(url, token)
 	if err != nil {
