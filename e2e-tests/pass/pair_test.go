@@ -18,33 +18,20 @@ func msgOfSize(size int, c byte) string {
 }
 
 func TestDelayedCommunication(t *testing.T) {
-	t.Run("BE sleeps before sending message", func(t *testing.T) {
-		t.Parallel()
+	resp, err := configureBrowserExtension()
+	if err != nil {
+		t.Fatalf("Failed to configure browser extension: %v", err)
+	}
 
-		resp, err := configureBrowserExtension()
-		if err != nil {
-			t.Fatalf("Failed to configure browser extension: %v", err)
-		}
+	t.Run("BE sleeps before sending message", func(t *testing.T) {
 		deviceID := getDeviceID()
 		testPairing(t, deviceID, resp, time.Minute, 0)
 	})
 	t.Run("Mobile sleeps before sending message", func(t *testing.T) {
-		t.Parallel()
-
-		resp, err := configureBrowserExtension()
-		if err != nil {
-			t.Fatalf("Failed to configure browser extension: %v", err)
-		}
 		deviceID := getDeviceID()
 		testPairing(t, deviceID, resp, 0, time.Minute)
 	})
 	t.Run("Both sleep before sending message", func(t *testing.T) {
-		t.Parallel()
-
-		resp, err := configureBrowserExtension()
-		if err != nil {
-			t.Fatalf("Failed to configure browser extension: %v", err)
-		}
 		deviceID := getDeviceID()
 		testPairing(t, deviceID, resp, time.Minute, time.Minute)
 	})
