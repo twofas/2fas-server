@@ -6,15 +6,17 @@ import (
 	"time"
 
 	"github.com/twofas/2fas-server/internal/common/logging"
+	"github.com/twofas/2fas-server/internal/pass/connection/proxy"
 )
 
 // ProxyServer manages proxy connections between Browser Extension and Mobile.
 type ProxyServer struct {
-	proxyPool *proxyPool
-	idLabel   string
+	proxyPool   *proxyPool
+	idLabel     string
+	proxyConfig proxy.Config
 }
 
-func NewProxyServer(idLabel string) *ProxyServer {
+func NewProxyServer(idLabel string, proxyConfig proxy.Config) *ProxyServer {
 	proxyPool := &proxyPool{proxies: map[string]*proxyPair{}}
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
@@ -24,8 +26,9 @@ func NewProxyServer(idLabel string) *ProxyServer {
 		}
 	}()
 	return &ProxyServer{
-		proxyPool: proxyPool,
-		idLabel:   idLabel,
+		proxyPool:   proxyPool,
+		idLabel:     idLabel,
+		proxyConfig: proxyConfig,
 	}
 }
 
@@ -38,8 +41,8 @@ func (p *ProxyServer) ServeExtensionProxyToMobileWS(w http.ResponseWriter, r *ht
 
 	log.Infof("Starting ServeExtensionProxyToMobileWS")
 
-	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
-	startProxy(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh.channel)
+	proxyPair := p.proxyPool.getOrCreateProxyPair(id, p.proxyConfig.DisconnectAfter)
+	proxy.Start(conn, proxyPair.toMobileDataCh, proxyPair.toExtensionDataCh.channel, p.proxyConfig)
 
 	p.proxyPool.deleteProxyPair(id)
 	return nil
@@ -52,9 +55,9 @@ func (p *ProxyServer) ServeMobileProxyToExtensionWS(w http.ResponseWriter, r *ht
 	}
 
 	logging.Infof("Starting ServeMobileProxyToExtensionWS for dev: %v", id)
-	proxyPair := p.proxyPool.getOrCreateProxyPair(id)
+	proxyPair := p.proxyPool.getOrCreateProxyPair(id, p.proxyConfig.DisconnectAfter)
 
-	startProxy(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh.channel)
+	proxy.Start(conn, proxyPair.toExtensionDataCh, proxyPair.toMobileDataCh.channel, p.proxyConfig)
 
 	p.proxyPool.deleteProxyPair(id)
 	return nil

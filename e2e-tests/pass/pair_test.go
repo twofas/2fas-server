@@ -2,7 +2,6 @@ package pass
 
 import (
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -17,26 +16,6 @@ func msgOfSize(size int, c byte) string {
 	return string(msg)
 }
 
-func TestDelayedCommunication(t *testing.T) {
-	resp, err := configureBrowserExtension()
-	if err != nil {
-		t.Fatalf("Failed to configure browser extension: %v", err)
-	}
-
-	t.Run("BE sleeps before sending a message", func(t *testing.T) {
-		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, 21*time.Second, 0)
-	})
-	t.Run("Mobile sleeps before sending a message", func(t *testing.T) {
-		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, 0, 21*time.Second)
-	})
-	t.Run("Both sleep before sending a message", func(t *testing.T) {
-		deviceID := getDeviceID()
-		testPairing(t, deviceID, resp, 21*time.Second, 21*time.Second)
-	})
-}
-
 func TestPairHappyFlow(t *testing.T) {
 	resp, err := configureBrowserExtension()
 	if err != nil {
@@ -44,7 +23,7 @@ func TestPairHappyFlow(t *testing.T) {
 	}
 
 	deviceID := getDeviceID()
-	testPairing(t, deviceID, resp, 0, 0)
+	testPairing(t, deviceID, resp)
 }
 
 func TestPairMultipleTimes(t *testing.T) {
@@ -55,14 +34,14 @@ func TestPairMultipleTimes(t *testing.T) {
 
 	deviceID := getDeviceID()
 	for i := 0; i < 10; i++ {
-		testPairing(t, deviceID, resp, 0, 0)
+		testPairing(t, deviceID, resp)
 		if t.Failed() {
 			break
 		}
 	}
 }
 
-func testPairing(t *testing.T, deviceID string, resp ConfigureBrowserExtensionResponse, sleepBeforeSendBE, sleepBeforeSendMobile time.Duration) {
+func testPairing(t *testing.T, deviceID string, resp ConfigureBrowserExtensionResponse) {
 	t.Helper()
 
 	browserExtensionDone := make(chan struct{})
@@ -84,7 +63,6 @@ func testPairing(t *testing.T, deviceID string, resp ConfigureBrowserExtensionRe
 			extProxyToken,
 			msgOfSize(messageSize, 'b'),
 			msgOfSize(messageSize, 'm'),
-			sleepBeforeSendBE,
 		)
 		if err != nil {
 			t.Errorf("Browser Extension: proxy failed: %v", err)
@@ -106,7 +84,6 @@ func testPairing(t *testing.T, deviceID string, resp ConfigureBrowserExtensionRe
 			mobileProxyToken,
 			msgOfSize(messageSize, 'm'),
 			msgOfSize(messageSize, 'b'),
-			sleepBeforeSendMobile,
 		)
 		if err != nil {
 			t.Errorf("Mobile: proxy failed: %v", err)

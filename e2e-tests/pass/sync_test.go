@@ -2,7 +2,6 @@ package pass
 
 import (
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -53,9 +52,7 @@ func TestSyncHappyFlow(t *testing.T) {
 			getWsURL()+"/browser_extension/sync/proxy",
 			proxyToken,
 			"sent from browser extension",
-			"sent from mobile",
-			time.Duration(0),
-		)
+			"sent from mobile")
 		if err != nil {
 			t.Errorf("Browser Extension: proxy failed: %v", err)
 			return
@@ -87,7 +84,6 @@ func TestSyncHappyFlow(t *testing.T) {
 			proxyToken,
 			"sent from mobile",
 			"sent from browser extension",
-			time.Duration(0),
 		)
 		if err != nil {
 			t.Errorf("Mobile: proxy failed: %v", err)

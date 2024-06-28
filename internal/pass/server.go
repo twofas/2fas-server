@@ -13,6 +13,7 @@ import (
 	httphelpers "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/recovery"
 	"github.com/twofas/2fas-server/internal/pass/connection"
+	"github.com/twofas/2fas-server/internal/pass/connection/proxy"
 	"github.com/twofas/2fas-server/internal/pass/fcm"
 	"github.com/twofas/2fas-server/internal/pass/pairing"
 	"github.com/twofas/2fas-server/internal/pass/sign"
@@ -64,10 +65,10 @@ func NewServer(cfg config.PassConfig) *Server {
 	}
 
 	pairingApp := pairing.NewApp(signSvc, cfg.PairingRequestTokenValidityDuration)
-	proxyPairingApp := connection.NewProxyServer("device_id")
+	proxyPairingApp := connection.NewProxyServer("device_id", proxy.DefaultConfig())
 
 	syncApp := sync.NewApp(signSvc, fcmClient)
-	proxySyncApp := connection.NewProxyServer("fcm_token")
+	proxySyncApp := connection.NewProxyServer("fcm_token", proxy.DefaultConfig())
 
 	router := gin.New()
 	router.Use(recovery.RecoveryMiddleware())

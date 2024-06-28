@@ -1,4 +1,4 @@
-package connection
+package proxy
 
 import (
 	"bytes"
@@ -12,18 +12,35 @@ import (
 )
 
 const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 20 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = pongWait / 4
+	DefaultWriteTimeout    = 10 * time.Second
+	DefaultReadTimeout     = 20 * time.Second
+	DefaultPingFrequency   = DefaultReadTimeout / 4
+	DefaultDisconnectAfter = 3 * time.Minute
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 10 * (2 << 20)
 )
+
+type Config struct {
+	WriteTimeout    time.Duration
+	ReadTimeout     time.Duration
+	PingFrequency   time.Duration
+	DisconnectAfter time.Duration
+}
+
+func DefaultConfig() Config {
+	return Config{
+		WriteTimeout:    DefaultWriteTimeout,
+		ReadTimeout:     DefaultReadTimeout,
+		PingFrequency:   DefaultPingFrequency,
+		DisconnectAfter: DefaultDisconnectAfter,
+	}
+}
+
+type WriterCloser interface {
+	Write(msg []byte)
+	Close()
+}
 
 var (
 	newline = []byte{'\n'}
@@ -37,20 +54,21 @@ var (
 	}
 )
 
-// proxy is a responsible for reading from read chan and sending it over wsConn
-// and reading fom wsChan and sending it over send chan
+// proxy is a responsible for reading from reader chan and sending it over conn
+// and reading fom conn and sending it over writer.
 type proxy struct {
-	send *safeChannel
-	read chan []byte
-
-	conn *websocket.Conn
+	writer WriterCloser
+	reader chan []byte
+	conn   *websocket.Conn
+	cfg    Config
 }
 
-func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
+func Start(wsConn *websocket.Conn, writer WriterCloser, reader chan []byte, cfg Config) {
 	proxy := &proxy{
-		send: send,
-		read: read,
-		conn: wsConn,
+		writer: writer,
+		reader: reader,
+		conn:   wsConn,
+		cfg:    cfg,
 	}
 
 	wg := sync.WaitGroup{}
@@ -67,11 +85,10 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 	})
 
 	go recovery.DoNotPanic(func() {
-		disconnectAfter := 3 * time.Minute
-		timeout := time.After(disconnectAfter)
+		timeout := time.After(cfg.DisconnectAfter)
 
 		<-timeout
-		logging.Info("Connection closed after", disconnectAfter)
+		logging.Info("Connection closed after", cfg.DisconnectAfter)
 
 		proxy.conn.Close()
 	})
@@ -79,7 +96,7 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 	wg.Wait()
 }
 
-// readPump pumps messages from the websocket proxy to send.
+// readPump pumps messages from the websocket proxy to writer.
 //
 // The application runs readPump in a per-proxy goroutine. The application
 // ensures that there is at most one reader on a proxy by executing all
@@ -87,13 +104,13 @@ func startProxy(wsConn *websocket.Conn, send *safeChannel, read chan []byte) {
 func (p *proxy) readPump() {
 	defer func() {
 		p.conn.Close()
-		p.send.close()
+		p.writer.Close()
 	}()
 
 	p.conn.SetReadLimit(maxMessageSize)
-	p.conn.SetReadDeadline(time.Now().Add(pongWait))
+	p.conn.SetReadDeadline(time.Now().Add(p.cfg.ReadTimeout))
 	p.conn.SetPongHandler(func(string) error {
-		p.conn.SetReadDeadline(time.Now().Add(pongWait))
+		p.conn.SetReadDeadline(time.Now().Add(p.cfg.ReadTimeout))
 		return nil
 	})
 
@@ -112,17 +129,17 @@ func (p *proxy) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		p.send.write(message)
+		p.writer.Write(message)
 	}
 }
 
-// writePump pumps messages from the read chan to the websocket proxy.
+// writePump pumps messages from the reader chan to the websocket proxy.
 //
 // A goroutine running writePump is started for each proxy. The
 // application ensures that there is at most one writer to a proxy by
 // executing all writes from this goroutine.
 func (p *proxy) writePump() {
-	ticker := time.NewTicker(pingPeriod)
+	ticker := time.NewTicker(p.cfg.PingFrequency)
 	defer func() {
 		ticker.Stop()
 		p.conn.Close()
@@ -130,8 +147,8 @@ func (p *proxy) writePump() {
 
 	for {
 		select {
-		case message, ok := <-p.read:
-			p.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		case message, ok := <-p.reader:
+			p.conn.SetWriteDeadline(time.Now().Add(p.cfg.WriteTimeout))
 			if !ok {
 				// The hub closed the channel.
 				p.conn.WriteMessage(websocket.CloseMessage, []byte{})
@@ -148,7 +165,7 @@ func (p *proxy) writePump() {
 				return
 			}
 		case <-ticker.C:
-			p.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			p.conn.SetWriteDeadline(time.Now().Add(p.cfg.WriteTimeout))
 			if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
