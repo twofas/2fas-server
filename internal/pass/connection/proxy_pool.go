@@ -10,13 +10,13 @@ type proxyPool struct {
 	proxies map[string]*proxyPair
 }
 
-// registerMobileConn register proxyPair if not existing in pool and returns it.
-func (pp *proxyPool) getOrCreateProxyPair(id string) *proxyPair {
+// getOrCreateProxyPair registers proxyPair if not existing in pool and returns it.
+func (pp *proxyPool) getOrCreateProxyPair(id string, disconnectAfter time.Duration) *proxyPair {
 	pp.mu.Lock()
 	defer pp.mu.Unlock()
 	v, ok := pp.proxies[id]
 	if !ok {
-		v = initProxyPair()
+		v = initProxyPair(disconnectAfter)
 	}
 	pp.proxies[id] = v
 	return v
@@ -48,12 +48,11 @@ type proxyPair struct {
 }
 
 // initProxyPair returns proxyPair and runs loop responsible for proxing data.
-func initProxyPair() *proxyPair {
-	const proxyTimeout = 3 * time.Minute
+func initProxyPair(disconnectAfter time.Duration) *proxyPair {
 	return &proxyPair{
 		toMobileDataCh:    newSafeChannel(),
 		toExtensionDataCh: newSafeChannel(),
-		expiresAt:         time.Now().Add(proxyTimeout),
+		expiresAt:         time.Now().Add(disconnectAfter + time.Minute),
 	}
 }
 
@@ -69,7 +68,7 @@ func newSafeChannel() *safeChannel {
 	}
 }
 
-func (sc *safeChannel) write(data []byte) {
+func (sc *safeChannel) Write(data []byte) {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
@@ -80,7 +79,7 @@ func (sc *safeChannel) write(data []byte) {
 	sc.channel <- data
 }
 
-func (sc *safeChannel) close() {
+func (sc *safeChannel) Close() {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
