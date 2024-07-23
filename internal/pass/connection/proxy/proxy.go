@@ -78,7 +78,6 @@ func Start(wsConn *websocket.Conn, writer WriterCloser, reader chan []byte, cfg 
 		defer wg.Done()
 		proxy.writePump()
 	})
-
 	go recovery.DoNotPanic(func() {
 		defer wg.Done()
 		proxy.readPump()
