@@ -1,5 +1,6 @@
 {
   "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/2fas-api_ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/2fas-api_ecsTaskRole",
   "containerDefinitions": [
     {
       "name": "2fas-api",
