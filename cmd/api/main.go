@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api"
 	"github.com/twofas/2fas-server/internal/common/http"
@@ -13,7 +14,10 @@ func main() {
 
 	config.LoadConfiguration()
 
-	application := api.NewApplication("api", config.Config)
+	application, err := api.NewApplication("api", config.Config)
+	if err != nil {
+		logging.Fatalf("Failed to initialize application: %v", err)
+	}
 
 	logging.Info("Initialize application ", config.Config.App.ListenAddr)
 	logging.Info("Environment is: ", config.Config.Env)

@@ -39,22 +39,6 @@
         {
           "name": "MOBILE_DEBUG_AWS_SECRET_ACCESS_KEY",
           "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/mobile-X5wmei:AWS_SECRET_ACCESS_KEY::"
-        },
-        {
-          "name": "S3_USER_ACCESS_KEY_ID",
-          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:2fas_api_access_key_id::"
-        },
-        {
-          "name": "S3_USER_ACCESS_SECRET_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:2fas_api_access_secret_key::"
-        },
-        {
-          "name": "ICONS_S3_ACCESS_KEY_ID",
-          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:icons_s3_access_key_id::"
-        },
-        {
-          "name": "ICONS_S3_ACCESS_SECRET_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-2:<AWS_ACCOUNT_ID>:secret:prod/api-EaED00:icons_s3_access_secret_key::"
         }
       ],
       "logConfiguration": {

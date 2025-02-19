@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app"
@@ -13,13 +15,10 @@ import (
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app/query"
 	apisec "github.com/twofas/2fas-server/internal/api/browser_extension/app/security"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/ports"
-	"github.com/twofas/2fas-server/internal/api/mobile/domain"
-	"github.com/twofas/2fas-server/internal/common/aws"
 	"github.com/twofas/2fas-server/internal/common/db"
 	mobile "github.com/twofas/2fas-server/internal/common/push"
 	"github.com/twofas/2fas-server/internal/common/rate_limit"
 	"github.com/twofas/2fas-server/internal/common/security"
-	"gorm.io/gorm"
 )
 
 type BrowserExtensionModule struct {
@@ -35,22 +34,13 @@ func NewBrowserExtensionModule(
 	database *sql.DB,
 	redisClient *redis.Client,
 	validate *validator.Validate,
+	pushClient mobile.Pusher,
 ) *BrowserExtensionModule {
 	queryBuilder := db.NewQueryBuilder(database)
 
 	browserExtensionsMysqlRepository := adapters.NewBrowserExtensionsMysqlRepository(gorm)
 	browserExtension2FaRequestRepository := adapters.NewBrowserExtension2FaRequestsMysqlRepository(gorm)
 	pairedDevicesRepository := adapters.NewBrowserExtensionDevicesMysqlRepository(gorm, queryBuilder)
-
-	var pushClient mobile.Pusher
-
-	if config.IsTestingEnv() {
-		pushClient = mobile.NewFakePushClient()
-	} else {
-		s3 := aws.NewAwsS3(config.Aws.Region, config.Aws.S3AccessKeyId, config.Aws.S3AccessSecretKey)
-		pushConfig := domain.NewFcmPushConfig(s3)
-		pushClient = mobile.NewFcmPushClient(pushConfig)
-	}
 
 	cqrs := &app.Cqrs{
 		Commands: app.Commands{

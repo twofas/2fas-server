@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/support/adapters"
 	"github.com/twofas/2fas-server/internal/api/support/app"
@@ -12,11 +14,9 @@ import (
 	"github.com/twofas/2fas-server/internal/api/support/app/queries"
 	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"github.com/twofas/2fas-server/internal/api/support/ports"
-	"github.com/twofas/2fas-server/internal/common/aws"
 	"github.com/twofas/2fas-server/internal/common/clock"
 	"github.com/twofas/2fas-server/internal/common/db"
 	"github.com/twofas/2fas-server/internal/common/storage"
-	"gorm.io/gorm"
 )
 
 type SupportModule struct {
@@ -25,18 +25,10 @@ type SupportModule struct {
 	Config        config.Configuration
 }
 
-func NewSupportModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate) *SupportModule {
+func NewSupportModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, debugLogsStorage storage.FileSystemStorage) *SupportModule {
 	queryBuilder := db.NewQueryBuilder(database)
 
 	debugLogsConfig := domain.LoadDebugLogsConfig()
-
-	var debugLogsStorage storage.FileSystemStorage
-
-	if config.IsTestingEnv() {
-		debugLogsStorage = storage.NewTmpFileSystem()
-	} else {
-		debugLogsStorage = aws.NewAwsS3(debugLogsConfig.AwsRegion, debugLogsConfig.AwsAccessKeyId, debugLogsConfig.AwsSecretAccessKey)
-	}
 
 	debugLogsAuditRepository := adapters.NewDebugLogsAuditMysqlRepository(gorm)
 

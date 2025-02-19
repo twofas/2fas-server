@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -18,7 +19,6 @@ type Configuration struct {
 	App       AppConfig       `json:"app"`
 	Websocket WebsocketConfig `json:"websocket"`
 	Security  SecurityConfig  `json:"security"`
-	Icons     IconsConfig     `json:"icons"`
 }
 
 func (c *Configuration) IsTestingEnv() bool {
@@ -62,10 +62,8 @@ type AwsConfig struct {
 }
 
 type IconsConfig struct {
-	AwsProfile        string `mapstructure:"aws_profile" json:"aws_profile"`
-	S3Bucket          string `mapstructure:"s3_bucket" json:"s3_bucket"`
-	S3AccessKeyId     string `mapstructure:"s3_access_key_id" json:"s3_access_key_id"`
-	S3AccessSecretKey string `mapstructure:"s3_access_secret_key" json:"s3_access_secret_key"`
+	AwsProfile string `mapstructure:"aws_profile" json:"aws_profile"`
+	S3Bucket   string `mapstructure:"s3_bucket" json:"s3_bucket"`
 }
 
 func initViper(configFilePath string) {

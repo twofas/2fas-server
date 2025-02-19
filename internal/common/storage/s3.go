@@ -1,4 +1,4 @@
-package aws
+package storage
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -15,36 +14,21 @@ import (
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
-type AwsS3 struct {
-	Region          string
-	AccessKeyId     string
-	AccessSecretKey string
+type S3 struct {
+	sess *session.Session
 }
 
-func NewAwsS3(region, accessKeyId, secretAccessKey string) *AwsS3 {
-	logging.WithFields(logging.Fields{
-		"region": region,
-	}).Debug("Initialize AWS S3 instance")
-
-	return &AwsS3{
-		Region:          region,
-		AccessKeyId:     accessKeyId,
-		AccessSecretKey: secretAccessKey,
+func NewS3Storage(sess *session.Session) *S3 {
+	return &S3{
+		sess: sess,
 	}
 }
 
-func (s *AwsS3) Get(path string) (file *os.File, err error) {
+func (s *S3) Get(path string) (file *os.File, err error) {
 	directory := filepath.Dir(path)
 	name := filepath.Base(path)
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{
-			Region:      aws.String(s.Region),
-			Credentials: credentials.NewStaticCredentials(s.AccessKeyId, s.AccessSecretKey, ""),
-		},
-	})
-
-	downloader := s3manager.NewDownloader(sess)
+	downloader := s3manager.NewDownloader(s.sess)
 
 	f, err := os.Create(name)
 	if err != nil {
@@ -62,18 +46,11 @@ func (s *AwsS3) Get(path string) (file *os.File, err error) {
 	return f, nil
 }
 
-func (s *AwsS3) Save(path string, data io.Reader) (location string, err error) {
+func (s *S3) Save(path string, data io.Reader) (location string, err error) {
 	directory := filepath.Dir(path)
 	name := filepath.Base(path)
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{
-			Region:      aws.String(s.Region),
-			Credentials: credentials.NewStaticCredentials(s.AccessKeyId, s.AccessSecretKey, ""),
-		},
-	})
-
-	uploader := s3manager.NewUploader(sess)
+	uploader := s3manager.NewUploader(s.sess)
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(directory),
@@ -94,18 +71,11 @@ func (s *AwsS3) Save(path string, data io.Reader) (location string, err error) {
 	return result.Location, nil
 }
 
-func (s *AwsS3) Move(oldPath, newPath string) (location string, err error) {
+func (s *S3) Move(oldPath, newPath string) (location string, err error) {
 	sourceDirectory := filepath.Dir(oldPath)
 	sourceName := filepath.Base(oldPath)
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{
-			Region:      aws.String(s.Region),
-			Credentials: credentials.NewStaticCredentials(s.AccessKeyId, s.AccessSecretKey, ""),
-		},
-	})
-
-	svc := s3.New(sess)
+	svc := s3.New(s.sess)
 
 	file, err := s.Get(oldPath)
 

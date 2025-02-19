@@ -2,18 +2,25 @@ package api
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+
 	"github.com/twofas/2fas-server/config"
 	extension "github.com/twofas/2fas-server/internal/api/browser_extension/service"
 	health "github.com/twofas/2fas-server/internal/api/health/service"
 	icons "github.com/twofas/2fas-server/internal/api/icons/service"
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	mobile "github.com/twofas/2fas-server/internal/api/mobile/service"
 	support "github.com/twofas/2fas-server/internal/api/support/service"
 	"github.com/twofas/2fas-server/internal/common/api"
 	"github.com/twofas/2fas-server/internal/common/db"
+	"github.com/twofas/2fas-server/internal/common/push"
 	"github.com/twofas/2fas-server/internal/common/redis"
+	"github.com/twofas/2fas-server/internal/common/storage"
 	"github.com/twofas/2fas-server/internal/common/validation"
 )
 
@@ -32,7 +39,7 @@ type Application struct {
 	HealthModule *health.HealthModule
 }
 
-func NewApplication(applicationName string, config config.Configuration) *Application {
+func NewApplication(applicationName string, config config.Configuration) (*Application, error) {
 	validate = validator.New()
 
 	gorm := db.NewGormConnection(config)
@@ -43,11 +50,32 @@ func NewApplication(applicationName string, config config.Configuration) *Applic
 
 	h := health.NewHealthModule(applicationName, config, redisClient)
 
+	var strg storage.FileSystemStorage
+	var pushClient push.Pusher
+
+	if config.IsTestingEnv() {
+		strg = storage.NewTmpFileSystem()
+		pushClient = push.NewFakePushClient()
+	} else {
+		sess, err := session.NewSession(&aws.Config{
+			Region: aws.String(config.Aws.Region),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create aws session: %w", err)
+		}
+		strg = storage.NewS3Storage(sess)
+		pushConfig, err := domain.NewFcmPushConfig(strg)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create fcm push config: %w", err)
+		}
+		pushClient = push.NewFcmPushClient(pushConfig)
+	}
+
 	modules := []Module{
 		h,
-		support.NewSupportModule(config, gorm, database, validate),
-		icons.NewIconsModule(config, gorm, database, validate),
-		extension.NewBrowserExtensionModule(config, gorm, database, redisClient, validate),
+		support.NewSupportModule(config, gorm, database, validate, strg),
+		icons.NewIconsModule(config, gorm, database, validate, strg),
+		extension.NewBrowserExtensionModule(config, gorm, database, redisClient, validate, pushClient),
 		mobile.NewMobileModule(config, gorm, database, validate, redisClient),
 	}
 
@@ -58,7 +86,7 @@ func NewApplication(applicationName string, config config.Configuration) *Applic
 		HealthModule: h,
 	}
 
-	return app
+	return app, nil
 }
 
 func (a *Application) RegisterRoutes(router *gin.Engine) {
