@@ -10,12 +10,22 @@ import (
 	"github.com/avast/retry-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/push"
 )
 
 var tokenPushNotificationTtl = time.Minute * 3
+
+type PushNotificationStatus string
+
+const (
+	PushNotificationStatusOK           = "ok"
+	PushNotificationStatusNoFCM        = "no_fcm"
+	PushNotificationStatusError        = "error"
+	PushNotificationStatusUnregistered = "unregistered"
+)
 
 type Request2FaTokenPushNotification struct {
 	ExtensionId  string `json:"extension_id"`
@@ -58,23 +68,21 @@ type Request2FaTokenHandler struct {
 	Pusher                               push.Pusher
 }
 
-func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToken) error {
+func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToken) (map[string]PushNotificationStatus, error) {
 	log := logging.FromContext(ctx)
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
 	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
-
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	tokenRequestId, _ := uuid.Parse(cmd.Id)
 	browserExtension2FaRequest := domain.NewBrowserExtension2FaRequest(tokenRequestId, browserExtension.Id, cmd.Domain)
 
 	err = h.BrowserExtension2FaRequestRepository.Save(browserExtension2FaRequest)
-
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pairedDevices := h.PairedDevicesRepository.FindAll(browserExtension.Id)
@@ -86,6 +94,8 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 		"type":         "browser_extension_request",
 	}
 
+	result := map[string]PushNotificationStatus{}
+
 	for _, device := range pairedDevices {
 		if device.FcmToken == "" {
 			log.WithFields(logging.Fields{
@@ -96,6 +106,7 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 				"platform":         device.Platform,
 				"type":             "browser_extension_request",
 			}).Info("Cannot send push notification, missing FCM token")
+			result[device.Id.String()] = PushNotificationStatusNoFCM
 			continue
 		}
 
@@ -116,8 +127,12 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 			retry.Attempts(5),
 			retry.LastErrorOnly(true),
 		)
-
-		if err != nil && !messaging.IsUnregistered(err) {
+		if err == nil {
+			result[device.Id.String()] = PushNotificationStatusOK
+		} else if messaging.IsUnregistered(err) {
+			result[device.Id.String()] = PushNotificationStatusUnregistered
+		} else {
+			result[device.Id.String()] = PushNotificationStatusError
 			log.WithFields(logging.Fields{
 				"extension_id":     extId.String(),
 				"device_id":        device.Id.String(),
@@ -130,7 +145,7 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 		}
 	}
 
-	return nil
+	return result, nil
 }
 
 func createPushNotificationForIos(token string, data map[string]interface{}) *messaging.Message {
