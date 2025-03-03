@@ -5,6 +5,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app/command"
@@ -12,7 +14,6 @@ import (
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"gorm.io/gorm"
 )
 
 type RoutesHandler struct {
@@ -311,8 +312,7 @@ func (r *RoutesHandler) Request2FaToken(c *gin.Context) {
 		return
 	}
 
-	err = r.cqrs.Commands.Request2FaToken.Handle(c.Request.Context(), cmd)
-
+	pushResult, err := r.cqrs.Commands.Request2FaToken.Handle(c.Request.Context(), cmd)
 	if err != nil {
 		c.JSON(500, api.NewInternalServerError(err))
 
@@ -325,13 +325,21 @@ func (r *RoutesHandler) Request2FaToken(c *gin.Context) {
 	}
 
 	result, err := r.cqrs.Queries.BrowserExtension2FaRequestQuery.Handle(q)
-
 	if err != nil {
 		c.JSON(500, api.NewInternalServerError(err))
 		return
 	}
 
-	c.JSON(200, result[0])
+	var jsonResult struct {
+		query.BrowserExtension2FaRequestPresenter
+		PushStatus map[string]command.PushNotificationStatus `json:"push_status"`
+	}
+	if len(result) >= 0 && result[0] != nil {
+		jsonResult.BrowserExtension2FaRequestPresenter = *result[0]
+	}
+	jsonResult.PushStatus = pushResult
+
+	c.JSON(200, jsonResult)
 }
 
 func (r *RoutesHandler) Close2FaRequest(c *gin.Context) {
