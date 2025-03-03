@@ -14,7 +14,10 @@ func main() {
 
 	config.LoadConfiguration()
 
-	application := api.NewApplication("admin-api", config.Config)
+	application, err := api.NewApplication("admin-api", config.Config)
+	if err != nil {
+		logging.Fatalf("Failed to initialize application: %v", err)
+	}
 
 	logging.Infof("Initialize admin-api application: %q", config.Config.App.ListenAddr)
 	logging.Infof("Environment is: %q", config.Config.Env)

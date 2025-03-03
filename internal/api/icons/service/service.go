@@ -5,17 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
+
 	"github.com/twofas/2fas-server/config"
 	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 	"github.com/twofas/2fas-server/internal/api/icons/app"
 	"github.com/twofas/2fas-server/internal/api/icons/app/command"
 	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
 	"github.com/twofas/2fas-server/internal/api/icons/ports"
-	"github.com/twofas/2fas-server/internal/common/aws"
 	"github.com/twofas/2fas-server/internal/common/db"
 	httpsec "github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/storage"
-	"gorm.io/gorm"
 )
 
 type IconsModule struct {
@@ -24,16 +24,8 @@ type IconsModule struct {
 	Config        config.Configuration
 }
 
-func NewIconsModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate) *IconsModule {
+func NewIconsModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, iconsStorage storage.FileSystemStorage) *IconsModule {
 	queryBuilder := db.NewQueryBuilder(database)
-
-	var iconsStorage storage.FileSystemStorage
-
-	if config.IsTestingEnv() {
-		iconsStorage = storage.NewTmpFileSystem()
-	} else {
-		iconsStorage = aws.NewAwsS3(config.Aws.Region, config.Aws.S3AccessKeyId, config.Aws.S3AccessSecretKey)
-	}
 
 	webServicesRepository := adapters.NewWebServiceMysqlRepository(gorm)
 	iconsRepository := adapters.NewIconMysqlRepository(gorm)
