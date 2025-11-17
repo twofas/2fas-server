@@ -320,7 +320,7 @@ func (r *RoutesHandler) Send2FaToken(c *gin.Context) {
 	cmd := &command.Send2FaToken{}
 
 	if err := c.BindJSON(&cmd); err != nil {
-		// c.BindQuery already returned 400 and error.
+		// c.BindJSON already returned 400 and error.
 		return
 	}
 	if err := c.BindUri(&cmd); err != nil {
