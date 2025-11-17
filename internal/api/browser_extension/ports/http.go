@@ -89,7 +89,7 @@ func (r *RoutesHandler) FindBrowserExtensionPairedMobileDevices(c *gin.Context) 
 func (r *RoutesHandler) GetBrowserExtensionPairedMobileDevice(c *gin.Context) {
 	cmd := &query.BrowserExtensionPairedDeviceQuery{}
 
-	if err := c.ShouldBindUri(&cmd); err != nil {
+	if err := c.BindUri(&cmd); err != nil {
 		// c.BindUri already returned 400 and error.
 		return
 	}
@@ -220,7 +220,7 @@ func (r *RoutesHandler) RemoveAllBrowserExtensionsDevices(c *gin.Context) {
 func (r *RoutesHandler) FindBrowserExtension(c *gin.Context) {
 	cmd := &query.BrowserExtensionQuery{}
 
-	if err := c.ShouldBindUri(cmd); err != nil {
+	if err := c.BindUri(cmd); err != nil {
 		// c.BindUri already returned 400 and error.
 		return
 	}

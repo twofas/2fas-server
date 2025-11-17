@@ -97,7 +97,7 @@ func (r *RoutesHandler) RegisterMobileDevice(c *gin.Context) {
 		Id: id,
 	}
 
-	if err := c.ShouldBindJSON(cmd); err != nil {
+	if err := c.BindJSON(cmd); err != nil {
 		// c.BindJSON already returned 400 and error.
 		return
 	}
@@ -150,7 +150,7 @@ func (r *RoutesHandler) PairMobileWithExtension(c *gin.Context) {
 	cmd := &command.PairMobileWithBrowserExtension{}
 
 	if err := c.BindJSON(&cmd); err != nil {
-		// c.BindQuery already returned 400 and error.
+		// c.BindJSON already returned 400 and error.
 		return
 	}
 	if err := c.BindUri(&cmd); err != nil {

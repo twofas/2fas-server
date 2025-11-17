@@ -39,8 +39,8 @@ func (r *RoutesHandler) CreateDebugLogsAuditClaim(c *gin.Context) {
 
 	logging.LogCommand(cmd)
 
-	if err := c.ShouldBindJSON(cmd); err != nil {
-		// c.BindUri already returned 400 and error.
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
 		return
 	}
 
@@ -70,12 +70,12 @@ func (r *RoutesHandler) CreateDebugLogsAuditClaim(c *gin.Context) {
 func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	cmd := &command.CreateDebugLogsAudit{}
 
-	if err := c.ShouldBindUri(cmd); err != nil {
+	if err := c.BindUri(cmd); err != nil {
 		// c.BindUri already returned 400 and error.
 		return
 	}
-	if err := c.ShouldBind(cmd); err != nil {
-		// c.ShouldBind already returned 400 and error.
+	if err := c.Bind(cmd); err != nil {
+		// c.Bind already returned 400 and error.
 		return
 	}
 
@@ -188,7 +188,7 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 func (r *RoutesHandler) DeleteDebugLogsAudit(c *gin.Context) {
 	cmd := &command.DeleteDebugLogsAudit{}
 
-	if err := c.ShouldBindUri(cmd); err != nil {
+	if err := c.BindUri(cmd); err != nil {
 		// c.BindUri already returned 400 and error.
 		return
 	}
@@ -235,7 +235,7 @@ func (r *RoutesHandler) DeleteAllDebugLogsAudit(c *gin.Context) {
 func (r *RoutesHandler) GetDebugLogsAudit(c *gin.Context) {
 	q := &queries.DebugLogsAuditQuery{}
 
-	if err := c.ShouldBindUri(q); err != nil {
+	if err := c.BindUri(q); err != nil {
 		// c.BindUri already returned 400 and error.
 		return
 	}
