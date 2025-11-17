@@ -46,6 +46,7 @@ func (r *RoutesHandler) Log(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if !ok {
 			c.JSON(500, api.NewInternalServerError(err))
+			return
 		}
 
 		c.JSON(400, api.NewBadRequestError(validationErrors))

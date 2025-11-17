@@ -26,7 +26,7 @@ func (h *StoreLogEventHandler) Handle(ctx context.Context, cmd *StoreLogEvent) {
 
 	extId, err := uuid.Parse(cmd.ExtensionId)
 	if err != nil {
-		log.Error("Failed to parse extension id: v", err)
+		log.Error("Failed to parse extension id: %v", err)
 		return
 	}
 	_, err = h.BrowserExtensionsRepository.FindById(extId)
