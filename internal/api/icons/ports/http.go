@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 	"github.com/twofas/2fas-server/internal/api/icons/app"
 	"github.com/twofas/2fas-server/internal/api/icons/app/command"
@@ -38,12 +39,18 @@ func (r *RoutesHandler) CreateWebService(c *gin.Context) {
 		Id: id,
 	}
 
-	c.BindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -87,8 +94,14 @@ func (r *RoutesHandler) CreateWebService(c *gin.Context) {
 func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 	cmd := &command.UpdateWebService{}
 
-	c.ShouldBindUri(cmd)
-	c.ShouldBindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 	if err != nil {
@@ -139,12 +152,18 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 func (r *RoutesHandler) RemoveWebService(c *gin.Context) {
 	cmd := &command.DeleteWebService{}
 
-	c.BindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -179,12 +198,19 @@ func (r *RoutesHandler) RemoveAllWebServices(c *gin.Context) {
 func (r *RoutesHandler) FindWebService(c *gin.Context) {
 	q := &queries.WebServiceQuery{}
 
-	c.BindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
-
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
+
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -209,12 +235,19 @@ func (r *RoutesHandler) FindWebService(c *gin.Context) {
 func (r *RoutesHandler) FindAllWebServices(c *gin.Context) {
 	q := &queries.WebServiceQuery{}
 
-	c.BindQuery(q)
+	if err := c.BindQuery(q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -236,12 +269,19 @@ func (r *RoutesHandler) FindAllWebServices(c *gin.Context) {
 func (r *RoutesHandler) DumpWebServices(c *gin.Context) {
 	q := &queries.WebServicesDumpQuery{}
 
-	c.BindQuery(q)
+	if err := c.BindQuery(q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -264,12 +304,19 @@ func (r *RoutesHandler) CreateIcon(c *gin.Context) {
 		Id: id,
 	}
 
-	c.BindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 
@@ -304,13 +351,23 @@ func (r *RoutesHandler) CreateIcon(c *gin.Context) {
 func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 	cmd := &command.UpdateIcon{}
 
-	c.BindUri(cmd)
-	c.BindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -325,7 +382,11 @@ func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 			return
 		}
 
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -346,7 +407,6 @@ func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
-
 		return
 	}
 
@@ -356,12 +416,18 @@ func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 func (r *RoutesHandler) RemoveIcon(c *gin.Context) {
 	cmd := &command.DeleteIcon{}
 
-	c.BindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -396,12 +462,19 @@ func (r *RoutesHandler) RemoveAllIcons(c *gin.Context) {
 func (r *RoutesHandler) FindIcon(c *gin.Context) {
 	q := &queries.IconQuery{}
 
-	c.BindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -426,12 +499,19 @@ func (r *RoutesHandler) FindIcon(c *gin.Context) {
 func (r *RoutesHandler) FindAllIcons(c *gin.Context) {
 	q := &queries.IconQuery{}
 
-	c.BindQuery(q)
+	if err := c.BindQuery(q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -454,12 +534,19 @@ func (r *RoutesHandler) CreateIconRequest(c *gin.Context) {
 		Id: id,
 	}
 
-	c.BindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 
@@ -494,12 +581,19 @@ func (r *RoutesHandler) CreateIconRequest(c *gin.Context) {
 func (r *RoutesHandler) RemoveIconRequest(c *gin.Context) {
 	cmd := &command.DeleteIconRequest{}
 
-	c.BindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -532,12 +626,22 @@ func (r *RoutesHandler) RemoveAllIconsRequests(c *gin.Context) {
 func (r *RoutesHandler) UpdateWebServiceFromIconRequest(c *gin.Context) {
 	cmd := &command.UpdateWebServiceFromIconRequest{}
 
-	c.BindUri(cmd)
-	c.BindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		logging.LogCommandFailed(cmd, err)
 		return
@@ -586,7 +690,11 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 
 	err := r.validator.Struct(cmd)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -623,12 +731,19 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 func (r *RoutesHandler) FindIconRequest(c *gin.Context) {
 	q := &queries.IconRequestQuery{}
 
-	c.BindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -653,12 +768,19 @@ func (r *RoutesHandler) FindIconRequest(c *gin.Context) {
 func (r *RoutesHandler) FindAllIconsRequests(c *gin.Context) {
 	q := &queries.IconRequestQuery{}
 
-	c.BindQuery(q)
+	if err := c.BindQuery(q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -681,12 +803,19 @@ func (r *RoutesHandler) CreateIconsCollection(c *gin.Context) {
 		Id: id,
 	}
 
-	c.BindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -717,13 +846,23 @@ func (r *RoutesHandler) CreateIconsCollection(c *gin.Context) {
 func (r *RoutesHandler) UpdateIconsCollection(c *gin.Context) {
 	cmd := &command.UpdateIconsCollection{}
 
-	c.BindUri(&cmd)
-	c.BindJSON(cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -738,7 +877,11 @@ func (r *RoutesHandler) UpdateIconsCollection(c *gin.Context) {
 			return
 		}
 
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -767,12 +910,19 @@ func (r *RoutesHandler) UpdateIconsCollection(c *gin.Context) {
 func (r *RoutesHandler) RemoveIconsCollection(c *gin.Context) {
 	cmd := &command.DeleteIconsCollection{}
 
-	c.BindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -797,12 +947,19 @@ func (r *RoutesHandler) RemoveIconsCollection(c *gin.Context) {
 func (r *RoutesHandler) FindIconsCollection(c *gin.Context) {
 	q := &queries.IconsCollectionQuery{}
 
-	c.BindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -827,12 +984,19 @@ func (r *RoutesHandler) FindIconsCollection(c *gin.Context) {
 func (r *RoutesHandler) FindAllIconsCollection(c *gin.Context) {
 	q := &queries.IconsCollectionQuery{}
 
-	c.BindQuery(q)
+	if err := c.BindQuery(q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}

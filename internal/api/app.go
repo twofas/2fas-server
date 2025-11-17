@@ -46,7 +46,7 @@ func NewApplication(applicationName string, config config.Configuration) (*Appli
 	database := db.NewDbConnection(config)
 	redisClient := redis.New(config.Redis.ServiceUrl, config.Redis.Port)
 
-	validate.RegisterValidation("not_blank", validation.NotBlank)
+	_ = validate.RegisterValidation("not_blank", validation.NotBlank)
 
 	h := health.NewHealthModule(applicationName, config, redisClient)
 

@@ -3,11 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/pressly/goose/v3"
-	"github.com/twofas/2fas-server/config"
-	"github.com/twofas/2fas-server/internal/common/db"
 	"log"
 	"os"
+
+	"github.com/pressly/goose/v3"
+
+	"github.com/twofas/2fas-server/config"
+	"github.com/twofas/2fas-server/internal/common/db"
 )
 
 const dialect = "mysql"
@@ -19,7 +21,10 @@ var (
 
 func main() {
 	flags.Usage = usage
-	flags.Parse(os.Args[1:])
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		fmt.Sprintf("Failed to parse flags: %v", err)
+		os.Exit(1)
+	}
 
 	args := flags.Args()
 

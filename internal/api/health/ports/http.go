@@ -113,7 +113,7 @@ func (r *RoutesHandler) GetApplicationConfiguration(c *gin.Context) {
 	})
 	if err != nil {
 		// This is an internal endpoint, so we can return the error as is.
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -121,7 +121,7 @@ func (r *RoutesHandler) GetApplicationConfiguration(c *gin.Context) {
 	pushConfig, err := mobile.NewFcmPushConfig(s3)
 	if err != nil {
 		// This is an internal endpoint, so we can return the error as is.
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 

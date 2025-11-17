@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/doug-martin/goqu/v9"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
-	"github.com/twofas/2fas-server/internal/common/storage"
-	"gorm.io/gorm"
 	"image"
 	"image/png"
 	"io"
 	"path/filepath"
+
+	"github.com/doug-martin/goqu/v9"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
+	"github.com/twofas/2fas-server/internal/common/storage"
 )
 
 var iconsStoragePath = "2fas-icons"
@@ -37,7 +39,9 @@ func processB64PngImage(b64Img string) (image.Image, io.Reader, error) {
 		return nil, nil, err
 	}
 
-	imageBytes.Seek(0, io.SeekStart)
+	if _, err := imageBytes.Seek(0, io.SeekStart); err != nil {
+		return nil, nil, fmt.Errorf("cannot seek to beginning of image: %w", err)
+	}
 
 	err = validateImage(pngImg)
 

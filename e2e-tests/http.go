@@ -125,7 +125,7 @@ func doRequest(t *testing.T, base, uri, method string, payload []byte, resp inte
 func createRequest(method, uri string, payload []byte) *http.Request {
 	request, _ := http.NewRequest(method, uri, bytes.NewBuffer(payload))
 
-	request.Header.Add("Content-type", "application/json")
+	request.Header.Add("Content-Type", "application/json")
 
 	if Auth != nil {
 		request.Header.Add("Authorization", Auth.Header())

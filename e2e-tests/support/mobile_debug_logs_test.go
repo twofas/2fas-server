@@ -12,7 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 	query "github.com/twofas/2fas-server/internal/api/support/app/queries"
 )
 
@@ -57,12 +58,12 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("file", "logs.json")
 
-	part.Write([]byte(`{"log":"data"}`))
+	_, _ = part.Write([]byte(`{"log":"data"}`))
 
 	writer.Close()
 
 	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
+	request.Header.Add("Content-Type", writer.FormDataContentType())
 
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(s.T(), err)
@@ -82,17 +83,17 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimTwice() {
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("file", "logs.json")
 
-	part.Write([]byte(`{"log":"data"}`))
+	_, _ = part.Write([]byte(`{"log":"data"}`))
 
 	writer.Close()
 
 	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
+	request.Header.Add("Content-Type", writer.FormDataContentType())
 	_, err := http.DefaultClient.Do(request)
 	require.NoError(s.T(), err)
 
 	secondRequest, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
+	request.Header.Add("Content-Type", writer.FormDataContentType())
 	secondResponse, err := http.DefaultClient.Do(secondRequest)
 
 	assert.Equal(s.T(), 410, secondResponse.StatusCode)

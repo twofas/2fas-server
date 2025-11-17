@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -32,7 +33,9 @@ func (fs *TmpFileSystem) Save(path string, data io.Reader) (location string, err
 
 	baseDir := filepath.Join(fs.baseDirectory, directory)
 
-	os.MkdirAll(baseDir, os.ModePerm)
+	if err := os.MkdirAll(baseDir, os.ModePerm); err != nil {
+		return "", fmt.Errorf("cannot create directory %s: %w", directory, err)
+	}
 
 	fp := filepath.Join(baseDir, name)
 
