@@ -122,10 +122,6 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	}
 
 	q := &queries.DebugLogsAuditQuery{}
-	if err := c.ShouldBindUri(q); err != nil {
-		// c.BindUri already returned 400 and error.
-		return
-	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 
@@ -178,10 +174,6 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 	}
 
 	q := &queries.DebugLogsAuditQuery{}
-	if err := c.ShouldBindUri(q); err != nil {
-		// c.BindUri already returned 400 and error.
-		return
-	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 

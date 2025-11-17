@@ -22,7 +22,7 @@ var (
 func main() {
 	flags.Usage = usage
 	if err := flags.Parse(os.Args[1:]); err != nil {
-		fmt.Sprintf("Failed to parse flags: %v", err)
+		fmt.Printf("Failed to parse flags: %v", err)
 		os.Exit(1)
 	}
 
