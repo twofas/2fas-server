@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -100,8 +101,12 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimTwice() {
 	secondRequest, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
 	request.Header.Add("Content-Type", formDataContentType)
 	secondResponse, err := http.DefaultClient.Do(secondRequest)
+	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), 410, secondResponse.StatusCode)
+	responseBody, err := io.ReadAll(secondResponse.Body)
+	require.NoError(s.T(), err)
+
+	assert.Equal(s.T(), 410, secondResponse.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillNotExistingDebugLogsAuditClaim() {
@@ -113,7 +118,10 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillNotExistingDebugLogsAuditClaim
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	responseBody, err := io.ReadAll(response.Body)
+	require.NoError(s.T(), err)
+
+	assert.Equal(s.T(), 404, response.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimUsingInvalidId() {
