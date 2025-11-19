@@ -79,7 +79,7 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 		return
 	}
 	if cmd.File == nil {
-		c.JSON(400, api.NewBadRequestError(errors.New("log file is required")))
+		c.JSON(400, api.NewBadRequestError(errors.New("logs file is required")))
 		return
 	}
 	if cmd.Id == "" {
