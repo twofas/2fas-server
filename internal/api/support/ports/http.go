@@ -78,6 +78,14 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 		// c.Bind already returned 400 and error.
 		return
 	}
+	if cmd.File == nil {
+		c.JSON(400, api.NewBadRequestError(errors.New("log file is required")))
+		return
+	}
+	if cmd.Id == "" {
+		c.JSON(400, api.NewBadRequestError(errors.New("audit id is required")))
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
@@ -121,7 +129,9 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 		return
 	}
 
-	q := &queries.DebugLogsAuditQuery{}
+	q := &queries.DebugLogsAuditQuery{
+		Id: cmd.Id,
+	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 
@@ -173,10 +183,10 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 		return
 	}
 
-	q := &queries.DebugLogsAuditQuery{}
-
+	q := &queries.DebugLogsAuditQuery{
+		Id: cmd.Id,
+	}
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
-
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
 		return
