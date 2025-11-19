@@ -36,7 +36,7 @@ func (h *StoreLogEventHandler) Handle(ctx context.Context, cmd *StoreLogEvent) {
 
 	context := logging.Fields{}
 	if err := json.Unmarshal([]byte(cmd.Context), &context); err != nil {
-		log.Error("Failed to unmarshal log context: %v", err)
+		log.Errorf("Failed to unmarshal log context: %v", err)
 		return
 	}
 
