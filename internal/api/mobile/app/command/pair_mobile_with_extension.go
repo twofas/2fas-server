@@ -85,7 +85,7 @@ func (h *PairMobileWithExtensionHandler) Handle(ctx context.Context, cmd *PairMo
 
 		sendErr := h.WebsocketClient.SendMessage(websocketUri, message)
 		if sendErr != nil {
-			log.Error("Failed to send browser extension hasn't been paired with the device: %v", sendErr)
+			log.Errorf("Failed to send browser extension hasn't been paired with the device: %v", sendErr)
 		}
 
 		return err
