@@ -6,11 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+
 	browser_adapters "github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"github.com/twofas/2fas-server/internal/api/mobile/app"
 	"github.com/twofas/2fas-server/internal/api/mobile/app/command"
-	"github.com/twofas/2fas-server/internal/api/mobile/app/queries"
+	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
 	"github.com/twofas/2fas-server/internal/common/logging"
@@ -37,15 +38,25 @@ func NewRoutesHandler(
 func (r *RoutesHandler) UpdateMobileDevice(c *gin.Context) {
 	cmd := &command.UpdateMobileDevice{}
 
-	c.ShouldBindUri(cmd)
-	c.ShouldBindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	logging.Info("Start command", cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -86,14 +97,21 @@ func (r *RoutesHandler) RegisterMobileDevice(c *gin.Context) {
 		Id: id,
 	}
 
-	c.ShouldBindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	logging.Info("Start command", cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -131,18 +149,27 @@ func (r *RoutesHandler) RemoveAllMobileDevices(c *gin.Context) {
 func (r *RoutesHandler) PairMobileWithExtension(c *gin.Context) {
 	cmd := &command.PairMobileWithBrowserExtension{}
 
-	c.BindJSON(&cmd)
-	c.BindUri(&cmd)
+	if err := c.BindJSON(&cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
-
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
 
-	err = r.cqrs.Commands.PairMobileWithExtension.Handle(cmd)
+	err = r.cqrs.Commands.PairMobileWithExtension.Handle(c.Request.Context(), cmd)
 
 	if err != nil {
 		var conflictError domain.ExtensionHasAlreadyBeenPairedError
@@ -171,12 +198,19 @@ func (r *RoutesHandler) PairMobileWithExtension(c *gin.Context) {
 func (r *RoutesHandler) RemovePairingWithExtension(c *gin.Context) {
 	cmd := &command.RemoveDevicePairedExtension{}
 
-	c.BindUri(&cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -202,12 +236,19 @@ func (r *RoutesHandler) RemovePairingWithExtension(c *gin.Context) {
 func (r *RoutesHandler) FindAllMobileAppExtensions(c *gin.Context) {
 	cmd := &query.DeviceBrowserExtensionsQuery{}
 
-	c.BindUri(&cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 
@@ -235,12 +276,19 @@ func (r *RoutesHandler) FindAllMobileAppExtensions(c *gin.Context) {
 func (r *RoutesHandler) FindMobileAppExtensionById(c *gin.Context) {
 	cmd := &query.DeviceBrowserExtensionsQuery{}
 
-	c.BindUri(&cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -271,13 +319,23 @@ func (r *RoutesHandler) FindMobileAppExtensionById(c *gin.Context) {
 func (r *RoutesHandler) Send2FaToken(c *gin.Context) {
 	cmd := &command.Send2FaToken{}
 
-	c.BindJSON(&cmd)
-	c.BindUri(&cmd)
+	if err := c.BindJSON(&cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -302,12 +360,19 @@ func (r *RoutesHandler) Send2FaToken(c *gin.Context) {
 
 func (r *RoutesHandler) GetAll2FaTokenRequests(c *gin.Context) {
 	q := &query.DeviceBrowserExtension2FaRequestQuery{}
-	c.BindUri(&q)
+	if err := c.BindUri(&q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -336,12 +401,19 @@ func (r *RoutesHandler) CreateMobileNotification(c *gin.Context) {
 
 	cmd := &command.CreateNotification{Id: id}
 
-	c.BindJSON(&cmd)
+	if err := c.BindJSON(&cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -368,13 +440,23 @@ func (r *RoutesHandler) CreateMobileNotification(c *gin.Context) {
 func (r *RoutesHandler) UpdateMobileNotification(c *gin.Context) {
 	cmd := &command.UpdateNotification{}
 
-	c.BindUri(cmd)
-	c.BindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -408,13 +490,23 @@ func (r *RoutesHandler) UpdateMobileNotification(c *gin.Context) {
 func (r *RoutesHandler) FindAllMobileNotifications(c *gin.Context) {
 	q := &query.MobileNotificationsQuery{}
 
-	c.BindUri(&q)
-	c.BindQuery(&q)
+	if err := c.BindUri(&q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindQuery(&q); err != nil {
+		// c.BindQuery already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -433,12 +525,19 @@ func (r *RoutesHandler) FindAllMobileNotifications(c *gin.Context) {
 func (r *RoutesHandler) FindMobileNotification(c *gin.Context) {
 	q := &query.MobileNotificationsQuery{}
 
-	c.BindUri(&q)
+	if err := c.BindUri(&q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(q)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -463,12 +562,19 @@ func (r *RoutesHandler) FindMobileNotification(c *gin.Context) {
 func (r *RoutesHandler) RemoveMobileNotification(c *gin.Context) {
 	cmd := &command.DeleteNotification{}
 
-	c.BindUri(&cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -501,12 +607,19 @@ func (r *RoutesHandler) RemoveAllMobileNotifications(c *gin.Context) {
 func (r *RoutesHandler) PublishMobileNotification(c *gin.Context) {
 	cmd := &command.PublishNotification{}
 
-	c.BindUri(&cmd)
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}

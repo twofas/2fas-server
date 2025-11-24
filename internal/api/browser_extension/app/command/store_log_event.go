@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
@@ -21,28 +22,34 @@ type StoreLogEventHandler struct {
 }
 
 func (h *StoreLogEventHandler) Handle(ctx context.Context, cmd *StoreLogEvent) {
-	extId, _ := uuid.Parse(cmd.ExtensionId)
+	log := logging.FromContext(ctx)
 
-	_, err := h.BrowserExtensionsRepository.FindById(extId)
-
+	extId, err := uuid.Parse(cmd.ExtensionId)
+	if err != nil {
+		log.Errorf("Failed to parse extension id: %v", err)
+		return
+	}
+	_, err = h.BrowserExtensionsRepository.FindById(extId)
 	if err != nil {
 		return
 	}
 
 	context := logging.Fields{}
-
-	json.Unmarshal([]byte(cmd.Context), &context)
+	if err := json.Unmarshal([]byte(cmd.Context), &context); err != nil {
+		log.Errorf("Failed to unmarshal log context: %v", err)
+		return
+	}
 
 	context["source"] = "browser_extension"
 
 	switch cmd.Level {
 	case "info":
-		logging.FromContext(ctx).WithFields(context).Info(cmd.Message)
+		log.WithFields(context).Info(cmd.Message)
 	case "warning":
-		logging.FromContext(ctx).WithFields(context).Warning(cmd.Message)
+		log.WithFields(context).Warning(cmd.Message)
 	case "error":
-		logging.FromContext(ctx).WithFields(context).Error(cmd.Message)
+		log.WithFields(context).Error(cmd.Message)
 	case "debug":
-		logging.FromContext(ctx).WithFields(context).Debug(cmd.Message)
+		log.WithFields(context).Debug(cmd.Message)
 	}
 }

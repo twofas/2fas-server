@@ -100,7 +100,10 @@ func LogCommand(command interface{}) {
 	commandName := reflect.TypeOf(command).Elem().Name()
 
 	var commandAsFields logrus.Fields
-	json.Unmarshal(context, &commandAsFields)
+	if err := json.Unmarshal(context, &commandAsFields); err != nil {
+		log.Errorf("Failed to unmarshal command for logging: %v", err)
+		// This will only break the command logging so we can continue.
+	}
 
 	log.
 		WithFields(logrus.Fields{

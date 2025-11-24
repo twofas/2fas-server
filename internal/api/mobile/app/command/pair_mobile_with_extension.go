@@ -1,11 +1,15 @@
 package command
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	mobile_domain "github.com/twofas/2fas-server/internal/api/mobile/domain"
+	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/websocket"
 )
 
@@ -54,7 +58,9 @@ type PairMobileWithExtensionHandler struct {
 	WebsocketClient                    *websocket.WebsocketApiClient
 }
 
-func (h *PairMobileWithExtensionHandler) Handle(cmd *PairMobileWithBrowserExtension) error {
+func (h *PairMobileWithExtensionHandler) Handle(ctx context.Context, cmd *PairMobileWithBrowserExtension) error {
+	log := logging.FromContext(ctx)
+
 	deviceId, _ := uuid.Parse(cmd.DeviceId)
 	extensionId, _ := uuid.Parse(cmd.ExtensionId)
 
@@ -77,7 +83,10 @@ func (h *PairMobileWithExtensionHandler) Handle(cmd *PairMobileWithBrowserExtens
 	if err != nil {
 		message := NewBrowserExtensionHasNotBeenPairedWithDevice(err, cmd.DeviceId, extensionId)
 
-		h.WebsocketClient.SendMessage(websocketUri, message)
+		sendErr := h.WebsocketClient.SendMessage(websocketUri, message)
+		if sendErr != nil {
+			log.Errorf("Failed to send browser extension hasn't been paired with the device: %v", sendErr)
+		}
 
 		return err
 	}

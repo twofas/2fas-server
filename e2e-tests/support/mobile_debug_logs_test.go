@@ -2,6 +2,8 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -12,7 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 	query "github.com/twofas/2fas-server/internal/api/support/app/queries"
 )
 
@@ -57,15 +60,16 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("file", "logs.json")
 
-	part.Write([]byte(`{"log":"data"}`))
+	_, _ = part.Write([]byte(`{"log":"data"}`))
 
 	writer.Close()
 
 	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
+	request.Header.Add("Content-Type", writer.FormDataContentType())
 
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(s.T(), err)
+	assert.Equal(s.T(), 200, response.StatusCode)
 
 	reqB, _ := ioutil.ReadAll(body)
 	s.T().Log(string(reqB))
@@ -75,44 +79,78 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 	s.T().Log(string(rawBody))
 }
 
+func mkFormFileBody() (*bytes.Buffer, string, error) {
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", "logs.json")
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to create form file: %w", err)
+	}
+
+	_, err = part.Write([]byte(`{"log":"data"}`))
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to write to form file: %w", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, "", fmt.Errorf("failed to close writer: %w", err)
+	}
+	return body, writer.FormDataContentType(), nil
+}
+
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimTwice() {
 	auditClaim := createDebugLogsAuditClaim(s.T(), "user1", "desc1")
 
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("file", "logs.json")
-
-	part.Write([]byte(`{"log":"data"}`))
-
-	writer.Close()
+	body, formDataContentType, err := mkFormFileBody()
+	assert.Nil(s.T(), err)
 
 	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
-	_, err := http.DefaultClient.Do(request)
+	request.Header.Add("Content-Type", formDataContentType)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), 200, response.StatusCode)
+
+	body, formDataContentType, err = mkFormFileBody()
+	assert.Nil(s.T(), err)
+	secondRequest, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	secondRequest.Header.Add("Content-Type", formDataContentType)
+	secondResponse, err := http.DefaultClient.Do(secondRequest)
 	require.NoError(s.T(), err)
 
-	secondRequest, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
-	request.Header.Add("Content-type", writer.FormDataContentType())
-	secondResponse, err := http.DefaultClient.Do(secondRequest)
+	responseBody, err := io.ReadAll(secondResponse.Body)
+	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), 410, secondResponse.StatusCode)
+	assert.Equal(s.T(), 410, secondResponse.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillNotExistingDebugLogsAuditClaim() {
 	notExistingAuditClaimId := uuid.New().String()
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId, nil)
-	response, _ := http.DefaultClient.Do(request)
+	body, formDataContentType, err := mkFormFileBody()
+	assert.Nil(s.T(), err)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId, body)
+	request.Header.Add("Content-Type", formDataContentType)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(s.T(), err)
+
+	responseBody, err := io.ReadAll(response.Body)
+	require.NoError(s.T(), err)
+
+	assert.Equal(s.T(), 404, response.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimUsingInvalidId() {
 	auditClaimId := uuid.New().String()
 	invalidId := strings.ToUpper(auditClaimId)
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+invalidId, nil)
-	response, _ := http.DefaultClient.Do(request)
+	body, formDataContentType, err := mkFormFileBody()
+	assert.Nil(s.T(), err)
+
+	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+invalidId, body)
+	request.Header.Add("Content-Type", formDataContentType)
+	response, err := http.DefaultClient.Do(request)
+	require.NoError(s.T(), err)
 
 	assert.Equal(s.T(), 404, response.StatusCode)
 }

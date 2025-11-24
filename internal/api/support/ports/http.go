@@ -2,9 +2,11 @@ package ports
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+
 	adapters3 "github.com/twofas/2fas-server/internal/api/support/adapters"
 	"github.com/twofas/2fas-server/internal/api/support/app"
 	"github.com/twofas/2fas-server/internal/api/support/app/command"
@@ -37,7 +39,10 @@ func (r *RoutesHandler) CreateDebugLogsAuditClaim(c *gin.Context) {
 
 	logging.LogCommand(cmd)
 
-	c.ShouldBindJSON(cmd)
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.cqrs.Commands.CreateDebugLogsAuditClain.Handle(cmd)
 
@@ -65,15 +70,33 @@ func (r *RoutesHandler) CreateDebugLogsAuditClaim(c *gin.Context) {
 func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	cmd := &command.CreateDebugLogsAudit{}
 
-	c.ShouldBindUri(cmd)
-	c.ShouldBind(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.Bind(cmd); err != nil {
+		// c.Bind already returned 400 and error.
+		return
+	}
+	if cmd.File == nil {
+		c.JSON(400, api.NewBadRequestError(errors.New("logs file is required")))
+		return
+	}
+	if cmd.Id == "" {
+		c.JSON(400, api.NewBadRequestError(errors.New("audit id is required")))
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	logging.LogCommand(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -106,8 +129,9 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 		return
 	}
 
-	q := &queries.DebugLogsAuditQuery{}
-	c.ShouldBindUri(q)
+	q := &queries.DebugLogsAuditQuery{
+		Id: cmd.Id,
+	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 
@@ -122,15 +146,25 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 	cmd := &command.UpdateDebugLogsAudit{}
 
-	c.ShouldBindUri(cmd)
-	c.ShouldBindJSON(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
+	if err := c.BindJSON(cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	logging.LogCommand(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -149,11 +183,10 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 		return
 	}
 
-	q := &queries.DebugLogsAuditQuery{}
-	c.ShouldBindUri(q)
-
+	q := &queries.DebugLogsAuditQuery{
+		Id: cmd.Id,
+	}
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
-
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
 		return
@@ -165,14 +198,21 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 func (r *RoutesHandler) DeleteDebugLogsAudit(c *gin.Context) {
 	cmd := &command.DeleteDebugLogsAudit{}
 
-	c.ShouldBindUri(cmd)
+	if err := c.BindUri(cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	err := r.validator.Struct(cmd)
 
 	logging.LogCommand(cmd)
 
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			c.JSON(500, api.NewInternalServerError(err))
+			return
+		}
 		c.JSON(400, api.NewBadRequestError(validationErrors))
 		return
 	}
@@ -205,7 +245,10 @@ func (r *RoutesHandler) DeleteAllDebugLogsAudit(c *gin.Context) {
 func (r *RoutesHandler) GetDebugLogsAudit(c *gin.Context) {
 	q := &queries.DebugLogsAuditQuery{}
 
-	c.ShouldBindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 
@@ -226,7 +269,10 @@ func (r *RoutesHandler) GetDebugLogsAudit(c *gin.Context) {
 
 func (r *RoutesHandler) GetDebugAllLogsAudit(c *gin.Context) {
 	q := &queries.DebugLogsAuditQuery{}
-	c.ShouldBindUri(q)
+	if err := c.BindUri(q); err != nil {
+		// c.BindUri already returned 400 and error.
+		return
+	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.FindAll(q)
 

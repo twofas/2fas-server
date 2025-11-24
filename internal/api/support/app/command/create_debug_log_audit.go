@@ -3,19 +3,21 @@ package command
 import (
 	"bytes"
 	"errors"
+	"io/ioutil"
+	"mime/multipart"
+	"path/filepath"
+
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/support/adapters"
 	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"github.com/twofas/2fas-server/internal/common/clock"
 	"github.com/twofas/2fas-server/internal/common/storage"
-	"io/ioutil"
-	"mime/multipart"
-	"path/filepath"
 )
 
 type CreateDebugLogsAudit struct {
-	Id   string                `uri:"audit_id" validate:"required"`
-	File *multipart.FileHeader `form:"file" binding:"required"`
+	Id   string                `uri:"audit_id"`
+	File *multipart.FileHeader `form:"file"`
 }
 
 type CreateDebugLogsAuditHandler struct {

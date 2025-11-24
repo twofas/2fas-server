@@ -64,7 +64,10 @@ func DoAdminRequest(t *testing.T, uri, method string, payload []byte, resp inter
 
 func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
 	response := doRequest(t, adminRawURL, uri, http.MethodPut, payload, resp)
-	require.Equal(t, http.StatusOK, response.StatusCode)
+	bb, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	require.Equal(t, http.StatusOK, response.StatusCode, fmt.Sprintf("invalid status code, response payload is: %q", string(bb)))
 }
 
 func DoAPISuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
@@ -125,7 +128,7 @@ func doRequest(t *testing.T, base, uri, method string, payload []byte, resp inte
 func createRequest(method, uri string, payload []byte) *http.Request {
 	request, _ := http.NewRequest(method, uri, bytes.NewBuffer(payload))
 
-	request.Header.Add("Content-type", "application/json")
+	request.Header.Add("Content-Type", "application/json")
 
 	if Auth != nil {
 		request.Header.Add("Authorization", Auth.Header())

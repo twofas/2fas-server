@@ -97,7 +97,7 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 	}
 
 	hubs.Range(func(key, value any) bool {
-		h1 := key.(*Hub)
+		h1 := key.(*Hub) //nolint:errcheck // We only store *Hub types as keys.
 		if !h1.isEmpty() {
 			if h2, ok := hp.hubs[h1.id]; !ok || h1 != h2 {
 				t.Fatalf("Non-empty hub was evicted from hub pool: %q", h1.id)

@@ -1,10 +1,13 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 )
 
 type RemoveAllExtensionPairedDevices struct {
@@ -20,7 +23,6 @@ func (h *RemoveALlExtensionPairedDevicesHandler) Handle(cmd *RemoveAllExtensionP
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
 	extension, err := h.BrowserExtensionRepository.FindById(extId)
-
 	if err != nil {
 		return err
 	}
@@ -28,7 +30,10 @@ func (h *RemoveALlExtensionPairedDevicesHandler) Handle(cmd *RemoveAllExtensionP
 	pairedDevices := h.BrowserExtensionPairedDevicesRepository.FindAll(extension.Id)
 
 	for _, device := range pairedDevices {
-		h.BrowserExtensionPairedDevicesRepository.Delete(device)
+		err := h.BrowserExtensionPairedDevicesRepository.Delete(device)
+		if err != nil {
+			return fmt.Errorf("failed to remove paired device: %w", err)
+		}
 	}
 
 	return nil

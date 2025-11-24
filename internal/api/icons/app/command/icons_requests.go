@@ -185,7 +185,7 @@ func (h *UpdateWebServiceFromIconRequestHandler) Handle(cmd *UpdateWebServiceFro
 		lightIcon.Id.String(),
 	}
 
-	if iconRequest.DarkIconUrl != "" {
+	if iconRequest.DarkIconUrl != "" { //nolint:dupl
 		darkIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.DarkIconUrl))
 
 		darkIconImg, err := h.IconsStorage.Get(darkIconStoragePath)
@@ -412,7 +412,7 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 		lightIcon.Id.String(),
 	}
 
-	if iconRequest.DarkIconUrl != "" {
+	if iconRequest.DarkIconUrl != "" { //nolint:dupl
 		darkIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.DarkIconUrl))
 
 		darkIconImg, err := h.IconsStorage.Get(darkIconStoragePath)

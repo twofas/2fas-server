@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+
 	"github.com/twofas/2fas-server/config"
 	browser_extension_adapters "github.com/twofas/2fas-server/internal/api/browser_extension/adapters"
 	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
@@ -19,7 +21,6 @@ import (
 	"github.com/twofas/2fas-server/internal/common/rate_limit"
 	"github.com/twofas/2fas-server/internal/common/security"
 	"github.com/twofas/2fas-server/internal/common/websocket"
-	"gorm.io/gorm"
 )
 
 type MobileModule struct {
@@ -42,7 +43,10 @@ func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.D
 	browserExtensionsMysqlRepository := browser_extension_adapters.NewBrowserExtensionsMysqlRepository(gorm)
 	mobileDeviceExtensionsRepository := adapters.NewMobileDeviceExtensionsGormRepository(gorm, queryBuilder)
 
-	validate.RegisterValidation("is-device-id", DeviceIdExistsValidator(mobileDeviceRepository))
+	err := validate.RegisterValidation("is-device-id", DeviceIdExistsValidator(mobileDeviceRepository))
+	if err != nil {
+		panic("failed to register device id validator: " + err.Error())
+	}
 
 	cqrs := &app.Cqrs{
 		Commands: app.Commands{

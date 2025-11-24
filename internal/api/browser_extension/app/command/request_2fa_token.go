@@ -39,26 +39,31 @@ type Request2FaToken struct {
 	Domain      string `json:"domain" validate:"required,lte=256"`
 }
 
-func New2FaTokenRequestFromGin(c *gin.Context) *Request2FaToken {
+func New2FaTokenRequestFromGin(c *gin.Context) (*Request2FaToken, bool) {
 	id := uuid.New()
 
 	cmd := &Request2FaToken{}
 	cmd.Id = id.String()
 
-	c.BindJSON(&cmd)
-	c.BindUri(&cmd)
+	if err := c.BindJSON(&cmd); err != nil {
+		// c.BindJSON already returned 400 and error.
+		return nil, false
+	}
+	if err := c.BindUri(&cmd); err != nil {
+		// c.BindUri already returned 400 and error.
+		return nil, false
+	}
 
 	u, err := url.Parse(cmd.Domain)
 
 	if err != nil {
 		cmd.Domain = ""
-
-		return cmd
+		return cmd, true
 	}
 
 	cmd.Domain = fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 
-	return cmd
+	return cmd, true
 }
 
 type Request2FaTokenHandler struct {
@@ -122,7 +127,7 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 
 		err = retry.Do(
 			func() error {
-				return h.Pusher.Send(context.Background(), notification)
+				return h.Pusher.Send(ctx, notification)
 			},
 			retry.Attempts(5),
 			retry.LastErrorOnly(true),
@@ -176,7 +181,11 @@ func createPushNotificationForAndroid(token string, data map[string]interface{})
 	androidData := make(map[string]string, len(data))
 
 	for key, value := range data {
-		androidData[key] = value.(string)
+		str, ok := value.(string)
+		if !ok {
+			continue
+		}
+		androidData[key] = str
 	}
 
 	androidData["click_action"] = "auth_request"
