@@ -13,6 +13,7 @@ import (
 	"github.com/twofas/2fas-server/internal/api/support/app/queries"
 	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -87,21 +88,14 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	logging.LogCommand(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.CreateDebugLogsAudit.Handle(cmd)
+	logging.LogCommand(cmd)
+
+	err := r.cqrs.Commands.CreateDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
@@ -155,21 +149,14 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	logging.LogCommand(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.UpdateDebugLogsAudit.Handle(cmd)
+	logging.LogCommand(cmd)
+
+	err := r.cqrs.Commands.UpdateDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
@@ -203,21 +190,14 @@ func (r *RoutesHandler) DeleteDebugLogsAudit(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	logging.LogCommand(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.DeleteDebugLogsAudit.Handle(cmd)
+	logging.LogCommand(cmd)
+
+	err := r.cqrs.Commands.DeleteDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
