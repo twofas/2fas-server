@@ -14,6 +14,7 @@ import (
 	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -47,21 +48,14 @@ func (r *RoutesHandler) UpdateMobileDevice(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	logging.Info("Start command", cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.UpdateMobileDevice.Handle(cmd)
+	logging.Info("Start command", cmd)
+
+	err := r.cqrs.Commands.UpdateMobileDevice.Handle(cmd)
 
 	if err != nil {
 		var deviceNotFoundErr adapters.MobileDeviceCouldNotBeFound
@@ -102,21 +96,14 @@ func (r *RoutesHandler) RegisterMobileDevice(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	logging.Info("Start command", cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RegisterMobileDevice.Handle(cmd)
+	logging.Info("Start command", cmd)
+
+	err := r.cqrs.Commands.RegisterMobileDevice.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -158,18 +145,12 @@ func (r *RoutesHandler) PairMobileWithExtension(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.PairMobileWithExtension.Handle(c.Request.Context(), cmd)
+	err := r.cqrs.Commands.PairMobileWithExtension.Handle(c.Request.Context(), cmd)
 
 	if err != nil {
 		var conflictError domain.ExtensionHasAlreadyBeenPairedError
@@ -203,19 +184,12 @@ func (r *RoutesHandler) RemovePairingWithExtension(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RemovePairingWithExtension.Handle(cmd)
+	err := r.cqrs.Commands.RemovePairingWithExtension.Handle(cmd)
 
 	if err != nil {
 		var deviceNotFoundErr *adapters.MobileDeviceCouldNotBeFound
@@ -241,22 +215,13 @@ func (r *RoutesHandler) FindAllMobileAppExtensions(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	deviceId, _ := uuid.Parse(cmd.DeviceId)
-	_, err = r.mobileDeviceRepository.FindById(deviceId)
+	_, err := r.mobileDeviceRepository.FindById(deviceId)
 
 	if err != nil {
 		c.JSON(404, api.NotFoundError(err))
@@ -281,20 +246,13 @@ func (r *RoutesHandler) FindMobileAppExtensionById(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	deviceId, _ := uuid.Parse(cmd.DeviceId)
-	_, err = r.mobileDeviceRepository.FindById(deviceId)
+	_, err := r.mobileDeviceRepository.FindById(deviceId)
 
 	if err != nil {
 		c.JSON(404, api.NotFoundError(err))
@@ -328,20 +286,13 @@ func (r *RoutesHandler) Send2FaToken(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	deviceId, _ := uuid.Parse(cmd.DeviceId)
-	_, err = r.mobileDeviceRepository.FindById(deviceId)
+	_, err := r.mobileDeviceRepository.FindById(deviceId)
 
 	if err != nil {
 		c.JSON(404, api.NotFoundError(err))
@@ -365,20 +316,13 @@ func (r *RoutesHandler) GetAll2FaTokenRequests(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	deviceId, _ := uuid.Parse(q.DeviceId)
-	_, err = r.mobileDeviceRepository.FindById(deviceId)
+	_, err := r.mobileDeviceRepository.FindById(deviceId)
 
 	if err != nil {
 		c.JSON(404, api.NotFoundError(err))
@@ -406,19 +350,12 @@ func (r *RoutesHandler) CreateMobileNotification(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.CreateNotification.Handle(cmd)
+	err := r.cqrs.Commands.CreateNotification.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -449,19 +386,12 @@ func (r *RoutesHandler) UpdateMobileNotification(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.UpdateNotification.Handle(cmd)
+	err := r.cqrs.Commands.UpdateNotification.Handle(cmd)
 
 	if err != nil {
 		var notificationNotFoundErr *adapters.MobileNotificationCouldNotBeFound
@@ -499,15 +429,8 @@ func (r *RoutesHandler) FindAllMobileNotifications(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -530,15 +453,8 @@ func (r *RoutesHandler) FindMobileNotification(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -567,19 +483,12 @@ func (r *RoutesHandler) RemoveMobileNotification(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.DeleteNotification.Handle(cmd)
+	err := r.cqrs.Commands.DeleteNotification.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.MobileNotificationCouldNotBeFound
@@ -612,19 +521,12 @@ func (r *RoutesHandler) PublishMobileNotification(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.PublishNotification.Handle(cmd)
+	err := r.cqrs.Commands.PublishNotification.Handle(cmd)
 
 	if err != nil {
 		var notificationNotFoundErr adapters.MobileNotificationCouldNotBeFound

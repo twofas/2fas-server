@@ -13,6 +13,7 @@ import (
 	"github.com/twofas/2fas-server/internal/api/browser_extension/app/query"
 	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
+	"github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -40,17 +41,8 @@ func (r *RoutesHandler) Log(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -67,17 +59,8 @@ func (r *RoutesHandler) FindBrowserExtensionPairedMobileDevices(c *gin.Context) 
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -94,17 +77,8 @@ func (r *RoutesHandler) GetBrowserExtensionPairedMobileDevice(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -130,21 +104,12 @@ func (r *RoutesHandler) RemovePairedDeviceFromExtension(c *gin.Context) {
 
 	logging.LogCommand(cmd)
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RemoveExtensionPairedDevice.Handle(cmd)
+	err := r.cqrs.Commands.RemoveExtensionPairedDevice.Handle(cmd)
 
 	if err != nil {
 		var extensionNotFoundErr adapters.BrowserExtensionsCouldNotBeFound
@@ -172,19 +137,12 @@ func (r *RoutesHandler) RemoveAllExtensionPairedDevices(c *gin.Context) {
 
 	logging.LogCommand(cmd)
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RemoveAllExtensionPairedDevices.Handle(cmd)
+	err := r.cqrs.Commands.RemoveAllExtensionPairedDevices.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.BrowserExtensionsCouldNotBeFound
@@ -225,17 +183,8 @@ func (r *RoutesHandler) FindBrowserExtension(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -266,21 +215,12 @@ func (r *RoutesHandler) RegisterBrowserExtension(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RegisterBrowserExtension.Handle(cmd)
+	err := r.cqrs.Commands.RegisterBrowserExtension.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -313,21 +253,12 @@ func (r *RoutesHandler) UpdateBrowserExtension(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.UpdateBrowserExtension.Handle(cmd)
+	err := r.cqrs.Commands.UpdateBrowserExtension.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.BrowserExtensionsCouldNotBeFound
@@ -368,17 +299,8 @@ func (r *RoutesHandler) Request2FaToken(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -424,19 +346,12 @@ func (r *RoutesHandler) Close2FaRequest(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.Close2FaRequest.Handle(cmd)
+	err := r.cqrs.Commands.Close2FaRequest.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.TokenRequestCouldNotBeFound

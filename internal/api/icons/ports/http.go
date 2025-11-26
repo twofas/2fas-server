@@ -14,6 +14,7 @@ import (
 	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"github.com/twofas/2fas-server/internal/common/api"
 	"github.com/twofas/2fas-server/internal/common/db"
+	"github.com/twofas/2fas-server/internal/common/http"
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -44,20 +45,14 @@ func (r *RoutesHandler) CreateWebService(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.CreateWebService.Handle(cmd)
+	err := r.cqrs.Commands.CreateWebService.Handle(cmd)
 	if err != nil {
 		if db.IsDBError(err) {
 			logging.LogCommandFailed(cmd, err)
@@ -103,22 +98,14 @@ func (r *RoutesHandler) UpdateWebService(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		var notFoundErr adapters.WebServiceCouldNotBeFound
-
-		if errors.As(err, &notFoundErr) {
-			c.JSON(404, api.NotFoundError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(err))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.UpdateWebService.Handle(cmd)
+	err := r.cqrs.Commands.UpdateWebService.Handle(cmd)
 	if err != nil {
 		if db.IsDBError(err) {
 			logging.LogCommandFailed(cmd, err)
@@ -157,20 +144,14 @@ func (r *RoutesHandler) RemoveWebService(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.RemoveWebService.Handle(cmd)
+	err := r.cqrs.Commands.RemoveWebService.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.WebServiceCouldNotBeFound
@@ -203,15 +184,8 @@ func (r *RoutesHandler) FindWebService(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -240,15 +214,8 @@ func (r *RoutesHandler) FindAllWebServices(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -274,15 +241,8 @@ func (r *RoutesHandler) DumpWebServices(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -309,23 +269,14 @@ func (r *RoutesHandler) CreateIcon(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.CreateIcon.Handle(cmd)
+	err := r.cqrs.Commands.CreateIcon.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -360,38 +311,14 @@ func (r *RoutesHandler) UpdateIcon(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	if err != nil {
-		var iconNotFound *adapters.IconCouldNotBeFound
-
-		if errors.As(err, &iconNotFound) {
-			c.JSON(404, api.NotFoundError(err))
-			return
-		}
-
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-		return
-	}
-
-	err = r.cqrs.Commands.UpdateIcon.Handle(cmd)
+	err := r.cqrs.Commands.UpdateIcon.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -421,20 +348,14 @@ func (r *RoutesHandler) RemoveIcon(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.RemoveIcon.Handle(cmd)
+	err := r.cqrs.Commands.RemoveIcon.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.IconCouldNotBeFound
@@ -467,15 +388,8 @@ func (r *RoutesHandler) FindIcon(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -504,15 +418,8 @@ func (r *RoutesHandler) FindAllIcons(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -539,23 +446,14 @@ func (r *RoutesHandler) CreateIconRequest(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.CreateIconRequest.Handle(cmd)
+	err := r.cqrs.Commands.CreateIconRequest.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -586,21 +484,14 @@ func (r *RoutesHandler) RemoveIconRequest(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.RemoveIconRequest.Handle(cmd)
+	err := r.cqrs.Commands.RemoveIconRequest.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.IconRequestCouldNotBeFound
@@ -635,21 +526,14 @@ func (r *RoutesHandler) UpdateWebServiceFromIconRequest(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-		logging.LogCommandFailed(cmd, err)
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.UpdateWebServiceFromIconRequest.Handle(cmd)
+	err := r.cqrs.Commands.UpdateWebServiceFromIconRequest.Handle(cmd)
 	if err != nil {
 		logging.LogCommandFailed(cmd, err)
 
@@ -688,20 +572,14 @@ func (r *RoutesHandler) TransformToWebService(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.TransformIconRequestToWebService.Handle(cmd)
+	err := r.cqrs.Commands.TransformIconRequestToWebService.Handle(cmd)
 	if err != nil {
 		var conflictErr domain.WebServiceAlreadyExistsError
 
@@ -736,15 +614,8 @@ func (r *RoutesHandler) FindIconRequest(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -773,15 +644,8 @@ func (r *RoutesHandler) FindAllIconsRequests(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -808,21 +672,14 @@ func (r *RoutesHandler) CreateIconsCollection(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	err = r.cqrs.Commands.CreateIconsCollection.Handle(cmd)
+	err := r.cqrs.Commands.CreateIconsCollection.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -855,38 +712,14 @@ func (r *RoutesHandler) UpdateIconsCollection(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
 	logging.LogCommand(cmd)
 
-	if err != nil {
-		var notFound *adapters.IconsCollectionCouldNotBeFound
-
-		if errors.As(err, &notFound) {
-			c.JSON(404, api.NotFoundError(err))
-			return
-		}
-
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
-		return
-	}
-
-	err = r.cqrs.Commands.UpdateIconsCollection.Handle(cmd)
+	err := r.cqrs.Commands.UpdateIconsCollection.Handle(cmd)
 
 	if err != nil {
 		c.JSON(400, api.NewBadRequestError(err))
@@ -915,19 +748,12 @@ func (r *RoutesHandler) RemoveIconsCollection(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(cmd)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, cmd); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
-	err = r.cqrs.Commands.RemoveIconsCollection.Handle(cmd)
+	err := r.cqrs.Commands.RemoveIconsCollection.Handle(cmd)
 
 	if err != nil {
 		var notFoundErr adapters.IconsCollectionCouldNotBeFound
@@ -952,15 +778,8 @@ func (r *RoutesHandler) FindIconsCollection(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
@@ -989,15 +808,8 @@ func (r *RoutesHandler) FindAllIconsCollection(c *gin.Context) {
 		return
 	}
 
-	err := r.validator.Struct(q)
-
-	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			c.JSON(500, api.NewInternalServerError(err))
-			return
-		}
-		c.JSON(400, api.NewBadRequestError(validationErrors))
+	if ok := http.Validate(c, r.validator, q); !ok {
+		// http.Validate already returned 400 and error.
 		return
 	}
 
