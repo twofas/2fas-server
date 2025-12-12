@@ -103,5 +103,5 @@ func (s *MobileNotificationsTestSuite) TestPublishNotification() {
 	var publishedNotification *query.MobileNotificationPresenter
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/notifications/"+notification.Id+"/commands/publish", payload, &publishedNotification)
 
-	s.NotEmpty(notification.PublishedAt, "published_at")
+	s.NotEmpty(publishedNotification.PublishedAt, "published_at")
 }
