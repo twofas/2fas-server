@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -44,11 +43,12 @@ func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
 	for _, tc := range testsCases {
 		response := createDevice(s.T(), tc.deviceName, tc.fcmToken)
 
-		assert.Equal(s.T(), tc.expectedHttpCode, response.StatusCode)
+		s.Equal(tc.expectedHttpCode, response.StatusCode)
 	}
 }
 
 func createDevice(t *testing.T, name, fcmToken string) *http.Response {
+	t.Helper()
 	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
 	return e2e_tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
 }

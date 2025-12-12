@@ -36,5 +36,4 @@ func TestIsDBError(t *testing.T) {
 			}
 		})
 	}
-
 }

@@ -5,17 +5,17 @@ run:
 linters:
   default: none
   enable:
-#    - asasalint
-#    - asciicheck
-#    - bidichk
-#    - canonicalheader
-#    - containedctx
-#    - contextcheck
-#    - copyloopvar
-#    - decorder
-#    - dogsled
-#    - dupword
-#    - durationcheck
+    - asasalint
+    - asciicheck
+    - bidichk
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - decorder
+    - dogsled
+    - dupword
+    - durationcheck
     - errcheck
     - errchkjson
     - errname
@@ -66,24 +66,24 @@ linters:
 #    - protogetter
 #    - reassign
 #    - revive
-#    - rowserrcheck
-#    - sloglint
-#    - spancheck
-#    - sqlclosecheck
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
 #    - staticcheck
 #    - tagliatelle
-#    - testableexamples
-#    - testifylint
-#    - thelper
-#    - tparallel
-#    - unconvert
-#    - unparam
-#    - unused
-#    - usestdlibvars
-#    - wastedassign
-#    - whitespace
+    - testableexamples
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
 #    - wrapcheck
-#    - zerologlint
+    - zerologlint
   settings:
     errcheck:
       check-type-assertions: true

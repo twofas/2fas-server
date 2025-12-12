@@ -7,7 +7,7 @@ import (
 
 const (
 	Light string = "light"
-	Dark         = "dark"
+	Dark  string = "dark"
 )
 
 type Icon struct {

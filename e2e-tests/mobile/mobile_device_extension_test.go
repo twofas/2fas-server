@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -30,7 +29,7 @@ func (s *MobileDeviceExtensionTestSuite) TestDoNotFindExtensionsForNotExistingDe
 
 	response := e2e_tests.DoAPIGet(s.T(), "/mobile/devices/"+notExistingDeviceId.String()+"/browser_extensions", nil)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *MobileDeviceExtensionTestSuite) TestDoNotFindNotExistingMobileDeviceExtension() {
@@ -41,7 +40,7 @@ func (s *MobileDeviceExtensionTestSuite) TestDoNotFindNotExistingMobileDeviceExt
 	notExistingExtensionId := uuid.New()
 	response := e2e_tests.DoAPIGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+notExistingExtensionId.String(), nil)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *MobileDeviceExtensionTestSuite) Test_FindExtensionForDevice() {
@@ -52,7 +51,7 @@ func (s *MobileDeviceExtensionTestSuite) Test_FindExtensionForDevice() {
 	var deviceBrowserExtension *e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt.Id, &deviceBrowserExtension)
 
-	assert.Equal(s.T(), browserExt.Id, deviceBrowserExtension.Id)
+	s.Equal(browserExt.Id, deviceBrowserExtension.Id)
 }
 
 func (s *MobileDeviceExtensionTestSuite) Test_FindAllDeviceExtensions() {
@@ -66,7 +65,7 @@ func (s *MobileDeviceExtensionTestSuite) Test_FindAllDeviceExtensions() {
 	var deviceBrowserExtensions []*e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/", &deviceBrowserExtensions)
 
-	assert.Len(s.T(), deviceBrowserExtensions, 2)
+	s.Len(deviceBrowserExtensions, 2)
 }
 
 func (s *MobileDeviceExtensionTestSuite) Test_DisconnectExtensionFromDevice() {
@@ -80,11 +79,11 @@ func (s *MobileDeviceExtensionTestSuite) Test_DisconnectExtensionFromDevice() {
 
 	var deviceBrowserExtension1 *e2e_tests.BrowserExtensionResponse
 	response := e2e_tests.DoAPIGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt1.Id, &deviceBrowserExtension1)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 
 	var deviceBrowserExtension2 *e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt2.Id, &deviceBrowserExtension2)
-	assert.Equal(s.T(), browserExt2.Id, deviceBrowserExtension2.Id)
+	s.Equal(browserExt2.Id, deviceBrowserExtension2.Id)
 }
 
 func (s *MobileDeviceExtensionTestSuite) TestExtensionHasAlreadyBeenConnected() {

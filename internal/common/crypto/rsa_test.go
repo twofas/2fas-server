@@ -3,22 +3,24 @@ package crypto
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_ConvertKeyPairToStringAndBackward(t *testing.T) {
+	t.Helper()
+
 	keyPair := GenerateKeyPair(2048)
 
 	privateKeyAsPemStr := ExportRsaPrivateKeyAsPemStr(keyPair.PrivateKey)
 	publicKeyAsPemStr := ExportRsaPublicKeyAsPemStr(keyPair.PublicKey)
 
-	assert.NotEmpty(t, publicKeyAsPemStr)
+	require.NotEmpty(t, publicKeyAsPemStr)
 
 	_, err := ParseRsaPrivateKeyFromPemStr(privateKeyAsPemStr)
 
-	assert.NoError(t, err, "Cannot convert PEM string to private key")
+	require.NoError(t, err, "Cannot convert PEM string to private key")
 
 	_, err = ParseRsaPublicKeyFromPemStr(publicKeyAsPemStr)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

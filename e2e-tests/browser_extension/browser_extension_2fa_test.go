@@ -100,6 +100,7 @@ func createPairingSuccessWebsocketMessage(t *testing.T, browserExtension *e2e_te
 }
 
 func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *e2e_tests.BrowserExtensionResponse, device *e2e_tests.DeviceResponse) {
+	t.Helper()
 	var browserExtensionDevices []*e2e_tests.DeviceResponse
 	e2e_tests.DoAPISuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
 
@@ -108,6 +109,7 @@ func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *e2e_t
 }
 
 func assertDeviceHasPairedExtension(t *testing.T, device *e2e_tests.DeviceResponse, browserExtension *e2e_tests.BrowserExtensionResponse) {
+	t.Helper()
 	var deviceBrowserExtensions []*e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)
 

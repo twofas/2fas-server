@@ -11,8 +11,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -38,8 +36,8 @@ func (s *DebugLogsAuditTestSuite) TestCreateDebugLogsAuditClaim() {
 
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/support/debug_logs/audit/claim", payload, auditClaim)
 
-	assert.Equal(s.T(), "app-user", auditClaim.Username)
-	assert.Equal(s.T(), "some description", auditClaim.Description)
+	s.Equal("app-user", auditClaim.Username)
+	s.Equal("some description", auditClaim.Description)
 }
 
 func (s *DebugLogsAuditTestSuite) TestUpdateDebugLogsAuditClaim() {
@@ -49,8 +47,8 @@ func (s *DebugLogsAuditTestSuite) TestUpdateDebugLogsAuditClaim() {
 	updatePayload := []byte(`{"username": "app-user-1", "description": "another description"}`)
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/support/debug_logs/audit/claim/"+auditClaim.Id, updatePayload, &updatedAuditClaim)
 
-	assert.Equal(s.T(), "app-user-1", updatedAuditClaim.Username)
-	assert.Equal(s.T(), "another description", updatedAuditClaim.Description)
+	s.Equal("app-user-1", updatedAuditClaim.Username)
+	s.Equal("another description", updatedAuditClaim.Description)
 }
 
 func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
@@ -64,12 +62,12 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 
 	writer.Close()
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
 	request.Header.Add("Content-Type", writer.FormDataContentType())
 
 	response, err := http.DefaultClient.Do(request)
-	require.NoError(s.T(), err)
-	assert.Equal(s.T(), 200, response.StatusCode)
+	s.Require().NoError(err)
+	s.Equal(200, response.StatusCode)
 
 	reqB, _ := ioutil.ReadAll(body)
 	s.T().Log(string(reqB))
@@ -102,42 +100,42 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimTwice() {
 	auditClaim := createDebugLogsAuditClaim(s.T(), "user1", "desc1")
 
 	body, formDataContentType, err := mkFormFileBody()
-	assert.Nil(s.T(), err)
+	s.Require().NoError(err)
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
 	request.Header.Add("Content-Type", formDataContentType)
 	response, err := http.DefaultClient.Do(request)
-	require.NoError(s.T(), err)
-	assert.Equal(s.T(), 200, response.StatusCode)
+	s.Require().NoError(err)
+	s.Equal(200, response.StatusCode)
 
 	body, formDataContentType, err = mkFormFileBody()
-	assert.Nil(s.T(), err)
-	secondRequest, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	s.Require().NoError(err)
+	secondRequest, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
 	secondRequest.Header.Add("Content-Type", formDataContentType)
 	secondResponse, err := http.DefaultClient.Do(secondRequest)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	responseBody, err := io.ReadAll(secondResponse.Body)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
-	assert.Equal(s.T(), 410, secondResponse.StatusCode, "Response body: %s", string(responseBody))
+	s.Equal(410, secondResponse.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillNotExistingDebugLogsAuditClaim() {
 	notExistingAuditClaimId := uuid.New().String()
 
 	body, formDataContentType, err := mkFormFileBody()
-	assert.Nil(s.T(), err)
+	s.Require().NoError(err)
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId, body)
+	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId, body)
 	request.Header.Add("Content-Type", formDataContentType)
 	response, err := http.DefaultClient.Do(request)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	responseBody, err := io.ReadAll(response.Body)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
-	assert.Equal(s.T(), 404, response.StatusCode, "Response body: %s", string(responseBody))
+	s.Equal(404, response.StatusCode, "Response body: %s", string(responseBody))
 }
 
 func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimUsingInvalidId() {
@@ -145,14 +143,14 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimUsingInvali
 	invalidId := strings.ToUpper(auditClaimId)
 
 	body, formDataContentType, err := mkFormFileBody()
-	assert.Nil(s.T(), err)
+	s.Require().NoError(err)
 
-	request, _ := http.NewRequest("POST", "http://localhost/mobile/support/debug_logs/audit/"+invalidId, body)
+	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+invalidId, body)
 	request.Header.Add("Content-Type", formDataContentType)
 	response, err := http.DefaultClient.Do(request)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *DebugLogsAuditTestSuite) TestGetDebugLogsAudit() {
@@ -161,9 +159,9 @@ func (s *DebugLogsAuditTestSuite) TestGetDebugLogsAudit() {
 	audit := new(query.DebugLogsAuditPresenter)
 	e2e_tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, audit)
 
-	assert.Equal(s.T(), auditClaim.Id, audit.Id)
-	assert.Equal(s.T(), "user1", audit.Username)
-	assert.Equal(s.T(), "desc1", audit.Description)
+	s.Equal(auditClaim.Id, audit.Id)
+	s.Equal("user1", audit.Username)
+	s.Equal("desc1", audit.Description)
 }
 
 func (s *DebugLogsAuditTestSuite) TestDeleteDebugLogsAudit() {
@@ -172,7 +170,7 @@ func (s *DebugLogsAuditTestSuite) TestDeleteDebugLogsAudit() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/support/debug_logs/audit/"+auditClaim.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *DebugLogsAuditTestSuite) TestFindAllDebugLogsAudit() {
@@ -182,10 +180,11 @@ func (s *DebugLogsAuditTestSuite) TestFindAllDebugLogsAudit() {
 	var audits []*query.DebugLogsAuditPresenter
 	e2e_tests.DoAdminSuccessGet(s.T(), "mobile/support/debug_logs/audit", &audits)
 
-	assert.Len(s.T(), audits, 2)
+	s.Len(audits, 2)
 }
 
 func createDebugLogsAuditClaim(t *testing.T, username, description string) *query.DebugLogsAuditPresenter {
+	t.Helper()
 	payload := []byte(`{"username": "` + username + `", "description": "` + description + `"}`)
 
 	auditClaim := new(query.DebugLogsAuditPresenter)

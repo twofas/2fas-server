@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/jaswdr/faker"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -32,8 +31,8 @@ func (s *IconsRequestsTestSuite) SetupTest() {
 func (s *IconsRequestsTestSuite) TestCreateIconRequest() {
 	iconRequest := createIconRequest(s.T(), "service")
 
-	assert.Equal(s.T(), "service", iconRequest.ServiceName)
-	assert.Equal(s.T(), "desc", iconRequest.Description)
+	s.Equal("service", iconRequest.ServiceName)
+	s.Equal("desc", iconRequest.Description)
 }
 
 func (s *IconsRequestsTestSuite) TestCreateIconRequestWithNotAllowedIconDimensions() {
@@ -68,7 +67,7 @@ func (s *IconsRequestsTestSuite) TestDeleteIconRequest() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons/requests/"+iconRequest.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/icons/requests/"+iconRequest.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *IconsRequestsTestSuite) TestFindAllIconsRequests() {
@@ -78,7 +77,7 @@ func (s *IconsRequestsTestSuite) TestFindAllIconsRequests() {
 	var iconsRequests []*queries.IconRequestPresenter
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/requests", &iconsRequests)
 
-	assert.Len(s.T(), iconsRequests, 2)
+	s.Len(iconsRequests, 2)
 }
 
 func (s *IconsRequestsTestSuite) TestFindIconRequest() {
@@ -87,7 +86,7 @@ func (s *IconsRequestsTestSuite) TestFindIconRequest() {
 	var searchResult *queries.IconPresenter
 	e2e_tests.DoAdminSuccessGet(s.T(), "mobile/icons/requests/"+iconRequest.Id, &searchResult)
 
-	assert.Equal(s.T(), "service", searchResult.Name)
+	s.Equal("service", searchResult.Name)
 }
 
 func (s *IconsRequestsTestSuite) TestTransformIconRequestIntoWebService() {
@@ -96,7 +95,7 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestIntoWebService() {
 	var result *queries.WebServicePresenter
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
 
-	assert.Equal(s.T(), "service", result.Name)
+	s.Equal("service", result.Name)
 }
 
 func (s *IconsRequestsTestSuite) TestTransformSingleIconRequestsIntoWebServiceFromManyRequestsWithSameServiceName() {
@@ -109,7 +108,7 @@ func (s *IconsRequestsTestSuite) TestTransformSingleIconRequestsIntoWebServiceFr
 	var icons []*queries.IconPresenter
 	e2e_tests.DoAPIGet(s.T(), "mobile/icons", &icons)
 
-	assert.Len(s.T(), icons, 1)
+	s.Len(icons, 1)
 }
 
 func (s *IconsRequestsTestSuite) TestTransformIconRequestWithAlreadyExistingWebService() {
@@ -128,16 +127,17 @@ func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
 	payload := []byte(`{"web_service_id":"` + webService.Id + `"}`)
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
 
-	assert.Equal(s.T(), webService.Name, result.Name)
+	s.Equal(webService.Name, result.Name)
 
 	var iconsCollections []string
 	if err := json.Unmarshal(result.IconsCollections, &iconsCollections); err != nil {
-		assert.NoError(s.T(), err)
+		s.NoError(err)
 	}
-	assert.Equal(s.T(), webService.IconsCollections, iconsCollections, "icons collections id should not change")
+	s.Equal(webService.IconsCollections, iconsCollections, "icons collections id should not change")
 }
 
 func createIconRequest(t *testing.T, serviceName string) *queries.IconRequestPresenter {
+	t.Helper()
 	if serviceName == "" {
 		serviceName = "some-service"
 	}

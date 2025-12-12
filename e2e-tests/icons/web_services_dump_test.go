@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -31,10 +30,11 @@ func (s *WebServicesDumpTestSuite) TestWebServicesDump() {
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/web_services/dump", nil)
 
-	assert.Equal(s.T(), 200, response.StatusCode)
+	s.Equal(200, response.StatusCode)
 }
 
 func createWebService(t *testing.T) *webServiceResponse {
+	t.Helper()
 	iconsCollection := createIconsCollection(t)
 
 	payload := []byte(`
@@ -55,6 +55,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 }
 
 func createIconsCollection(t *testing.T) *iconsCollectionResponse {
+	t.Helper()
 	icon := createIcon(t)
 
 	payload := []byte(`

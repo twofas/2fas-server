@@ -137,12 +137,10 @@ func (m *BrowserExtensionModule) RegisterPublicRoutes(router *gin.Engine) {
 	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests", m.RoutesHandler.GetAllBrowserExtension2FaTokenRequests)
 	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests/:token_request_id", m.RoutesHandler.GetBrowserExtension2FaTokenRequest)
 	publicRouter.POST("/browser_extensions/:extension_id/2fa_requests/:token_request_id/commands/close_2fa_request", m.RoutesHandler.Close2FaRequest)
-
 }
 func (m *BrowserExtensionModule) RegisterAdminRoutes(g *gin.RouterGroup) {
 	if m.Config.IsTestingEnv() {
 		g.DELETE("/browser_extensions", m.RoutesHandler.RemoveAllBrowserExtensions)
 		g.DELETE("/browser_extensions/devices", m.RoutesHandler.RemoveAllBrowserExtensionsDevices)
 	}
-
 }

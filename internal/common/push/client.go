@@ -38,6 +38,9 @@ func NewFcmPushClient(config *domain.FcmPushConfig) *FcmPushClient {
 	}
 
 	client, err := app.Messaging(context.Background())
+	if err != nil {
+		logging.WithField("error", err.Error()).Fatal("Error initializing FCM Messaging client")
+	}
 
 	return &FcmPushClient{
 		FcmMessaging: client,

@@ -85,7 +85,7 @@ func (c *Client) readPump(log logging.FieldLogger) {
 			break
 		}
 
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		message = bytes.TrimSpace(bytes.ReplaceAll(message, newline, space))
 
 		go c.hub.broadcastMsg(message)
 	}

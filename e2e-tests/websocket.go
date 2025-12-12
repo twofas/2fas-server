@@ -52,5 +52,6 @@ func (l *WebsocketTestListener) StartListening() *websocket.Conn {
 }
 
 func (l *WebsocketTestListener) AssertMessageHasBeenReceived(t *testing.T, expected string) {
+	t.Helper()
 	assert.JSONEq(t, expected, <-l.ReceivedMessages)
 }

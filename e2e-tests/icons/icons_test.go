@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/jaswdr/faker"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -14,6 +13,7 @@ import (
 )
 
 func createIcon(t *testing.T) *query.IconPresenter {
+	t.Helper()
 	img := faker.New().Image().Image(120, 120)
 
 	pngImg, err := ioutil.ReadFile(img.Name())
@@ -55,7 +55,7 @@ func (s *IconsTestSuite) SetupTest() {
 func (s *IconsTestSuite) TestCreateIcon() {
 	icon := createIcon(s.T())
 
-	assert.Equal(s.T(), "facebook", icon.Name)
+	s.Equal("facebook", icon.Name)
 }
 
 func (s *IconsTestSuite) TestUpdateIcon() {
@@ -70,7 +70,7 @@ func (s *IconsTestSuite) TestUpdateIcon() {
 	var updatedIcon *query.IconPresenter
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/icons/"+icon.Id, updatePayload, &updatedIcon)
 
-	assert.Equal(s.T(), "meta", updatedIcon.Name)
+	s.Equal("meta", updatedIcon.Name)
 }
 
 func (s *IconsTestSuite) TestDeleteIcon() {
@@ -79,7 +79,7 @@ func (s *IconsTestSuite) TestDeleteIcon() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons/"+icon.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/icons/"+icon.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *IconsTestSuite) TestFindAllIcons() {
@@ -89,7 +89,7 @@ func (s *IconsTestSuite) TestFindAllIcons() {
 	var Icons []*query.IconPresenter
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons", &Icons)
 
-	assert.Len(s.T(), Icons, 2)
+	s.Len(Icons, 2)
 }
 
 func (s *IconsTestSuite) TestFindIcon() {
@@ -98,5 +98,5 @@ func (s *IconsTestSuite) TestFindIcon() {
 	var searchResult *query.IconPresenter
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/"+icon.Id, &searchResult)
 
-	assert.Equal(s.T(), "facebook", searchResult.Name)
+	s.Equal("facebook", searchResult.Name)
 }

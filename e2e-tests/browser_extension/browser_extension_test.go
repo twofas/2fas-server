@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -43,7 +42,7 @@ func (s *BrowserExtensionTestSuite) TestCreateBrowserExtension() {
 	for _, tc := range testsCases {
 		response := createBrowserExtension(s.T(), tc.extensionName)
 
-		assert.Equal(s.T(), tc.expectedHttpCode, response.StatusCode)
+		s.Equal(tc.expectedHttpCode, response.StatusCode)
 	}
 }
 
@@ -56,7 +55,7 @@ func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtension() {
 	var browserExtension *e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+browserExt.Id, &browserExtension)
 
-	assert.Equal(s.T(), "updated-extension-name", browserExtension.Name)
+	s.Equal("updated-extension-name", browserExtension.Name)
 }
 
 func (s *BrowserExtensionTestSuite) TestUpdateNotExistingBrowserExtension() {
@@ -65,7 +64,7 @@ func (s *BrowserExtensionTestSuite) TestUpdateNotExistingBrowserExtension() {
 	payload := []byte(`{"name": "updated-extension-name"}`)
 	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+id.String(), http.MethodPut, payload, nil)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtensionSetEmptyName() {
@@ -74,7 +73,7 @@ func (s *BrowserExtensionTestSuite) TestUpdateBrowserExtensionSetEmptyName() {
 	payload := []byte(`{"name": ""}`)
 	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id, http.MethodPut, payload, nil)
 
-	assert.Equal(s.T(), 400, response.StatusCode)
+	s.Equal(400, response.StatusCode)
 }
 
 func (s *BrowserExtensionTestSuite) TestDoNotFindNotExistingExtension() {
@@ -83,10 +82,11 @@ func (s *BrowserExtensionTestSuite) TestDoNotFindNotExistingExtension() {
 	var browserExtension *e2e_tests.BrowserExtensionResponse
 	response := e2e_tests.DoAPIGet(s.T(), "/browser_extensions/"+notExistingId.String(), &browserExtension)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func createBrowserExtension(t *testing.T, name string) *http.Response {
+	t.Helper()
 	keyPair := crypto.GenerateKeyPair(2048)
 
 	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
@@ -94,5 +94,4 @@ func createBrowserExtension(t *testing.T, name string) *http.Response {
 	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, pubKey))
 
 	return e2e_tests.DoAPIRequest(t, "/browser_extensions", http.MethodPost, payload, nil)
-
 }

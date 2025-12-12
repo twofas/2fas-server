@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -31,11 +30,11 @@ func (s *MobileNotificationsTestSuite) TestCreateMobileNotification() {
 
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/notifications", payload, &notification)
 
-	assert.Equal(s.T(), "android", notification.Platform)
-	assert.Equal(s.T(), "0.1", notification.Version)
-	assert.Equal(s.T(), "2fas.com", notification.Link)
-	assert.Equal(s.T(), "demo", notification.Message)
-	assert.Equal(s.T(), "features", notification.Icon)
+	s.Equal("android", notification.Platform)
+	s.Equal("0.1", notification.Version)
+	s.Equal("2fas.com", notification.Link)
+	s.Equal("demo", notification.Message)
+	s.Equal("features", notification.Icon)
 }
 
 func (s *MobileNotificationsTestSuite) TestUpdateMobileNotification() {
@@ -47,11 +46,11 @@ func (s *MobileNotificationsTestSuite) TestUpdateMobileNotification() {
 	var updatedNotification *query.MobileNotificationPresenter
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/notifications/"+notification.Id, payload, &updatedNotification)
 
-	assert.Equal(s.T(), "ios", updatedNotification.Platform)
-	assert.Equal(s.T(), "1.1", updatedNotification.Version)
-	assert.Equal(s.T(), "new-2fas.com", updatedNotification.Link)
-	assert.Equal(s.T(), "new-demo", updatedNotification.Message)
-	assert.Equal(s.T(), "youtube", updatedNotification.Icon)
+	s.Equal("ios", updatedNotification.Platform)
+	s.Equal("1.1", updatedNotification.Version)
+	s.Equal("new-2fas.com", updatedNotification.Link)
+	s.Equal("new-demo", updatedNotification.Message)
+	s.Equal("youtube", updatedNotification.Icon)
 }
 
 func (s *MobileNotificationsTestSuite) TestDeleteMobileNotification() {
@@ -62,7 +61,7 @@ func (s *MobileNotificationsTestSuite) TestDeleteMobileNotification() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/notifications/"+notification.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/notifications/"+notification.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *MobileNotificationsTestSuite) TestDeleteNotExistingMobileNotification() {
@@ -70,7 +69,7 @@ func (s *MobileNotificationsTestSuite) TestDeleteNotExistingMobileNotification()
 
 	response := e2e_tests.DoAPIRequest(s.T(), "mobile/notifications/"+id.String(), http.MethodDelete, nil /*payload*/, nil /*resp*/)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *MobileNotificationsTestSuite) TestFindAllNotifications() {
@@ -85,7 +84,7 @@ func (s *MobileNotificationsTestSuite) TestFindAllNotifications() {
 	var collection []*query.MobileNotificationPresenter
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/notifications", &collection)
 
-	assert.Len(s.T(), collection, 2)
+	s.Len(collection, 2)
 }
 
 func (s *MobileNotificationsTestSuite) TestDoNotFindNotifications() {
@@ -93,7 +92,7 @@ func (s *MobileNotificationsTestSuite) TestDoNotFindNotifications() {
 
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/notifications", &collection)
 
-	assert.Len(s.T(), collection, 0)
+	s.Empty(collection)
 }
 
 func (s *MobileNotificationsTestSuite) TestPublishNotification() {
@@ -104,5 +103,5 @@ func (s *MobileNotificationsTestSuite) TestPublishNotification() {
 	var publishedNotification *query.MobileNotificationPresenter
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/notifications/"+notification.Id+"/commands/publish", payload, &publishedNotification)
 
-	assert.NotEmpty(s.T(), "published_at", notification.PublishedAt)
+	s.NotEmpty(notification.PublishedAt, "published_at")
 }

@@ -3,7 +3,6 @@ package tests
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
@@ -34,7 +33,7 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestGetPending2FaRequests() 
 
 	var tokenRequestsCollection []*e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
-	assert.Len(s.T(), tokenRequestsCollection, 1)
+	s.Len(tokenRequestsCollection, 1)
 }
 
 func (s *MobileDeviceExtensionIntegrationTestSuite) TestDoNotReturnCompleted2FaRequests() {
@@ -51,5 +50,5 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestDoNotReturnCompleted2FaR
 
 	var tokenRequestsCollection []*e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
-	assert.Len(s.T(), tokenRequestsCollection, 0)
+	s.Empty(tokenRequestsCollection)
 }
