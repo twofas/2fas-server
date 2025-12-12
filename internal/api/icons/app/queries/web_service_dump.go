@@ -3,6 +3,8 @@ package queries
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+
 	"gorm.io/datatypes"
 )
 
@@ -49,7 +51,10 @@ func (h *WebServicesDumpQueryHandler) Dump(q *WebServicesDumpQuery) ([]json.RawM
 			return emptyResult, err
 		}
 
-		out, _ := json.Marshal(&jsonRow)
+		out, err := json.Marshal(&jsonRow)
+		if err != nil {
+			return emptyResult, fmt.Errorf("could not marshal json: %w", err)
+		}
 
 		services = append(services, out)
 	}

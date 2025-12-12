@@ -2,9 +2,11 @@ package command
 
 import (
 	"database/sql"
-	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 
 type PublishNotification struct {

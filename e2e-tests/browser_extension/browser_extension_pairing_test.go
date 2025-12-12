@@ -9,7 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestBrowserExtensionPairingTestSuite(t *testing.T) {
@@ -178,7 +179,7 @@ func (s *BrowserExtensionPairingTestSuite) TestShareExtensionPublicKeyWithMobile
 	assert.Equal(s.T(), "b64-rsa-pub-key", result.ExtensionPublicKey)
 }
 
-func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionTwice() {
+func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionTwice(t *testing.T) {
 	browserExtension := e2e_tests.CreateBrowserExtensionWithPublicKey(s.T(), "go-test", "b64-rsa-pub-key")
 	device, devicePubKey := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 
@@ -195,7 +196,8 @@ func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionT
 	}
 
 	pairingResult := new(e2e_tests.PairingResultResponse)
-	payloadJson, _ := json.Marshal(payload)
+	payloadJson, err := json.Marshal(payload)
+	require.NoError(t, err)
 
 	e2e_tests.DoAPIPostAndAssertCode(s.T(), 409, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 }

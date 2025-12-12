@@ -3,18 +3,20 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 
-type MobileDeviceExtensionCouldNotBeFound struct {
+type MobileDeviceExtensionCouldNotBeFoundError struct {
 	DeviceId    string
 	ExtensionId string
 }
 
-func (e MobileDeviceExtensionCouldNotBeFound) Error() string {
+func (e MobileDeviceExtensionCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Mobile device could not be found: %s", e.DeviceId)
 }
 
@@ -36,7 +38,7 @@ func (r *MobileDeviceExtensionsGormRepository) FindById(deviceId, extensionId uu
 	result := r.db.First(&pairedExtension, "device_id = ? and extension_id = ?", deviceId.String(), extensionId.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, MobileDeviceExtensionCouldNotBeFound{DeviceId: deviceId.String(), ExtensionId: extensionId.String()}
+		return nil, MobileDeviceExtensionCouldNotBeFoundError{DeviceId: deviceId.String(), ExtensionId: extensionId.String()}
 	}
 
 	return pairedExtension, nil

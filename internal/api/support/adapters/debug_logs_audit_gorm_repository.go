@@ -3,16 +3,18 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/support/domain"
 )
 
-type DebugLogsAuditCouldNotBeFound struct {
+type DebugLogsAuditCouldNotBeFoundError struct {
 	AuditId string
 }
 
-func (e DebugLogsAuditCouldNotBeFound) Error() string {
+func (e DebugLogsAuditCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Debug logs audit could not be found: %s", e.AuditId)
 }
 
@@ -46,7 +48,7 @@ func (r *DebugLogsAuditMysqlRepository) FindById(id uuid.UUID) (*domain.DebugLog
 	result := r.db.First(&audit, "id = ?", id.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, DebugLogsAuditCouldNotBeFound{AuditId: id.String()}
+		return nil, DebugLogsAuditCouldNotBeFoundError{AuditId: id.String()}
 	}
 
 	return audit, nil

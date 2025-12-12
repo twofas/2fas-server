@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 

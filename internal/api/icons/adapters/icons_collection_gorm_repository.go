@@ -3,16 +3,18 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
 )
 
-type IconsCollectionCouldNotBeFound struct {
+type IconsCollectionCouldNotBeFoundError struct {
 	IconsCollectionId string
 }
 
-func (e IconsCollectionCouldNotBeFound) Error() string {
+func (e IconsCollectionCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Icons collection could not be found: %s", e.IconsCollectionId)
 }
 
@@ -54,7 +56,7 @@ func (r *IconsCollectionMysqlRepository) FindById(id uuid.UUID) (*domain.IconsCo
 	result := r.db.First(&IconsCollection, "id = ?", id.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, IconsCollectionCouldNotBeFound{IconsCollectionId: id.String()}
+		return nil, IconsCollectionCouldNotBeFoundError{IconsCollectionId: id.String()}
 	}
 
 	return IconsCollection, nil

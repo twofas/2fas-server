@@ -3,7 +3,9 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/go-sql-driver/mysql"
+
 	"github.com/twofas/2fas-server/config"
 )
 

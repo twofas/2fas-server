@@ -58,7 +58,10 @@ func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserEx
 
 	pairingResult := new(PairingResultResponse)
 
-	payloadJson, _ := json.Marshal(payload)
+	payloadJson, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("failed to marshal pairing payload: %v", err)
+	}
 
 	DoAPISuccessPost(t, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 

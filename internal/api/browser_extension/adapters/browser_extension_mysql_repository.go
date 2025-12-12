@@ -3,16 +3,18 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 )
 
-type BrowserExtensionsCouldNotBeFound struct {
+type BrowserExtensionsCouldNotBeFoundError struct {
 	ExtensionId string
 }
 
-func (e BrowserExtensionsCouldNotBeFound) Error() string {
+func (e BrowserExtensionsCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Extension could not be found: %s", e.ExtensionId)
 }
 
@@ -46,7 +48,7 @@ func (r *BrowserExtensionsMysqlRepository) FindById(id uuid.UUID) (*domain.Brows
 	result := r.db.First(&extension, "id = ?", id.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, BrowserExtensionsCouldNotBeFound{ExtensionId: id.String()}
+		return nil, BrowserExtensionsCouldNotBeFoundError{ExtensionId: id.String()}
 	}
 
 	return extension, nil

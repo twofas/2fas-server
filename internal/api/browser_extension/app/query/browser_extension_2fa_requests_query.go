@@ -2,8 +2,9 @@ package query
 
 import (
 	"github.com/doug-martin/goqu/v9"
-	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 )
 
 type BrowserExtension2FaRequestPresenter struct {

@@ -1,11 +1,12 @@
 package e2e_tests
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"net/url"
 	"testing"
+
+	"github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
 )
 
 type WebsocketTestListener struct {

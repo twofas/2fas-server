@@ -2,9 +2,10 @@ package queries
 
 import (
 	"github.com/doug-martin/goqu/v9"
-	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/adapters"
 )
 
 type IconsCollectionPresenter struct {
@@ -36,7 +37,7 @@ func (h *IconsCollectionQueryHandler) FindOne(query *IconsCollectionQuery) (*Ico
 	result := h.Database.Raw(sql).First(&presenter)
 
 	if result.Error != nil {
-		return nil, adapters.IconsCollectionCouldNotBeFound{IconsCollectionId: query.Id}
+		return nil, adapters.IconsCollectionCouldNotBeFoundError{IconsCollectionId: query.Id}
 	}
 
 	return presenter, nil

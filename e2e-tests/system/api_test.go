@@ -6,7 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func Test_Default404Response(t *testing.T) {

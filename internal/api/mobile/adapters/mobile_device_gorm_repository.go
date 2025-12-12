@@ -3,16 +3,18 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 
-type MobileDeviceCouldNotBeFound struct {
+type MobileDeviceCouldNotBeFoundError struct {
 	DeviceId string
 }
 
-func (e MobileDeviceCouldNotBeFound) Error() string {
+func (e MobileDeviceCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Mobile device could not be found: %s", e.DeviceId)
 }
 
@@ -46,7 +48,7 @@ func (r *MobileDeviceMysqlRepository) FindById(id uuid.UUID) (*domain.MobileDevi
 	result := r.db.First(&device, "id = ?", id.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, MobileDeviceCouldNotBeFound{DeviceId: id.String()}
+		return nil, MobileDeviceCouldNotBeFoundError{DeviceId: id.String()}
 	}
 
 	return device, nil

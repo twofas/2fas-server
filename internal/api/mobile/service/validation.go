@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 

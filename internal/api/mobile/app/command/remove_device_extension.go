@@ -2,6 +2,7 @@ package command
 
 import (
 	"github.com/google/uuid"
+
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 

@@ -7,7 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 	query "github.com/twofas/2fas-server/internal/api/mobile/app/queries"
 )
 

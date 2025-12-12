@@ -6,7 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestTwoFactorAuthTestSuite(t *testing.T) {
@@ -35,7 +36,7 @@ func (s *TwoFactorAuthTestSuite) TestBrowserExtensionAuthFullFlow() {
 
 	assertDeviceHasPairedExtension(s.T(), device, browserExtension)
 	assertBrowserExtensionHasPairedDevice(s.T(), browserExtension, device)
-	expectedPairingSuccessWebsocket := createPairingSuccessWebsocketMessage(browserExtension, device, devicePubKey)
+	expectedPairingSuccessWebsocket := createPairingSuccessWebsocketMessage(s.T(), browserExtension, device, devicePubKey)
 	websocketTestListener.AssertMessageHasBeenReceived(s.T(), expectedPairingSuccessWebsocket)
 
 	tokenRequest := e2e_tests.Request2FaToken(s.T(), "facebook.com", browserExtension.Id)
@@ -46,11 +47,13 @@ func (s *TwoFactorAuthTestSuite) TestBrowserExtensionAuthFullFlow() {
 
 	e2e_tests.Send2FaTokenToExtension(s.T(), browserExtension.Id, device.Id, tokenRequest.Id, "2fa-token")
 
-	expected2FaTokenWebsocket := createBrowserExtensionReceived2FaTokenMessage(browserExtension.Id, device.Id, tokenRequest.Id)
+	expected2FaTokenWebsocket := createBrowserExtensionReceived2FaTokenMessage(s.T(), browserExtension.Id, device.Id, tokenRequest.Id)
 	extensionTokenRequestWebsocketListener.AssertMessageHasBeenReceived(s.T(), expected2FaTokenWebsocket)
 }
 
-func createBrowserExtensionReceived2FaTokenMessage(extensionId, deviceId, requestId string) string {
+func createBrowserExtensionReceived2FaTokenMessage(t *testing.T, extensionId, deviceId, requestId string) string {
+	t.Helper()
+
 	expected2FaTokenWebsocketMessageRaw := struct {
 		Event          string `json:"event"`
 		ExtensionId    string `json:"extension_id"`
@@ -65,12 +68,17 @@ func createBrowserExtensionReceived2FaTokenMessage(extensionId, deviceId, reques
 		Token:          "2fa-token",
 	}
 
-	message, _ := json.Marshal(expected2FaTokenWebsocketMessageRaw)
+	message, err := json.Marshal(expected2FaTokenWebsocketMessageRaw)
+	if err != nil {
+		t.Fatalf("failed to marshal expected 2FA token websocket message: %v", err)
+	}
 
 	return string(message)
 }
 
-func createPairingSuccessWebsocketMessage(browserExtension *e2e_tests.BrowserExtensionResponse, device *e2e_tests.DeviceResponse, devicePubKey string) string {
+func createPairingSuccessWebsocketMessage(t *testing.T, browserExtension *e2e_tests.BrowserExtensionResponse, device *e2e_tests.DeviceResponse, devicePubKey string) string {
+	t.Helper()
+
 	expectedPairingWebsocketMessageRaw := &struct {
 		Event              string `json:"event"`
 		BrowserExtensionId string `json:"browser_extension_id"`
@@ -83,7 +91,10 @@ func createPairingSuccessWebsocketMessage(browserExtension *e2e_tests.BrowserExt
 		DevicePublicKey:    devicePubKey,
 	}
 
-	message, _ := json.Marshal(expectedPairingWebsocketMessageRaw)
+	message, err := json.Marshal(expectedPairingWebsocketMessageRaw)
+	if err != nil {
+		t.Fatalf("failed to marshal expected pairing websocket message: %v", err)
+	}
 
 	return string(message)
 }

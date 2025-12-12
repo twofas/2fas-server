@@ -154,7 +154,7 @@ func (r *RoutesHandler) RemoveWebService(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveWebService.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.WebServiceCouldNotBeFound
+		var notFoundErr adapters.WebServiceCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -192,7 +192,7 @@ func (r *RoutesHandler) FindWebService(c *gin.Context) {
 	result, err := r.cqrs.Queries.WebServiceQuery.FindOne(q)
 
 	if err != nil {
-		var notFoundErr adapters.WebServiceCouldNotBeFound
+		var notFoundErr adapters.WebServiceCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -358,7 +358,7 @@ func (r *RoutesHandler) RemoveIcon(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveIcon.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.IconCouldNotBeFound
+		var notFoundErr adapters.IconCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -396,7 +396,7 @@ func (r *RoutesHandler) FindIcon(c *gin.Context) {
 	result, err := r.cqrs.Queries.IconQuery.FindOne(q)
 
 	if err != nil {
-		var notFoundErr adapters.IconCouldNotBeFound
+		var notFoundErr adapters.IconCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -494,7 +494,7 @@ func (r *RoutesHandler) RemoveIconRequest(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveIconRequest.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.IconRequestCouldNotBeFound
+		var notFoundErr adapters.IconRequestCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -622,7 +622,7 @@ func (r *RoutesHandler) FindIconRequest(c *gin.Context) {
 	result, err := r.cqrs.Queries.IconRequestQuery.FindOne(q)
 
 	if err != nil {
-		var notFoundErr adapters.IconRequestCouldNotBeFound
+		var notFoundErr adapters.IconRequestCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -756,7 +756,7 @@ func (r *RoutesHandler) RemoveIconsCollection(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveIconsCollection.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.IconsCollectionCouldNotBeFound
+		var notFoundErr adapters.IconsCollectionCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -786,7 +786,7 @@ func (r *RoutesHandler) FindIconsCollection(c *gin.Context) {
 	result, err := r.cqrs.Queries.IconsCollectionQuery.FindOne(q)
 
 	if err != nil {
-		var notFoundErr adapters.IconsCollectionCouldNotBeFound
+		var notFoundErr adapters.IconsCollectionCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))

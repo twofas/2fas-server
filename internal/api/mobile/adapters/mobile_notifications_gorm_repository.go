@@ -3,16 +3,18 @@ package adapters
 import (
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 )
 
-type MobileNotificationCouldNotBeFound struct {
+type MobileNotificationCouldNotBeFoundError struct {
 	NotificationId string
 }
 
-func (e MobileNotificationCouldNotBeFound) Error() string {
+func (e MobileNotificationCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Mobile notification could not be found: %s", e.NotificationId)
 }
 
@@ -54,7 +56,7 @@ func (r *MobileNotificationMysqlRepository) FindById(id uuid.UUID) (*domain.Mobi
 	result := r.db.First(&notification, "id = ?", id.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, MobileNotificationCouldNotBeFound{NotificationId: id.String()}
+		return nil, MobileNotificationCouldNotBeFoundError{NotificationId: id.String()}
 	}
 
 	return notification, nil

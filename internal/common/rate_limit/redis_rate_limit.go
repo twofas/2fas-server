@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 

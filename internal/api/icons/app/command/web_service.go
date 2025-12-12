@@ -56,7 +56,7 @@ func (h *CreateWebServiceHandler) Handle(cmd *CreateWebService) error {
 
 	conflict, err := h.Repository.FindByName(cmd.Name)
 	if err != nil {
-		var notFound adapters.WebServiceCouldNotBeFound
+		var notFound adapters.WebServiceCouldNotBeFoundError
 		if !errors.As(err, &notFound) {
 			return err
 		}

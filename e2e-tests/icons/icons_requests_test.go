@@ -9,7 +9,8 @@ import (
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 	"github.com/twofas/2fas-server/internal/api/icons/app/queries"
 )
 

@@ -2,11 +2,11 @@ package http
 
 import "fmt"
 
-type ErrorResponse struct {
+type ResponseError struct {
 	Status  int
 	Message string `json:"message"`
 }
 
-func (error *ErrorResponse) Error() string {
+func (error *ResponseError) Error() string {
 	return fmt.Sprintf("Status: %d Message: %s", error.Status, error.Message)
 }

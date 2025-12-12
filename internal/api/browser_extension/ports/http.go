@@ -112,8 +112,8 @@ func (r *RoutesHandler) RemovePairedDeviceFromExtension(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveExtensionPairedDevice.Handle(cmd)
 
 	if err != nil {
-		var extensionNotFoundErr adapters.BrowserExtensionsCouldNotBeFound
-		var deviceNotFoundErr adapters.ExtensionDeviceCouldNotBeFound
+		var extensionNotFoundErr adapters.BrowserExtensionsCouldNotBeFoundError
+		var deviceNotFoundErr adapters.ExtensionDeviceCouldNotBeFoundError
 
 		if errors.As(err, &deviceNotFoundErr) || errors.As(err, &extensionNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -145,7 +145,7 @@ func (r *RoutesHandler) RemoveAllExtensionPairedDevices(c *gin.Context) {
 	err := r.cqrs.Commands.RemoveAllExtensionPairedDevices.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.BrowserExtensionsCouldNotBeFound
+		var notFoundErr adapters.BrowserExtensionsCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -261,7 +261,7 @@ func (r *RoutesHandler) UpdateBrowserExtension(c *gin.Context) {
 	err := r.cqrs.Commands.UpdateBrowserExtension.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.BrowserExtensionsCouldNotBeFound
+		var notFoundErr adapters.BrowserExtensionsCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -277,7 +277,7 @@ func (r *RoutesHandler) UpdateBrowserExtension(c *gin.Context) {
 
 	presenter, err := r.cqrs.Queries.BrowserExtensionQuery.Handle(queryCmd)
 
-	if errors.Is(err, adapters.BrowserExtensionsCouldNotBeFound{}) {
+	if errors.Is(err, adapters.BrowserExtensionsCouldNotBeFoundError{}) {
 		c.JSON(404, api.NotFoundError(err))
 
 		return
@@ -354,7 +354,7 @@ func (r *RoutesHandler) Close2FaRequest(c *gin.Context) {
 	err := r.cqrs.Commands.Close2FaRequest.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.TokenRequestCouldNotBeFound
+		var notFoundErr adapters.TokenRequestCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))

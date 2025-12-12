@@ -3,8 +3,9 @@ package command
 import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/api/support/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/support/domain"
 )
 
 type DeleteDebugLogsAudit struct {

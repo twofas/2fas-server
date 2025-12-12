@@ -1,8 +1,9 @@
 package validation
 
 import (
-	"github.com/go-playground/validator/v10"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func NotBlank(fl validator.FieldLevel) bool {

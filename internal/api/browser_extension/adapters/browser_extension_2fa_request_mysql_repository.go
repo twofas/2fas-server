@@ -2,17 +2,19 @@ package adapters
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 )
 
-type TokenRequestCouldNotBeFound struct {
+type TokenRequestCouldNotBeFoundError struct {
 	RequestId string
 }
 
-func (e TokenRequestCouldNotBeFound) Error() string {
+func (e TokenRequestCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Token request could not be found: %s", e.RequestId)
 }
 
@@ -62,7 +64,7 @@ func (r *BrowserExtension2FaRequestsMysqlRepository) FindById(tokenRequestId, ex
 	result := r.db.First(&request, "extension_id = ? AND id = ?", extensionId.String(), tokenRequestId.String())
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, TokenRequestCouldNotBeFound{RequestId: tokenRequestId.String()}
+		return nil, TokenRequestCouldNotBeFoundError{RequestId: tokenRequestId.String()}
 	}
 
 	return request, nil

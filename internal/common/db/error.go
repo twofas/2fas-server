@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var dbError = errors.New("database error")
+var dbError = errors.New("database error") //nolint:errname
 
 func WrapError(err error) error {
 	return fmt.Errorf("%w: %w", dbError, err)

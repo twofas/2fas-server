@@ -58,7 +58,7 @@ func (r *RoutesHandler) UpdateMobileDevice(c *gin.Context) {
 	err := r.cqrs.Commands.UpdateMobileDevice.Handle(cmd)
 
 	if err != nil {
-		var deviceNotFoundErr adapters.MobileDeviceCouldNotBeFound
+		var deviceNotFoundErr adapters.MobileDeviceCouldNotBeFoundError
 
 		if errors.As(err, &deviceNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -192,8 +192,8 @@ func (r *RoutesHandler) RemovePairingWithExtension(c *gin.Context) {
 	err := r.cqrs.Commands.RemovePairingWithExtension.Handle(cmd)
 
 	if err != nil {
-		var deviceNotFoundErr *adapters.MobileDeviceCouldNotBeFound
-		var extensionsNotFoundErr *browser_adapters.BrowserExtensionsCouldNotBeFound
+		var deviceNotFoundErr *adapters.MobileDeviceCouldNotBeFoundError
+		var extensionsNotFoundErr *browser_adapters.BrowserExtensionsCouldNotBeFoundError
 
 		if errors.As(err, &deviceNotFoundErr) || errors.As(err, &extensionsNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -262,7 +262,7 @@ func (r *RoutesHandler) FindMobileAppExtensionById(c *gin.Context) {
 	result, err := r.cqrs.Queries.DeviceBrowserExtensionsQuery.Handle(cmd)
 
 	if len(result) == 0 {
-		c.JSON(404, api.NotFoundError(browser_adapters.BrowserExtensionsCouldNotBeFound{ExtensionId: cmd.ExtensionId}))
+		c.JSON(404, api.NotFoundError(browser_adapters.BrowserExtensionsCouldNotBeFoundError{ExtensionId: cmd.ExtensionId}))
 		return
 	}
 
@@ -394,7 +394,7 @@ func (r *RoutesHandler) UpdateMobileNotification(c *gin.Context) {
 	err := r.cqrs.Commands.UpdateNotification.Handle(cmd)
 
 	if err != nil {
-		var notificationNotFoundErr *adapters.MobileNotificationCouldNotBeFound
+		var notificationNotFoundErr *adapters.MobileNotificationCouldNotBeFoundError
 
 		if errors.As(err, &notificationNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -461,7 +461,7 @@ func (r *RoutesHandler) FindMobileNotification(c *gin.Context) {
 	result, err := r.cqrs.Queries.MobileNotificationsQuery.FindOne(q)
 
 	if err != nil {
-		var notificationNotFoundErr adapters.MobileNotificationCouldNotBeFound
+		var notificationNotFoundErr adapters.MobileNotificationCouldNotBeFoundError
 
 		if errors.As(err, &notificationNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -491,7 +491,7 @@ func (r *RoutesHandler) RemoveMobileNotification(c *gin.Context) {
 	err := r.cqrs.Commands.DeleteNotification.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters.MobileNotificationCouldNotBeFound
+		var notFoundErr adapters.MobileNotificationCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -529,7 +529,7 @@ func (r *RoutesHandler) PublishMobileNotification(c *gin.Context) {
 	err := r.cqrs.Commands.PublishNotification.Handle(cmd)
 
 	if err != nil {
-		var notificationNotFoundErr adapters.MobileNotificationCouldNotBeFound
+		var notificationNotFoundErr adapters.MobileNotificationCouldNotBeFoundError
 
 		if errors.As(err, &notificationNotFoundErr) {
 			c.JSON(404, api.NotFoundError(err))

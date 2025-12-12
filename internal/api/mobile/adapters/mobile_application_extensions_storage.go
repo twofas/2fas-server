@@ -3,8 +3,9 @@ package adapters
 import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"github.com/twofas/2fas-server/internal/common/clock"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/common/clock"
 )
 
 type DeviceExtensionsService struct {

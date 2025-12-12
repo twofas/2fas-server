@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 	"github.com/twofas/2fas-server/internal/common/rate_limit"
 )

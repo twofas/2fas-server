@@ -2,6 +2,7 @@ package browser_extension
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/internal/websocket/common"
 )
 

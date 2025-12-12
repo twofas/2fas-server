@@ -366,7 +366,7 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 	if err == nil {
 		return domain.WebServiceAlreadyExistsError{Name: iconRequest.ServiceName}
 	} else {
-		var notFound adapters.WebServiceCouldNotBeFound
+		var notFound adapters.WebServiceCouldNotBeFoundError
 		if !errors.As(err, &notFound) {
 			fmt.Printf("Error is: %T %+v\n", err, err)
 			return fmt.Errorf("failed to find web service by name: %w", err)
