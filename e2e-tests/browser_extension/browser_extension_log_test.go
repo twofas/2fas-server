@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 
 	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
@@ -21,9 +22,8 @@ func Test_BrowserExtensionLogging(t *testing.T) {
 	}
 
 	payload, err := json.Marshal(log)
-	if err != nil {
-		t.Fatalf("Failed to marshal log payload: %v", err)
-	}
+	require.NoError(t, err)
+
 	e2e_tests.DoAPISuccessPost(t, "/browser_extensions/"+browserExtension.Id+"/commands/store_log", payload, nil)
 }
 
@@ -39,8 +39,7 @@ func Test_NotExistingBrowserExtensionLogging(t *testing.T) {
 	}
 
 	payload, err := json.Marshal(log)
-	if err != nil {
-		t.Fatalf("Failed to marshal log payload: %v", err)
-	}
+	require.NoError(t, err)
+
 	e2e_tests.DoAPISuccessPost(t, "/browser_extensions/"+someId.String()+"/commands/store_log", payload, nil)
 }
