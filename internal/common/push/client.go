@@ -3,14 +3,16 @@ package push
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"time"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
+	"google.golang.org/api/option"
+
 	"github.com/twofas/2fas-server/internal/api/mobile/domain"
 	"github.com/twofas/2fas-server/internal/common/logging"
-	"google.golang.org/api/option"
 )
 
 type Pusher interface {
@@ -36,6 +38,9 @@ func NewFcmPushClient(config *domain.FcmPushConfig) *FcmPushClient {
 	}
 
 	client, err := app.Messaging(context.Background())
+	if err != nil {
+		logging.WithField("error", err.Error()).Fatal("Error initializing FCM Messaging client")
+	}
 
 	return &FcmPushClient{
 		FcmMessaging: client,
@@ -43,7 +48,10 @@ func NewFcmPushClient(config *domain.FcmPushConfig) *FcmPushClient {
 }
 
 func (p *FcmPushClient) Send(ctx context.Context, message *messaging.Message) error {
-	data, _ := json.Marshal(message)
+	data, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("could not marshal the message: %w", err)
+	}
 
 	logging.WithFields(logging.Fields{
 		"notification": string(data),
@@ -71,7 +79,10 @@ func NewFakePushClient() *FakePushClient {
 }
 
 func (p *FakePushClient) Send(ctx context.Context, message *messaging.Message) error {
-	data, _ := json.Marshal(message)
+	data, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("could not marshal the message: %w", err)
+	}
 
 	logging.WithFields(logging.Fields{
 		"notification": string(data),

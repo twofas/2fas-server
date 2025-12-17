@@ -3,9 +3,9 @@ package tests
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 	"github.com/twofas/2fas-server/internal/api/icons/app/command"
 )
 
@@ -47,11 +47,11 @@ func (s *WebServicesTestSuite) TestCreateWebService() {
 	var webService *webServiceResponse
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
-	assert.Equal(s.T(), "facebook", webService.Name)
-	assert.Equal(s.T(), "desc", webService.Description)
-	assert.Equal(s.T(), []string{"facebook", "meta"}, webService.Issuers)
-	assert.Equal(s.T(), []string{"shitbook"}, webService.Tags)
-	assert.Equal(s.T(), []string{"123e4567-e89b-12d3-a456-426614174000"}, webService.IconsCollections)
+	s.Equal("facebook", webService.Name)
+	s.Equal("desc", webService.Description)
+	s.Equal([]string{"facebook", "meta"}, webService.Issuers)
+	s.Equal([]string{"shitbook"}, webService.Tags)
+	s.Equal([]string{"123e4567-e89b-12d3-a456-426614174000"}, webService.IconsCollections)
 }
 
 func (s *WebServicesTestSuite) TestCreateWebServiceWithAlreadyExistingName() {
@@ -82,7 +82,7 @@ func (s *WebServicesTestSuite) TestCreateWebServiceWithMatchRules() {
 	var webService *webServiceResponse
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/web_services", payload, &webService)
 
-	assert.Equal(s.T(), []*command.MatchRule{{
+	s.Equal([]*command.MatchRule{{
 		Field:      "label",
 		Text:       "facebook.com",
 		Matcher:    "contains",
@@ -114,10 +114,10 @@ func (s *WebServicesTestSuite) TestUpdateWebService() {
 	var updatedWebService *webServiceResponse
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
 
-	assert.Equal(s.T(), "meta", updatedWebService.Name)
-	assert.Equal(s.T(), []string{"meta", "facebook"}, updatedWebService.Issuers)
-	assert.Equal(s.T(), []string{"tag1", "tag2"}, updatedWebService.Tags)
-	assert.Equal(s.T(), []string{"set1", "set2"}, updatedWebService.IconsCollections)
+	s.Equal("meta", updatedWebService.Name)
+	s.Equal([]string{"meta", "facebook"}, updatedWebService.Issuers)
+	s.Equal([]string{"tag1", "tag2"}, updatedWebService.Tags)
+	s.Equal([]string{"set1", "set2"}, updatedWebService.IconsCollections)
 }
 
 func (s *WebServicesTestSuite) TestUpdateWebServiceMatchRule() {
@@ -143,10 +143,10 @@ func (s *WebServicesTestSuite) TestUpdateWebServiceMatchRule() {
 	var updatedWebService *webServiceResponse
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/web_services/"+webService.Id, updatePayload, &updatedWebService)
 
-	assert.Equal(s.T(), "issuer", updatedWebService.MatchRules[0].Field)
-	assert.Equal(s.T(), "facebook.pl", updatedWebService.MatchRules[0].Text)
-	assert.Equal(s.T(), "starts_with", updatedWebService.MatchRules[0].Matcher)
-	assert.Equal(s.T(), false, updatedWebService.MatchRules[0].IgnoreCase)
+	s.Equal("issuer", updatedWebService.MatchRules[0].Field)
+	s.Equal("facebook.pl", updatedWebService.MatchRules[0].Text)
+	s.Equal("starts_with", updatedWebService.MatchRules[0].Matcher)
+	s.False(updatedWebService.MatchRules[0].IgnoreCase)
 }
 
 func (s *WebServicesTestSuite) TestDeleteWebService() {
@@ -165,7 +165,7 @@ func (s *WebServicesTestSuite) TestDeleteWebService() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/web_services/"+webService.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/web_services/"+webService.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *WebServicesTestSuite) TestFindAllWebServices() {
@@ -193,7 +193,7 @@ func (s *WebServicesTestSuite) TestFindAllWebServices() {
 
 	var webServices []*webServiceResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/web_services", &webServices)
-	assert.Len(s.T(), webServices, 2)
+	s.Len(webServices, 2)
 }
 
 func (s *WebServicesTestSuite) TestFindWebService() {
@@ -212,5 +212,5 @@ func (s *WebServicesTestSuite) TestFindWebService() {
 	var webService *webServiceResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/web_services/"+createdWebService.Id, &webService)
 
-	assert.Equal(s.T(), "just-one", webService.Name)
+	s.Equal("just-one", webService.Name)
 }

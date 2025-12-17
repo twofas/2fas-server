@@ -2,8 +2,9 @@ package query
 
 import (
 	"github.com/doug-martin/goqu/v9"
-	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/mobile/adapters"
 )
 
 type MobileNotificationPresenter struct {
@@ -43,7 +44,7 @@ func (h *MobileNotificationsQueryHandler) FindOne(query *MobileNotificationsQuer
 	result := h.Database.Raw(sql).First(&presenter)
 
 	if result.Error != nil {
-		return nil, adapters.MobileNotificationCouldNotBeFound{NotificationId: query.Id}
+		return nil, adapters.MobileNotificationCouldNotBeFoundError{NotificationId: query.Id}
 	}
 
 	return presenter, nil

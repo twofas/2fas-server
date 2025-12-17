@@ -31,7 +31,7 @@ func (h *CreateDebugLogsAuditHandler) Handle(command *CreateDebugLogsAudit) erro
 	id, err := uuid.Parse(command.Id)
 
 	if err != nil {
-		return adapters.DebugLogsAuditCouldNotBeFound{AuditId: id.String()}
+		return adapters.DebugLogsAuditCouldNotBeFoundError{AuditId: id.String()}
 	}
 
 	auditClaim, err := h.DebugLogsAuditRepository.FindById(id)

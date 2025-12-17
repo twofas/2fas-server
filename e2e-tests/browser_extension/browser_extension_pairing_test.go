@@ -6,10 +6,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestBrowserExtensionPairingTestSuite(t *testing.T) {
@@ -28,36 +27,36 @@ func (s *BrowserExtensionPairingTestSuite) SetupTest() {
 func (s *BrowserExtensionPairingTestSuite) TestPairBrowserExtensionWithMobileDevice() {
 	browserExt := e2e_tests.CreateBrowserExtension(s.T(), "go-test")
 	_, err := uuid.Parse(browserExt.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	device, devicePubKey := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 	_, err = uuid.Parse(device.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
 	var extensionDevice *e2e_tests.DevicePairedBrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, &extensionDevice)
 
-	assert.Equal(s.T(), extensionDevice.Id, device.Id)
+	s.Equal(extensionDevice.Id, device.Id)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestDoNotFindNotPairedBrowserExtensionMobileDevice() {
 	browserExt := e2e_tests.CreateBrowserExtension(s.T(), "go-test")
 	_, err := uuid.Parse(browserExt.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	device, _ := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 
 	response := e2e_tests.DoAPIGet(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, nil)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestPairBrowserExtensionWithMultipleDevices() {
 	browserExt := e2e_tests.CreateBrowserExtension(s.T(), "go-test")
 	_, err := uuid.Parse(browserExt.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	device1, devicePubKey1 := e2e_tests.CreateDevice(s.T(), "go-test-device-1", "some-device-id-1")
 	device2, devicePubKey2 := e2e_tests.CreateDevice(s.T(), "go-test-device-2", "some-device-id-2")
@@ -67,7 +66,7 @@ func (s *BrowserExtensionPairingTestSuite) TestPairBrowserExtensionWithMultipleD
 
 	extensionDevices := e2e_tests.GetExtensionDevices(s.T(), browserExt.Id)
 
-	assert.Len(s.T(), extensionDevices, 2)
+	s.Len(extensionDevices, 2)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevice() {
@@ -80,13 +79,13 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevic
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey2, browserExt, device2)
 
 	extensionDevices := getExtensionPairedDevices(s.T(), browserExt)
-	assert.Len(s.T(), extensionDevices, 2)
+	s.Len(extensionDevices, 2)
 
 	e2e_tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device1.Id)
 
 	extensionDevices = getExtensionPairedDevices(s.T(), browserExt)
-	assert.Len(s.T(), extensionDevices, 1)
-	assert.Equal(s.T(), device2.Id, extensionDevices[0].Id)
+	s.Len(extensionDevices, 1)
+	s.Equal(device2.Id, extensionDevices[0].Id)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDeviceTwice() {
@@ -98,7 +97,7 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevic
 	e2e_tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id)
 	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, http.MethodDelete, nil /*payload*/, nil /*resp*/)
 
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestRemoveAllBrowserExtensionPairedDevices() {
@@ -111,7 +110,7 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveAllBrowserExtensionPairedDe
 	e2e_tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices")
 
 	extensionDevices := e2e_tests.GetExtensionDevices(s.T(), browserExt.Id)
-	assert.Len(s.T(), extensionDevices, 0)
+	s.Empty(extensionDevices)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesWhichIDoNotOwn() {
@@ -125,12 +124,12 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesWhichIDoNotOwn() 
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey2, browserExt2, device2)
 
 	firstExtensionDevices := getExtensionPairedDevices(s.T(), browserExt1)
-	assert.Len(s.T(), firstExtensionDevices, 1)
-	assert.Equal(s.T(), device1.Id, firstExtensionDevices[0].Id)
+	s.Len(firstExtensionDevices, 1)
+	s.Equal(device1.Id, firstExtensionDevices[0].Id)
 
 	secondExtensionDevices := getExtensionPairedDevices(s.T(), browserExt2)
-	assert.Len(s.T(), secondExtensionDevices, 1)
-	assert.Equal(s.T(), device2.Id, secondExtensionDevices[0].Id)
+	s.Len(secondExtensionDevices, 1)
+	s.Equal(device2.Id, secondExtensionDevices[0].Id)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByInvalidExtensionId() {
@@ -145,8 +144,8 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByInvalidExtensio
 
 	invalidResp := map[string]any{}
 	response := e2e_tests.DoAPIGet(s.T(), "/browser_extensions/some-invalid-id/devices/", &invalidResp)
-	assert.Equal(s.T(), 400, response.StatusCode)
-	assert.Contains(s.T(), invalidResp["Reason"], `Field validation for 'ExtensionId' failed on the 'uuid4'`)
+	s.Equal(400, response.StatusCode)
+	s.Contains(invalidResp["Reason"], `Field validation for 'ExtensionId' failed on the 'uuid4'`)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByNotExistingExtensionId() {
@@ -162,20 +161,20 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByNotExistingExte
 	notExistingExtensionId := uuid.New()
 	var firstExtensionDevices []*e2e_tests.ExtensionPairedDeviceResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+notExistingExtensionId.String()+"/devices/", &firstExtensionDevices)
-	assert.Len(s.T(), firstExtensionDevices, 0)
+	s.Empty(firstExtensionDevices)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestShareExtensionPublicKeyWithMobileDevice() {
 	browserExt := e2e_tests.CreateBrowserExtensionWithPublicKey(s.T(), "go-test", "b64-rsa-pub-key")
 	_, err := uuid.Parse(browserExt.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	device, devicePubKey := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 	_, err = uuid.Parse(device.Id)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	result := e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
-	assert.Equal(s.T(), "b64-rsa-pub-key", result.ExtensionPublicKey)
+	s.Equal("b64-rsa-pub-key", result.ExtensionPublicKey)
 }
 
 func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionTwice() {
@@ -195,12 +194,14 @@ func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionT
 	}
 
 	pairingResult := new(e2e_tests.PairingResultResponse)
-	payloadJson, _ := json.Marshal(payload)
+	payloadJson, err := json.Marshal(payload)
+	s.Require().NoError(err)
 
 	e2e_tests.DoAPIPostAndAssertCode(s.T(), 409, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 }
 
 func getExtensionPairedDevices(t *testing.T, browserExt *e2e_tests.BrowserExtensionResponse) []*e2e_tests.ExtensionPairedDeviceResponse {
+	t.Helper()
 	var extensionDevices []*e2e_tests.ExtensionPairedDeviceResponse
 	e2e_tests.DoAPISuccessGet(t, "/browser_extensions/"+browserExt.Id+"/devices/", &extensionDevices)
 	return extensionDevices

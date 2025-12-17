@@ -3,9 +3,9 @@ package tests
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 type iconsCollectionResponse struct {
@@ -41,9 +41,9 @@ func (s *IconsCollectionsTestSuite) TestCreateIconsCollection() {
 	var IconsCollection *iconsCollectionResponse
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/collections", payload, &IconsCollection)
 
-	assert.Equal(s.T(), "facebook", IconsCollection.Name)
-	assert.Equal(s.T(), "desc", IconsCollection.Description)
-	assert.Equal(s.T(), []string{"123e4567-e89b-12d3-a456-426614174000"}, IconsCollection.Icons)
+	s.Equal("facebook", IconsCollection.Name)
+	s.Equal("desc", IconsCollection.Description)
+	s.Equal([]string{"123e4567-e89b-12d3-a456-426614174000"}, IconsCollection.Icons)
 }
 
 func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
@@ -67,8 +67,8 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 	var updatedIconsCollection *iconsCollectionResponse
 	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
 
-	assert.Equal(s.T(), "meta", updatedIconsCollection.Name)
-	assert.Equal(s.T(), []string{"icon-1", "icon-2"}, updatedIconsCollection.Icons)
+	s.Equal("meta", updatedIconsCollection.Name)
+	s.Equal([]string{"icon-1", "icon-2"}, updatedIconsCollection.Icons)
 }
 
 func (s *IconsCollectionsTestSuite) TestDeleteIconsCollection() {
@@ -84,7 +84,7 @@ func (s *IconsCollectionsTestSuite) TestDeleteIconsCollection() {
 	e2e_tests.DoAdminSuccessDelete(s.T(), "mobile/icons/collections/"+iconsCollection.Id)
 
 	response := e2e_tests.DoAPIGet(s.T(), "mobile/icons/collections/"+iconsCollection.Id, nil)
-	assert.Equal(s.T(), 404, response.StatusCode)
+	s.Equal(404, response.StatusCode)
 }
 
 func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
@@ -107,7 +107,7 @@ func (s *IconsCollectionsTestSuite) TestFindAllIconsCollections() {
 
 	var IconsCollections []*iconsCollectionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/collections", &IconsCollections)
-	assert.Len(s.T(), IconsCollections, 2)
+	s.Len(IconsCollections, 2)
 }
 
 func (s *IconsCollectionsTestSuite) TestFindIconsCollection() {
@@ -124,5 +124,5 @@ func (s *IconsCollectionsTestSuite) TestFindIconsCollection() {
 	var IconsCollection *iconsCollectionResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "mobile/icons/collections/"+createdIconsCollection.Id, &IconsCollection)
 
-	assert.Equal(s.T(), "just-one", IconsCollection.Name)
+	s.Equal("just-one", IconsCollection.Name)
 }

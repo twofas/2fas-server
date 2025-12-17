@@ -1,11 +1,12 @@
 package e2e_tests
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"net/url"
 	"testing"
+
+	"github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
 )
 
 type WebsocketTestListener struct {
@@ -51,5 +52,6 @@ func (l *WebsocketTestListener) StartListening() *websocket.Conn {
 }
 
 func (l *WebsocketTestListener) AssertMessageHasBeenReceived(t *testing.T, expected string) {
+	t.Helper()
 	assert.JSONEq(t, expected, <-l.ReceivedMessages)
 }

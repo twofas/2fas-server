@@ -1,8 +1,9 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type IntegrationTestSuite struct {

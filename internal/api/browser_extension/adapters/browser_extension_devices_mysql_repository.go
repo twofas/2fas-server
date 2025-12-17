@@ -2,18 +2,20 @@ package adapters
 
 import (
 	"fmt"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/browser_extension/domain"
 )
 
-type ExtensionDeviceCouldNotBeFound struct {
+type ExtensionDeviceCouldNotBeFoundError struct {
 	DeviceId string
 }
 
-func (d ExtensionDeviceCouldNotBeFound) Error() string {
+func (d ExtensionDeviceCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Extension device could not be found: %s", d.DeviceId)
 }
 
@@ -89,7 +91,7 @@ func (r *BrowserExtensionDevicesMysqlRepository) GetById(extensionId, deviceId u
 	result := r.db.Raw(sql).First(&device)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, ExtensionDeviceCouldNotBeFound{DeviceId: deviceId.String()}
+		return nil, ExtensionDeviceCouldNotBeFoundError{DeviceId: deviceId.String()}
 	}
 
 	return device, nil

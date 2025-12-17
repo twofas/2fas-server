@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )

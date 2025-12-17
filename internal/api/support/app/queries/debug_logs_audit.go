@@ -2,8 +2,9 @@ package queries
 
 import (
 	"github.com/doug-martin/goqu/v9"
-	"github.com/twofas/2fas-server/internal/api/support/adapters"
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/support/adapters"
 )
 
 type DebugLogsAuditPresenter struct {
@@ -35,7 +36,7 @@ func (h *DebugLogsAuditQueryHandler) Find(query *DebugLogsAuditQuery) (*DebugLog
 	result := h.Database.Raw(sql).First(&presenter)
 
 	if result.Error != nil {
-		return nil, adapters.DebugLogsAuditCouldNotBeFound{AuditId: query.Id}
+		return nil, adapters.DebugLogsAuditCouldNotBeFoundError{AuditId: query.Id}
 	}
 
 	return presenter, nil

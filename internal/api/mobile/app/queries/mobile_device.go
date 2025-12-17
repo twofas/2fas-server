@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	MobileDeviceNotFound = errors.New("Mobile device can not be found")
+	ErrMobileDeviceNotFound = errors.New("Mobile device can not be found")
 )
 
 type MobileDevicePresenter struct {
@@ -37,7 +37,7 @@ func (h *MobileDeviceQueryHandler) Handle(query *MobileDeviceQuery) (*MobileDevi
 	result := h.Database.Raw(sql).Scan(&presenter)
 
 	if result.Error != nil {
-		return nil, MobileDeviceNotFound
+		return nil, ErrMobileDeviceNotFound
 	}
 
 	return presenter, nil

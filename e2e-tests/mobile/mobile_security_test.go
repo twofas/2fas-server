@@ -6,8 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/twofas/2fas-server/e2e-tests"
 	"golang.org/x/sync/errgroup"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func Test_MobileApiBandwidthAbuse(t *testing.T) {

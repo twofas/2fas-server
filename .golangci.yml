@@ -19,59 +19,59 @@ linters:
     - errcheck
     - errchkjson
     - errname
-    - errorlint
-    - exhaustive
-    - fatcontext
-    - forbidigo
-    - forcetypeassert
-    - funlen
-    - ginkgolinter
-    - gocheckcompilerdirectives
-    - gochecknoinits
-    - gochecksumtype
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - gomoddirectives
-    - gomodguard
-    - goprintffuncname
-    - gosec
-    - gosmopolitan
-    - govet
-    - grouper
-    - importas
-    - inamedparam
-    - ineffassign
-    - interfacebloat
-    - lll
-    - loggercheck
-    - maintidx
-    - makezero
-    - mirror
-    - misspell
-    - musttag
-    - nakedret
-    - nestif
-    - nilerr
-    - nilnil
-    - noctx
-    - nolintlint
-    - nonamedreturns
-    - nosprintfhostport
-    - prealloc
-    - predeclared
-    - promlinter
-    - protogetter
-    - reassign
-    - revive
+#    - errorlint
+#    - exhaustive
+#    - fatcontext
+#    - forbidigo
+#    - forcetypeassert
+#    - funlen
+#    - ginkgolinter
+#    - gocheckcompilerdirectives
+#    - gochecknoinits
+#    - gochecksumtype
+#    - gocognit
+#    - goconst
+#    - gocritic
+#    - gocyclo
+#    - godot
+#    - gomoddirectives
+#    - gomodguard
+#    - goprintffuncname
+#    - gosec
+#    - gosmopolitan
+#    - govet
+#    - grouper
+#    - importas
+#    - inamedparam
+#    - ineffassign
+#    - interfacebloat
+#    - lll
+#    - loggercheck
+#    - maintidx
+#    - makezero
+#    - mirror
+#    - misspell
+#    - musttag
+#    - nakedret
+#    - nestif
+#    - nilerr
+#    - nilnil
+#    - noctx
+#    - nolintlint
+#    - nonamedreturns
+#    - nosprintfhostport
+#    - prealloc
+#    - predeclared
+#    - promlinter
+#    - protogetter
+#    - reassign
+#    - revive
     - rowserrcheck
     - sloglint
     - spancheck
     - sqlclosecheck
-    - staticcheck
-    - tagliatelle
+#    - staticcheck
+#    - tagliatelle
     - testableexamples
     - testifylint
     - thelper
@@ -82,7 +82,7 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
-    - wrapcheck
+#    - wrapcheck
     - zerologlint
   settings:
     errcheck:

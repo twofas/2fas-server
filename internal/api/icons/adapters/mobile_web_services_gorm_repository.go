@@ -11,11 +11,11 @@ import (
 	"github.com/twofas/2fas-server/internal/common/db"
 )
 
-type WebServiceCouldNotBeFound struct {
+type WebServiceCouldNotBeFoundError struct {
 	Identifier string
 }
 
-func (e WebServiceCouldNotBeFound) Error() string {
+func (e WebServiceCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Web service could not be found: %s", e.Identifier)
 }
 
@@ -58,7 +58,7 @@ func (r *WebServiceMysqlRepository) FindById(id uuid.UUID) (*domain.WebService, 
 
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, WebServiceCouldNotBeFound{Identifier: id.String()}
+			return nil, WebServiceCouldNotBeFoundError{Identifier: id.String()}
 		}
 		return nil, db.WrapError(err)
 	}
@@ -73,7 +73,7 @@ func (r *WebServiceMysqlRepository) FindByName(name string) (*domain.WebService,
 
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, WebServiceCouldNotBeFound{Identifier: name}
+			return nil, WebServiceCouldNotBeFoundError{Identifier: name}
 		}
 		return nil, db.WrapError(err)
 	}

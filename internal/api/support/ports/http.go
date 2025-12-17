@@ -98,7 +98,7 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	err := r.cqrs.Commands.CreateDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
+		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -159,7 +159,7 @@ func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {
 	err := r.cqrs.Commands.UpdateDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
+		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -200,7 +200,7 @@ func (r *RoutesHandler) DeleteDebugLogsAudit(c *gin.Context) {
 	err := r.cqrs.Commands.DeleteDebugLogsAudit.Handle(cmd)
 
 	if err != nil {
-		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
+		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))
@@ -233,7 +233,7 @@ func (r *RoutesHandler) GetDebugLogsAudit(c *gin.Context) {
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
 
 	if err != nil {
-		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFound
+		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
 
 		if errors.As(err, &notFoundErr) {
 			c.JSON(404, api.NotFoundError(err))

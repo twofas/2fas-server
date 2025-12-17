@@ -32,7 +32,6 @@ func LoggingMiddleware() gin.HandlerFunc {
 			"request_id":     requestId,
 		}))
 		c.Request = c.Request.WithContext(ctxWithLog)
-
 	}
 }
 

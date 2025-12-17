@@ -2,11 +2,13 @@ package command
 
 import (
 	"encoding/json"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	domain2 "github.com/twofas/2fas-server/internal/api/icons/domain"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+
+	domain2 "github.com/twofas/2fas-server/internal/api/icons/domain"
 )
 
 // CreateIconCollection

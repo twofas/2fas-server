@@ -95,7 +95,11 @@ func Fatalf(format string, args ...interface{}) {
 }
 
 func LogCommand(command interface{}) {
-	context, _ := json.Marshal(command)
+	context, err := json.Marshal(command)
+	if err != nil {
+		log.Errorf("Failed to marshal command for logging: %v", err)
+		// This will only break the command logging so we can continue.
+	}
 
 	commandName := reflect.TypeOf(command).Elem().Name()
 

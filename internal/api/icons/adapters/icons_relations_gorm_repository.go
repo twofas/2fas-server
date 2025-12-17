@@ -2,8 +2,10 @@ package adapters
 
 import (
 	"fmt"
-	"github.com/twofas/2fas-server/internal/api/icons/domain"
+
 	"gorm.io/gorm"
+
+	"github.com/twofas/2fas-server/internal/api/icons/domain"
 )
 
 type IconsRelationsMysqlRepository struct {

@@ -51,7 +51,7 @@ func (h *WebServiceQueryHandler) FindOne(query *WebServiceQuery) (*WebServicePre
 	result := h.Database.Raw(sql).First(&presenter)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, adapters.WebServiceCouldNotBeFound{Identifier: query.Id}
+			return nil, adapters.WebServiceCouldNotBeFoundError{Identifier: query.Id}
 		}
 		return nil, db.WrapError(err)
 	}

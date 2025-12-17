@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/twofas/2fas-server/internal/common/logging"
 )
 
@@ -85,6 +86,6 @@ func function(pc uintptr) []byte {
 	if period := bytes.Index(name, []byte(".")); period >= 0 {
 		name = name[period+1:]
 	}
-	name = bytes.Replace(name, []byte("·"), []byte("."), -1)
+	name = bytes.ReplaceAll(name, []byte("·"), []byte("."))
 	return name
 }

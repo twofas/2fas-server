@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"

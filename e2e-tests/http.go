@@ -32,11 +32,13 @@ func (a *BasicAuth) Header() string {
 }
 
 func DoAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
 	bb, err := io.ReadAll(response.Body)
 	require.NoError(t, err)
@@ -45,56 +47,69 @@ func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interf
 }
 
 func DoAdminPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, expCode, response.StatusCode)
 }
 
 func DoAPIPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, expCode, response.StatusCode)
 }
 
 func DoAPIRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+	t.Helper()
 	return doRequest(t, apiRawURL, uri, method, payload, resp)
 }
 
 func DoAdminRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+	t.Helper()
 	return doRequest(t, apiRawURL, uri, method, payload, resp)
 }
 
 func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPut, payload, resp)
 	bb, err := io.ReadAll(response.Body)
 	require.NoError(t, err)
 
-	require.Equal(t, http.StatusOK, response.StatusCode, fmt.Sprintf("invalid status code, response payload is: %q", string(bb)))
+	require.Equal(t, http.StatusOK, response.StatusCode, "invalid status code, response payload is: %q", string(bb))
 }
 
 func DoAPISuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+	t.Helper()
+
 	response := doRequest(t, apiRawURL, uri, http.MethodPut, payload, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func DoAPISuccessGet(t *testing.T, uri string, resp interface{}) {
+	t.Helper()
+
 	response := doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func DoAPIGet(t *testing.T, uri string, resp interface{}) *http.Response {
+	t.Helper()
 	return doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 }
 
 func DoAdminSuccessGet(t *testing.T, uri string, resp interface{}) {
+	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func DoAdminSuccessDelete(t *testing.T, uri string) {
+	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodDelete, nil /*payload*/, nil /*response*/)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
 func DoAPISuccessDelete(t *testing.T, uri string) {
+	t.Helper()
 	response := doRequest(t, apiRawURL, uri, http.MethodDelete, nil /*payload*/, nil /*response*/)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }

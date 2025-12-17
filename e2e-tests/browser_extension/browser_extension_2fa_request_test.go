@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/twofas/2fas-server/e2e-tests"
+
+	e2e_tests "github.com/twofas/2fas-server/e2e-tests"
 )
 
 func TestBrowserExtensionTwoFactorAuthTestSuite(t *testing.T) {
@@ -30,12 +30,12 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestRequest2FaToken() {
 	request2FaTokenPayload := []byte(`{"domain":"https://facebook.com/path/nested"}`)
 	e2e_tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
 
-	assert.Equal(s.T(), browserExtension.Id, tokenRequest.ExtensionId)
+	s.Equal(browserExtension.Id, tokenRequest.ExtensionId)
 
 	var tokenRequestById *e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id, &tokenRequestById)
-	assert.Equal(s.T(), tokenRequest.Id, tokenRequestById.Id)
-	assert.Equal(s.T(), "https://facebook.com", tokenRequestById.Domain)
+	s.Equal(tokenRequest.Id, tokenRequestById.Id)
+	s.Equal("https://facebook.com", tokenRequestById.Domain)
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestFindAll2FaRequestsForBrowserExtension() {
@@ -50,7 +50,7 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestFindAll2FaRequestsForBrowse
 	var tokenRequestsCollection []*e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests", &tokenRequestsCollection)
 
-	assert.Len(s.T(), tokenRequestsCollection, 2)
+	s.Len(tokenRequestsCollection, 2)
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestClose2FaTokenRequest() {
@@ -63,7 +63,7 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestClose2FaTokenRequest() {
 
 	var closedTokenRequest *e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id, &closedTokenRequest)
-	assert.Equal(s.T(), "completed", closedTokenRequest.Status)
+	s.Equal("completed", closedTokenRequest.Status)
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestCloseNotExisting2FaTokenRequest() {
@@ -72,7 +72,6 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestCloseNotExisting2FaTokenReq
 
 	closeTokenRequestPayload := []byte(`{"status":"completed"}`)
 	e2e_tests.DoAPIPostAndAssertCode(s.T(), 404, "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+notExistingTokenRequestId.String()+"/commands/close_2fa_request", closeTokenRequestPayload, nil)
-
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestDoNotReturnClosed2FaRequests() {
@@ -86,7 +85,7 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestDoNotReturnClosed2FaRequest
 
 	var response []*e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests", &response)
-	assert.Len(s.T(), response, 0)
+	s.Empty(response)
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestTerminate2FaRequest() {
@@ -100,7 +99,7 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestTerminate2FaRequest() {
 
 	var response *e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id, &response)
-	assert.Equal(s.T(), "terminated", response.Status)
+	s.Equal("terminated", response.Status)
 }
 
 func (s *BrowserExtensionTwoFactorAuthTestSuite) TestClose2FaRequest() {
@@ -117,5 +116,5 @@ func (s *BrowserExtensionTwoFactorAuthTestSuite) TestClose2FaRequest() {
 
 	var closedTokenRequest *e2e_tests.AuthTokenRequestResponse
 	e2e_tests.DoAPISuccessGet(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id, &closedTokenRequest)
-	assert.Equal(s.T(), "completed", closedTokenRequest.Status)
+	s.Equal("completed", closedTokenRequest.Status)
 }

@@ -52,7 +52,12 @@ func (r *RoutesHandler) FakeError(c *gin.Context) {
 		Message: "Fake error with message as JSON",
 	}
 
-	message, _ := json.Marshal(messageStruct)
+	message, err := json.Marshal(messageStruct)
+	if err != nil {
+		logging.Error("Failed to marshal fake error message to JSON")
+		c.JSON(500, gin.H{})
+		return
+	}
 
 	logging.Error(string(message))
 

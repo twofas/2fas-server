@@ -11,11 +11,11 @@ import (
 	"github.com/twofas/2fas-server/internal/common/db"
 )
 
-type IconRequestCouldNotBeFound struct {
+type IconRequestCouldNotBeFoundError struct {
 	IconRequestId string
 }
 
-func (e IconRequestCouldNotBeFound) Error() string {
+func (e IconRequestCouldNotBeFoundError) Error() string {
 	return fmt.Sprintf("Icon request could not be found: %s", e.IconRequestId)
 }
 
@@ -57,7 +57,7 @@ func (r *IconRequestMysqlRepository) FindById(id uuid.UUID) (*domain.IconRequest
 	result := r.db.First(&iconRequest, "id = ?", id.String())
 	if err := result.Error; err != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, IconRequestCouldNotBeFound{IconRequestId: id.String()}
+			return nil, IconRequestCouldNotBeFoundError{IconRequestId: id.String()}
 		}
 		return nil, db.WrapError(err)
 	}

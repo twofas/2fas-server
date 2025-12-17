@@ -9,6 +9,8 @@ import (
 )
 
 func CreateDevice(t *testing.T, name, fcmToken string) (*DeviceResponse, string) {
+	t.Helper()
+
 	keyPair := crypto.GenerateKeyPair(2048)
 	devicePubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
 
@@ -22,6 +24,8 @@ func CreateDevice(t *testing.T, name, fcmToken string) (*DeviceResponse, string)
 }
 
 func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse {
+	t.Helper()
+
 	keyPair := crypto.GenerateKeyPair(2048)
 
 	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
@@ -36,6 +40,8 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 }
 
 func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *BrowserExtensionResponse {
+	t.Helper()
+
 	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, publicKey))
 
 	browserExt := new(BrowserExtensionResponse)
@@ -46,6 +52,8 @@ func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *
 }
 
 func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserExtension *BrowserExtensionResponse, device *DeviceResponse) *PairingResultResponse {
+	t.Helper()
+
 	payload := struct {
 		ExtensionId     string `json:"extension_id"`
 		DeviceName      string `json:"device_name"`
@@ -58,7 +66,10 @@ func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserEx
 
 	pairingResult := new(PairingResultResponse)
 
-	payloadJson, _ := json.Marshal(payload)
+	payloadJson, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("failed to marshal pairing payload: %v", err)
+	}
 
 	DoAPISuccessPost(t, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
 
@@ -66,6 +77,8 @@ func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserEx
 }
 
 func GetExtensionDevices(t *testing.T, extensionId string) []*ExtensionPairedDeviceResponse {
+	t.Helper()
+
 	var extensionDevices []*ExtensionPairedDeviceResponse
 
 	DoAPISuccessGet(t, "/browser_extensions/"+extensionId+"/devices", &extensionDevices)
@@ -74,6 +87,8 @@ func GetExtensionDevices(t *testing.T, extensionId string) []*ExtensionPairedDev
 }
 
 func Request2FaToken(t *testing.T, domain, extensionId string) *AuthTokenRequestResponse {
+	t.Helper()
+
 	var response *AuthTokenRequestResponse
 
 	payload := []byte(fmt.Sprintf(`{"domain":"%s"}`, domain))
@@ -84,39 +99,49 @@ func Request2FaToken(t *testing.T, domain, extensionId string) *AuthTokenRequest
 }
 
 func Send2FaTokenToExtension(t *testing.T, extensionId, deviceId, requestId, token string) {
+	t.Helper()
+
 	j := fmt.Sprintf(`{"token_request_id":"%s","extension_id":"%s","token":"%s"}`, requestId, extensionId, token)
 
 	DoAPISuccessPost(t, "mobile/devices/"+deviceId+"/commands/send_2fa_token", []byte(j), nil)
 }
 
 func RemoveAllBrowserExtensionsDevices(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "browser_extensions/devices")
 }
 
 func RemoveAllBrowserExtensions(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "browser_extensions")
 }
 
 func RemoveAllMobileDevices(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "/mobile/devices")
 }
 
 func RemoveAllMobileIconsCollections(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "mobile/icons/collections")
 }
 
 func RemoveAllMobileWebServices(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "mobile/web_services")
 }
 
 func RemoveAllMobileIcons(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "mobile/icons")
 }
 
 func RemoveAllMobileIconsRequests(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "mobile/icons/requests")
 }
 
 func RemoveAllMobileNotifications(t *testing.T) {
+	t.Helper()
 	DoAdminSuccessDelete(t, "mobile/notifications")
 }
