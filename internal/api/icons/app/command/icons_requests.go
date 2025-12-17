@@ -208,7 +208,8 @@ func saveIcons(iconRequest *domain.IconRequest, iconsStorage storage.FileSystemS
 }
 
 func saveIcon(iconURL, serviceName, iconType string, iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) (uuid.UUID, error) {
-	storagePath := filepath.Join(iconsStoragePath, iconURL)
+	iconFileName := filepath.Base(iconURL)
+	storagePath := filepath.Join(iconsStoragePath, iconFileName)
 
 	iconImg, err := iconsStorage.Get(storagePath)
 	if err != nil {
@@ -401,12 +402,13 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 func (h *TransformIconRequestToWebServiceHandler) checkServiceDoesNotExist(iconRequest *domain.IconRequest) error {
 	_, err := h.WebServiceRepository.FindByName(iconRequest.ServiceName)
 	if err == nil {
+		// No error means service was found, which is an error in this case.
 		return domain.WebServiceAlreadyExistsError{Name: iconRequest.ServiceName}
-	} else {
-		var notFound adapters.WebServiceCouldNotBeFoundError
-		if !errors.As(err, &notFound) {
-			return fmt.Errorf("failed to find web service by name: %w", err)
-		}
+	}
+	// We got an error, but we need to make sure it is "not found" error, not something else.
+	var notFound adapters.WebServiceCouldNotBeFoundError
+	if !errors.As(err, &notFound) {
+		return fmt.Errorf("failed to find web service by name: %w", err)
 	}
 	return nil
 }
