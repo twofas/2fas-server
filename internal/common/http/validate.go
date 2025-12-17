@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,8 @@ func Validate(c *gin.Context, v *validator.Validate, a any) bool {
 	err := v.Struct(a)
 
 	if err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
+		var validationErrors validator.ValidationErrors
+		ok := errors.As(err, &validationErrors)
 		if !ok {
 			logging.FromContext(c.Request.Context()).Errorf("unexpected validation error: %v", err)
 			c.JSON(500, api.NewInternalServerError(fmt.Errorf("unexpected validation error")))

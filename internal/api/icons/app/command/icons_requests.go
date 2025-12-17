@@ -148,78 +148,9 @@ func (h *UpdateWebServiceFromIconRequestHandler) Handle(cmd *UpdateWebServiceFro
 		return err
 	}
 
-	lightIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.LightIconUrl))
-
-	lightIconImg, err := h.IconsStorage.Get(lightIconStoragePath)
+	iconsIds, err := saveIcons(iconRequest, h.IconsStorage, h.IconsRepository)
 	if err != nil {
-		return fmt.Errorf("failed to get the icon from the storage: %w", err)
-	}
-
-	lightIconPng, err := png.Decode(lightIconImg)
-	if err != nil {
-		return fmt.Errorf("failed to decode the icon as pgn: %w", err)
-	}
-
-	lightIconId := uuid.New()
-	lightIconNewPath := filepath.Join(iconsStoragePath, lightIconId.String()+".png")
-	newLightIconLocation, err := h.IconsStorage.Move(lightIconStoragePath, lightIconNewPath)
-	if err != nil {
-		return fmt.Errorf("failed to move icons storage: %w", err)
-	}
-
-	lightIcon := &domain.Icon{
-		Id:     lightIconId,
-		Name:   iconRequest.ServiceName,
-		Url:    newLightIconLocation,
-		Width:  lightIconPng.Bounds().Dx(),
-		Height: lightIconPng.Bounds().Dy(),
-		Type:   domain.Light,
-	}
-
-	err = h.IconsRepository.Save(lightIcon)
-	if err != nil {
-		return fmt.Errorf("failed to save light icon: %w", err)
-	}
-
-	iconsIds := []string{
-		lightIcon.Id.String(),
-	}
-
-	if iconRequest.DarkIconUrl != "" { //nolint:dupl
-		darkIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.DarkIconUrl))
-
-		darkIconImg, err := h.IconsStorage.Get(darkIconStoragePath)
-		if err != nil {
-			return fmt.Errorf("failed to get dark icon: %w", err)
-		}
-
-		darkIconPng, err := png.Decode(darkIconImg)
-		if err != nil {
-			return fmt.Errorf("failed to decode dark icon: %w", err)
-		}
-
-		darkIconId := uuid.New()
-		darkIconNewPath := filepath.Join(iconsStoragePath, darkIconId.String()+".png")
-		newDarkIconLocation, err := h.IconsStorage.Move(darkIconStoragePath, darkIconNewPath)
-		if err != nil {
-			return fmt.Errorf("failed to move dark icon: %w", err)
-		}
-
-		darkIcon := &domain.Icon{
-			Id:     darkIconId,
-			Name:   iconRequest.ServiceName,
-			Url:    newDarkIconLocation,
-			Width:  darkIconPng.Bounds().Dx(),
-			Height: darkIconPng.Bounds().Dy(),
-			Type:   domain.Dark,
-		}
-
-		err = h.IconsRepository.Save(darkIcon)
-		if err != nil {
-			return fmt.Errorf("failed to save dark icon: %w", err)
-		}
-
-		iconsIds = append(iconsIds, darkIconId.String())
+		return err
 	}
 
 	iconsJson, err := json.Marshal(iconsIds)
@@ -253,6 +184,63 @@ func (h *UpdateWebServiceFromIconRequestHandler) Handle(cmd *UpdateWebServiceFro
 	}
 
 	return nil
+}
+
+func saveIcons(iconRequest *domain.IconRequest, iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) ([]string, error) {
+	lightIconID, err := saveIcon(iconRequest.LightIconUrl, iconRequest.ServiceName, domain.Light, iconsStorage, iconsRepository)
+	if err != nil {
+		return nil, fmt.Errorf("failed to save light icon: %w", err)
+	}
+
+	iconsIds := []string{
+		lightIconID.String(),
+	}
+
+	if iconRequest.DarkIconUrl != "" { //nolint:dupl
+		darkIconId, err := saveIcon(iconRequest.DarkIconUrl, iconRequest.ServiceName, domain.Dark, iconsStorage, iconsRepository)
+		if err != nil {
+			return nil, fmt.Errorf("failed to save dark icon: %w", err)
+		}
+
+		iconsIds = append(iconsIds, darkIconId.String())
+	}
+	return iconsIds, nil
+}
+
+func saveIcon(iconURL, serviceName, iconType string, iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) (uuid.UUID, error) {
+	storagePath := filepath.Join(iconsStoragePath, iconURL)
+
+	iconImg, err := iconsStorage.Get(storagePath)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to get icon: %w", err)
+	}
+
+	iconPng, err := png.Decode(iconImg)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to decode icon: %w", err)
+	}
+
+	iconID := uuid.New()
+	newPath := filepath.Join(iconsStoragePath, iconID.String()+".png")
+	newLocation, err := iconsStorage.Move(storagePath, newPath)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to move icon: %w", err)
+	}
+
+	icon := &domain.Icon{
+		Id:     iconID,
+		Name:   serviceName,
+		Url:    newLocation,
+		Width:  iconPng.Bounds().Dx(),
+		Height: iconPng.Bounds().Dy(),
+		Type:   iconType,
+	}
+
+	err = iconsRepository.Save(icon)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to save icon: %w", err)
+	}
+	return iconID, nil
 }
 
 func (h *UpdateWebServiceFromIconRequestHandler) updateIconsCollection(iconsCollectionID string, name string, iconsJson []byte) error {
@@ -362,91 +350,13 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 		return err
 	}
 
-	_, err = h.WebServiceRepository.FindByName(iconRequest.ServiceName)
-	if err == nil {
-		return domain.WebServiceAlreadyExistsError{Name: iconRequest.ServiceName}
-	} else {
-		var notFound adapters.WebServiceCouldNotBeFoundError
-		if !errors.As(err, &notFound) {
-			fmt.Printf("Error is: %T %+v\n", err, err)
-			return fmt.Errorf("failed to find web service by name: %w", err)
-		}
+	if err := h.checkServiceDoesNotExist(iconRequest); err != nil {
+		return err
 	}
 
-	iconsCollectionId := uuid.New()
-
-	lightIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.LightIconUrl))
-
-	lightIconImg, err := h.IconsStorage.Get(lightIconStoragePath)
+	iconsIds, err := saveIcons(iconRequest, h.IconsStorage, h.IconsRepository)
 	if err != nil {
-		return fmt.Errorf("failed to get light icon: %w", err)
-	}
-
-	lightIconPng, err := png.Decode(lightIconImg)
-	if err != nil {
-		return fmt.Errorf("failed to decode light icon: %w", err)
-	}
-
-	lightIconId := uuid.New()
-	lightIconNewPath := filepath.Join(iconsStoragePath, lightIconId.String()+".png")
-	newLightIconLocation, err := h.IconsStorage.Move(lightIconStoragePath, lightIconNewPath)
-	if err != nil {
-		return fmt.Errorf("failed to move light icon: %w", err)
-	}
-
-	lightIcon := &domain.Icon{
-		Id:     lightIconId,
-		Name:   iconRequest.ServiceName,
-		Url:    newLightIconLocation,
-		Width:  lightIconPng.Bounds().Dx(),
-		Height: lightIconPng.Bounds().Dy(),
-		Type:   domain.Light,
-	}
-
-	err = h.IconsRepository.Save(lightIcon)
-	if err != nil {
-		return fmt.Errorf("failed to save light icon: %w", err)
-	}
-
-	iconsIds := []string{
-		lightIcon.Id.String(),
-	}
-
-	if iconRequest.DarkIconUrl != "" { //nolint:dupl
-		darkIconStoragePath := filepath.Join(iconsStoragePath, filepath.Base(iconRequest.DarkIconUrl))
-
-		darkIconImg, err := h.IconsStorage.Get(darkIconStoragePath)
-		if err != nil {
-			return fmt.Errorf("failed to get dark icon: %w", err)
-		}
-
-		darkIconPng, err := png.Decode(darkIconImg)
-		if err != nil {
-			return fmt.Errorf("failed to decode dark icon: %w", err)
-		}
-
-		darkIconId := uuid.New()
-		darkIconNewPath := filepath.Join(iconsStoragePath, darkIconId.String()+".png")
-		newDarkIconLocation, err := h.IconsStorage.Move(darkIconStoragePath, darkIconNewPath)
-		if err != nil {
-			return fmt.Errorf("failed to move dark icon: %w", err)
-		}
-
-		darkIcon := &domain.Icon{
-			Id:     darkIconId,
-			Name:   iconRequest.ServiceName,
-			Url:    newDarkIconLocation,
-			Width:  darkIconPng.Bounds().Dx(),
-			Height: darkIconPng.Bounds().Dy(),
-			Type:   domain.Dark,
-		}
-
-		err = h.IconsRepository.Save(darkIcon)
-		if err != nil {
-			return fmt.Errorf("failed to save dark icon: %w", err)
-		}
-
-		iconsIds = append(iconsIds, darkIconId.String())
+		return err
 	}
 
 	iconsJson, err := json.Marshal(iconsIds)
@@ -454,6 +364,7 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 		return fmt.Errorf("failed to encode icon ids: %w", err)
 	}
 
+	iconsCollectionId := uuid.New()
 	iconsCollection := &domain.IconsCollection{
 		Id:    iconsCollectionId,
 		Name:  iconRequest.ServiceName,
@@ -484,5 +395,18 @@ func (h *TransformIconRequestToWebServiceHandler) Handle(cmd *TransformIconReque
 		return fmt.Errorf("failed to delete icon request: %w", err)
 	}
 
+	return nil
+}
+
+func (h *TransformIconRequestToWebServiceHandler) checkServiceDoesNotExist(iconRequest *domain.IconRequest) error {
+	_, err := h.WebServiceRepository.FindByName(iconRequest.ServiceName)
+	if err == nil {
+		return domain.WebServiceAlreadyExistsError{Name: iconRequest.ServiceName}
+	} else {
+		var notFound adapters.WebServiceCouldNotBeFoundError
+		if !errors.As(err, &notFound) {
+			return fmt.Errorf("failed to find web service by name: %w", err)
+		}
+	}
 	return nil
 }

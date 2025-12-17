@@ -77,20 +77,10 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 	log := logging.FromContext(ctx)
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
-	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
+	pairedDevices, err := h.findPairedDevices(extId, cmd)
 	if err != nil {
 		return nil, err
 	}
-
-	tokenRequestId, _ := uuid.Parse(cmd.Id)
-	browserExtension2FaRequest := domain.NewBrowserExtension2FaRequest(tokenRequestId, browserExtension.Id, cmd.Domain)
-
-	err = h.BrowserExtension2FaRequestRepository.Save(browserExtension2FaRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	pairedDevices := h.PairedDevicesRepository.FindAll(browserExtension.Id)
 
 	data := map[string]interface{}{
 		"extension_id": extId.String(),
@@ -115,23 +105,7 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 			continue
 		}
 
-		var err error
-		var notification *messaging.Message
-
-		switch device.Platform {
-		case domain.Android:
-			notification = createPushNotificationForAndroid(device.FcmToken, data)
-		case domain.IOS:
-			notification = createPushNotificationForIos(device.FcmToken, data)
-		}
-
-		err = retry.Do(
-			func() error {
-				return h.Pusher.Send(ctx, notification)
-			},
-			retry.Attempts(5),
-			retry.LastErrorOnly(true),
-		)
+		err := h.sendNotification(ctx, device, data)
 		if err == nil {
 			result[device.Id.String()] = PushNotificationStatusOK
 		} else if messaging.IsUnregistered(err) {
@@ -151,6 +125,43 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 	}
 
 	return result, nil
+}
+
+func (h *Request2FaTokenHandler) findPairedDevices(extId uuid.UUID, cmd *Request2FaToken) ([]*domain.ExtensionDevice, error) {
+	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenRequestId, _ := uuid.Parse(cmd.Id)
+	browserExtension2FaRequest := domain.NewBrowserExtension2FaRequest(tokenRequestId, browserExtension.Id, cmd.Domain)
+
+	err = h.BrowserExtension2FaRequestRepository.Save(browserExtension2FaRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	pairedDevices := h.PairedDevicesRepository.FindAll(browserExtension.Id)
+	return pairedDevices, nil
+}
+
+func (h *Request2FaTokenHandler) sendNotification(ctx context.Context, device *domain.ExtensionDevice, data map[string]interface{}) error {
+	var notification *messaging.Message
+
+	switch device.Platform {
+	case domain.Android:
+		notification = createPushNotificationForAndroid(device.FcmToken, data)
+	case domain.IOS:
+		notification = createPushNotificationForIos(device.FcmToken, data)
+	}
+
+	return retry.Do(
+		func() error {
+			return h.Pusher.Send(ctx, notification)
+		},
+		retry.Attempts(5),
+		retry.LastErrorOnly(true),
+	)
 }
 
 func createPushNotificationForIos(token string, data map[string]interface{}) *messaging.Message {
