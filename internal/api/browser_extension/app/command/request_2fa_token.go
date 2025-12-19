@@ -133,7 +133,11 @@ func (h *Request2FaTokenHandler) findPairedDevices(extId uuid.UUID, cmd *Request
 		return nil, err
 	}
 
-	tokenRequestId, _ := uuid.Parse(cmd.Id)
+	tokenRequestId, err := uuid.Parse(cmd.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token request id: %w", err)
+	}
+
 	browserExtension2FaRequest := domain.NewBrowserExtension2FaRequest(tokenRequestId, browserExtension.Id, cmd.Domain)
 
 	err = h.BrowserExtension2FaRequestRepository.Save(browserExtension2FaRequest)
@@ -141,8 +145,7 @@ func (h *Request2FaTokenHandler) findPairedDevices(extId uuid.UUID, cmd *Request
 		return nil, err
 	}
 
-	pairedDevices := h.PairedDevicesRepository.FindAll(browserExtension.Id)
-	return pairedDevices, nil
+	return h.PairedDevicesRepository.FindAll(browserExtension.Id), nil
 }
 
 func (h *Request2FaTokenHandler) sendNotification(ctx context.Context, device *domain.ExtensionDevice, data map[string]interface{}) error {
