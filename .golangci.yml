@@ -19,16 +19,16 @@ linters:
     - errcheck
     - errchkjson
     - errname
-#    - errorlint
-#    - exhaustive
-#    - fatcontext
-#    - forbidigo
-#    - forcetypeassert
-#    - funlen
-#    - ginkgolinter
-#    - gocheckcompilerdirectives
-#    - gochecknoinits
-#    - gochecksumtype
+    - errorlint
+    - exhaustive
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
 #    - gocognit
 #    - goconst
 #    - gocritic
@@ -103,6 +103,10 @@ linters:
       - third_party$
       - builtin$
       - examples$
+    rules:
+      - path: cmd/migrate/main.go
+        linters:
+          - forbidigo
 formatters:
   enable:
     - gofmt

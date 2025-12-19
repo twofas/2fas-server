@@ -28,7 +28,7 @@ type BrowserExtensionModule struct {
 	Config        config.Configuration
 }
 
-func NewBrowserExtensionModule(
+func NewBrowserExtensionModule( //nolint:funlen // This is an initialization function.
 	config config.Configuration,
 	gorm *gorm.DB,
 	database *sql.DB,

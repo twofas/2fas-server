@@ -96,30 +96,8 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	logging.LogCommand(cmd)
 
 	err := r.cqrs.Commands.CreateDebugLogsAudit.Handle(cmd)
-
 	if err != nil {
-		var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
-
-		if errors.As(err, &notFoundErr) {
-			c.JSON(404, api.NotFoundError(err))
-			return
-		}
-
-		var expiredErr domain.DebugLogsAuditClaimIsHasBeenExpiredError
-
-		if errors.As(err, &expiredErr) {
-			c.JSON(410, api.GoneError(err))
-			return
-		}
-
-		var completedErr domain.DebugLogsAuditClaimIsAlreadyCompletedError
-
-		if errors.As(err, &completedErr) {
-			c.JSON(410, api.GoneError(err))
-			return
-		}
-
-		c.JSON(400, api.NewBadRequestError(err))
+		r.handleError(c, err)
 		return
 	}
 
@@ -128,13 +106,38 @@ func (r *RoutesHandler) CreateDebugLogsAudit(c *gin.Context) {
 	}
 
 	presenter, err := r.cqrs.Queries.DebugLogsAuditQuery.Find(q)
-
 	if err != nil {
 		c.JSON(404, api.NotFoundError(err))
 		return
 	}
 
 	c.JSON(200, presenter)
+}
+
+func (r *RoutesHandler) handleError(c *gin.Context, err error) {
+	var notFoundErr adapters3.DebugLogsAuditCouldNotBeFoundError
+
+	if errors.As(err, &notFoundErr) {
+		c.JSON(404, api.NotFoundError(err))
+		return
+	}
+
+	var expiredErr domain.DebugLogsAuditClaimIsHasBeenExpiredError
+
+	if errors.As(err, &expiredErr) {
+		c.JSON(410, api.GoneError(err))
+		return
+	}
+
+	var completedErr domain.DebugLogsAuditClaimIsAlreadyCompletedError
+
+	if errors.As(err, &completedErr) {
+		c.JSON(410, api.GoneError(err))
+		return
+	}
+
+	c.JSON(400, api.NewBadRequestError(err))
+	return
 }
 
 func (r *RoutesHandler) UpdateDebugLogsAuditClaim(c *gin.Context) {

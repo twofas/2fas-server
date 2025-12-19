@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -123,7 +122,7 @@ func doRequest(t *testing.T, base, uri, method string, payload []byte, resp inte
 	response, err := http.DefaultClient.Do(request)
 	require.NoError(t, err)
 
-	logRequest(request, response)
+	logRequest(t, request, response)
 
 	rawBody, err := io.ReadAll(response.Body)
 	require.NoError(t, err)
@@ -152,14 +151,15 @@ func createRequest(method, uri string, payload []byte) *http.Request {
 	return request
 }
 
-func logRequest(req *http.Request, resp *http.Response) {
+func logRequest(t *testing.T, req *http.Request, resp *http.Response) {
+	t.Helper()
 	if DebugHttpRequests {
 		rawBody, _ := io.ReadAll(resp.Body)
 
 		resp.Body.Close()
 		resp.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
-		fmt.Printf("Request: %s: %s %v \n", req.Method, req.URL.RequestURI(), req.Body)
-		fmt.Println("Response: ", req.URL.RequestURI(), resp.StatusCode, string(rawBody))
+		t.Logf("Request: %s: %s %v", req.Method, req.URL.RequestURI(), req.Body)
+		t.Log("Response: ", req.URL.RequestURI(), resp.StatusCode, string(rawBody))
 	}
 }

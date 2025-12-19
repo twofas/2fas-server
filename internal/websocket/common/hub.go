@@ -47,7 +47,7 @@ func (h *Hub) sendToClient(c *Client, msg []byte) {
 
 func (h *Hub) broadcastMsg(msg []byte) {
 	h.clients.Range(func(key, value any) bool {
-		c := key.(*Client) //nolint:errcheck // We only store *Client types in the map.
+		c := key.(*Client) //nolint:errcheck,forcetypeassert // We only store *Client types in the map.
 		h.sendToClient(c, msg)
 		return true
 	})

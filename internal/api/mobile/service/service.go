@@ -30,7 +30,7 @@ type MobileModule struct {
 	Redis         *redis.Client
 }
 
-func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, redisClient *redis.Client) *MobileModule {
+func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, redisClient *redis.Client) *MobileModule { //nolint:funlen // This is an initialization function.
 	queryBuilder := db.NewQueryBuilder(database)
 
 	mobileDeviceRepository := adapters.NewMobileDeviceMysqlRepository(gorm)
