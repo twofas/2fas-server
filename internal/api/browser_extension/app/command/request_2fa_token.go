@@ -73,7 +73,9 @@ type Request2FaTokenHandler struct {
 	Pusher                               push.Pusher
 }
 
-func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToken) (map[string]PushNotificationStatus, error) {
+func (h *Request2FaTokenHandler) Handle(
+	ctx context.Context,
+	cmd *Request2FaToken) (map[string]PushNotificationStatus, error) {
 	log := logging.FromContext(ctx)
 	extId, _ := uuid.Parse(cmd.ExtensionId)
 
@@ -92,42 +94,47 @@ func (h *Request2FaTokenHandler) Handle(ctx context.Context, cmd *Request2FaToke
 	result := map[string]PushNotificationStatus{}
 
 	for _, device := range pairedDevices {
-		if device.FcmToken == "" {
-			log.WithFields(logging.Fields{
-				"extension_id":     extId.String(),
-				"device_id":        device.Id.String(),
-				"token_request_id": cmd.Id,
-				"domain":           cmd.Domain,
-				"platform":         device.Platform,
-				"type":             "browser_extension_request",
-			}).Info("Cannot send push notification, missing FCM token")
-			result[device.Id.String()] = PushNotificationStatusNoFCM
-			continue
-		}
+		log = log.WithFields(logging.Fields{
+			"extension_id":     extId.String(),
+			"device_id":        device.Id.String(),
+			"token_request_id": cmd.Id,
+			"domain":           cmd.Domain,
+			"platform":         device.Platform,
+			"type":             "browser_extension_request",
+		})
 
-		err := h.sendNotification(ctx, device, data)
-		if err == nil {
-			result[device.Id.String()] = PushNotificationStatusOK
-		} else if messaging.IsUnregistered(err) {
-			result[device.Id.String()] = PushNotificationStatusUnregistered
-		} else {
-			result[device.Id.String()] = PushNotificationStatusError
-			log.WithFields(logging.Fields{
-				"extension_id":     extId.String(),
-				"device_id":        device.Id.String(),
-				"token_request_id": cmd.Id,
-				"domain":           cmd.Domain,
-				"platform":         device.Platform,
-				"type":             "browser_extension_request",
-				"error":            err.Error(),
-			}).Error("Cannot send push notification for \"2fa_request\"")
-		}
+		result[device.Id.String()] = h.sendPush(ctx, log, device, data)
 	}
 
 	return result, nil
 }
 
-func (h *Request2FaTokenHandler) findPairedDevices(extId uuid.UUID, cmd *Request2FaToken) ([]*domain.ExtensionDevice, error) {
+func (h *Request2FaTokenHandler) sendPush(
+	ctx context.Context,
+	log logging.FieldLogger,
+	device *domain.ExtensionDevice,
+	data map[string]interface{}) PushNotificationStatus {
+	if device.FcmToken == "" {
+		log.Info("Cannot send push notification, missing FCM token")
+		return PushNotificationStatusNoFCM
+	}
+
+	err := h.sendNotification(ctx, device, data)
+	if err != nil {
+		if messaging.IsUnregistered(err) {
+			return PushNotificationStatusUnregistered
+		}
+		log.WithFields(logging.Fields{
+			"error": err.Error(),
+		}).Error("Cannot send push notification for \"2fa_request\"")
+		return PushNotificationStatusError
+	}
+	return PushNotificationStatusOK
+}
+
+func (h *Request2FaTokenHandler) findPairedDevices(
+	extId uuid.UUID,
+	cmd *Request2FaToken) ([]*domain.ExtensionDevice, error) {
 	browserExtension, err := h.BrowserExtensionsRepository.FindById(extId)
 	if err != nil {
 		return nil, err

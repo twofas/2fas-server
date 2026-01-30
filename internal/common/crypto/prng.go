@@ -15,5 +15,5 @@ func GenerateNonce() (string, error) {
 	}
 
 	return hex.EncodeToString(bytes), nil
-	//return base64.URLEncoding.EncodeToString(nonceBytes), nil
+	// return base64.URLEncoding.EncodeToString(nonceBytes), nil
 }

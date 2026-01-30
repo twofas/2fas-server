@@ -37,15 +37,16 @@ func createWebService(t *testing.T) *webServiceResponse {
 	t.Helper()
 	iconsCollection := createIconsCollection(t)
 
-	payload := []byte(`
+	id := fmt.Sprintf("service-%d", rand.Int()) // nolint:gosec // only for tests
+	payload := []byte(fmt.Sprintf(`
 		{
-			"name":"` + fmt.Sprintf("service-%d", rand.Int()) + `",
+			"name":"%s", 
 			"description":"another",
 			"issuers":["facebook", "m.facebook"],
 			"tags":["shitbook"],
-			"icons_collections":["` + iconsCollection.Id + `"]
+			"icons_collections":["%s"]
 		}
-	`)
+	`, id, iconsCollection.Id))
 
 	var webService *webServiceResponse
 

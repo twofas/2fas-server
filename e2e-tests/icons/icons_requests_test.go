@@ -93,7 +93,10 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestIntoWebService() {
 	iconRequest := createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	e2e_tests.DoAdminAPISuccessPost(s.T(),
+		"mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service",
+		nil,
+		&result)
 
 	s.Equal("service", result.Name)
 }

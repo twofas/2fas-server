@@ -50,16 +50,15 @@ func main() {
 
 	config.LoadConfiguration()
 
-	appDb := db.NewDbConnection(config.Config)
-
-	defer appDb.Close()
-
 	if err := goose.SetDialect(dialect); err != nil {
 		log.Fatal(err)
 	}
 
+	appDb := db.NewDbConnection(config.Config)
+	defer appDb.Close()
+
 	if err := goose.Run(command, appDb, *dir, args[1:]...); err != nil {
-		log.Fatalf("migrate run: %v", err)
+		log.Fatalf("migrate run: %v", err) // nolint:gocritic
 	}
 }
 

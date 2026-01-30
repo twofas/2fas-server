@@ -326,7 +326,7 @@ func (r *RoutesHandler) Request2FaToken(c *gin.Context) {
 		query.BrowserExtension2FaRequestPresenter
 		PushStatus map[string]command.PushNotificationStatus `json:"push_status"`
 	}
-	if len(result) >= 0 && result[0] != nil {
+	if len(result) > 0 && result[0] != nil {
 		jsonResult.BrowserExtension2FaRequestPresenter = *result[0]
 	}
 	jsonResult.PushStatus = pushResult

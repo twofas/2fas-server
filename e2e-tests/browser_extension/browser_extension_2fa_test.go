@@ -41,13 +41,21 @@ func (s *TwoFactorAuthTestSuite) TestBrowserExtensionAuthFullFlow() {
 
 	tokenRequest := e2e_tests.Request2FaToken(s.T(), "facebook.com", browserExtension.Id)
 
-	extensionTokenRequestWebsocketListener := e2e_tests.NewWebsocketTestListener("browser_extensions/" + browserExtension.Id + "/2fa_requests/" + tokenRequest.Id)
+	extensionTokenRequestWebsocketListener := e2e_tests.NewWebsocketTestListener(
+		"browser_extensions/" + browserExtension.Id + "/2fa_requests/" + tokenRequest.Id)
 	extensionTokenRequestWebsocketConnection := extensionTokenRequestWebsocketListener.StartListening()
 	defer extensionTokenRequestWebsocketConnection.Close()
 
-	e2e_tests.Send2FaTokenToExtension(s.T(), browserExtension.Id, device.Id, tokenRequest.Id, "2fa-token")
+	e2e_tests.Send2FaTokenToExtension(s.T(),
+		browserExtension.Id,
+		device.Id,
+		tokenRequest.Id,
+		"2fa-token")
 
-	expected2FaTokenWebsocket := createBrowserExtensionReceived2FaTokenMessage(s.T(), browserExtension.Id, device.Id, tokenRequest.Id)
+	expected2FaTokenWebsocket := createBrowserExtensionReceived2FaTokenMessage(s.T(),
+		browserExtension.Id,
+		device.Id,
+		tokenRequest.Id)
 	extensionTokenRequestWebsocketListener.AssertMessageHasBeenReceived(s.T(), expected2FaTokenWebsocket)
 }
 
@@ -76,7 +84,11 @@ func createBrowserExtensionReceived2FaTokenMessage(t *testing.T, extensionId, de
 	return string(message)
 }
 
-func createPairingSuccessWebsocketMessage(t *testing.T, browserExtension *e2e_tests.BrowserExtensionResponse, device *e2e_tests.DeviceResponse, devicePubKey string) string {
+func createPairingSuccessWebsocketMessage(
+	t *testing.T,
+	browserExtension *e2e_tests.BrowserExtensionResponse,
+	device *e2e_tests.DeviceResponse,
+	devicePubKey string) string {
 	t.Helper()
 
 	expectedPairingWebsocketMessageRaw := &struct {
@@ -99,7 +111,10 @@ func createPairingSuccessWebsocketMessage(t *testing.T, browserExtension *e2e_te
 	return string(message)
 }
 
-func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *e2e_tests.BrowserExtensionResponse, device *e2e_tests.DeviceResponse) {
+func assertBrowserExtensionHasPairedDevice(
+	t *testing.T,
+	browserExtension *e2e_tests.BrowserExtensionResponse,
+	device *e2e_tests.DeviceResponse) {
 	t.Helper()
 	var browserExtensionDevices []*e2e_tests.DeviceResponse
 	e2e_tests.DoAPISuccessGet(t, "browser_extensions/"+browserExtension.Id+"/devices", &browserExtensionDevices)
@@ -108,7 +123,10 @@ func assertBrowserExtensionHasPairedDevice(t *testing.T, browserExtension *e2e_t
 	assert.Equal(t, device.Id, browserExtensionDevices[0].Id)
 }
 
-func assertDeviceHasPairedExtension(t *testing.T, device *e2e_tests.DeviceResponse, browserExtension *e2e_tests.BrowserExtensionResponse) {
+func assertDeviceHasPairedExtension(
+	t *testing.T,
+	device *e2e_tests.DeviceResponse,
+	browserExtension *e2e_tests.BrowserExtensionResponse) {
 	t.Helper()
 	var deviceBrowserExtensions []*e2e_tests.BrowserExtensionResponse
 	e2e_tests.DoAPISuccessGet(t, "mobile/devices/"+device.Id+"/browser_extensions", &deviceBrowserExtensions)

@@ -24,7 +24,7 @@ type IconsModule struct {
 	Config        config.Configuration
 }
 
-func NewIconsModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, iconsStorage storage.FileSystemStorage) *IconsModule { //nolint:funlen // This is an initialization function.
+func NewIconsModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, iconsStorage storage.FileSystemStorage) *IconsModule { //nolint:funlen,lll // This is an initialization function.
 	queryBuilder := db.NewQueryBuilder(database)
 
 	webServicesRepository := adapters.NewWebServiceMysqlRepository(gorm)
