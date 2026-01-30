@@ -155,7 +155,9 @@ func (h *Request2FaTokenHandler) findPairedDevices(
 	return h.PairedDevicesRepository.FindAll(browserExtension.Id), nil
 }
 
-func (h *Request2FaTokenHandler) sendNotification(ctx context.Context, device *domain.ExtensionDevice, data map[string]interface{}) error {
+func (h *Request2FaTokenHandler) sendNotification(ctx context.Context,
+	device *domain.ExtensionDevice,
+	data map[string]interface{}) error {
 	var notification *messaging.Message
 
 	switch device.Platform {

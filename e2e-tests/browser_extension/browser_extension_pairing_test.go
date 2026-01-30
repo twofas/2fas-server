@@ -210,7 +210,9 @@ func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionT
 		pairingResult)
 }
 
-func getExtensionPairedDevices(t *testing.T, browserExt *e2e_tests.BrowserExtensionResponse) []*e2e_tests.ExtensionPairedDeviceResponse {
+func getExtensionPairedDevices(
+	t *testing.T,
+	browserExt *e2e_tests.BrowserExtensionResponse) []*e2e_tests.ExtensionPairedDeviceResponse {
 	t.Helper()
 	var extensionDevices []*e2e_tests.ExtensionPairedDeviceResponse
 	e2e_tests.DoAPISuccessGet(t, "/browser_extensions/"+browserExt.Id+"/devices/", &extensionDevices)

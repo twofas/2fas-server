@@ -27,7 +27,8 @@ type DeviceBrowserExtension2FaRequestQueryHandler struct {
 	Clock    clock.Clock
 }
 
-func (h *DeviceBrowserExtension2FaRequestQueryHandler) Handle(query *DeviceBrowserExtension2FaRequestQuery) ([]*DeviceBrowserExtension2FaRequestPresenter, error) {
+func (h *DeviceBrowserExtension2FaRequestQueryHandler) Handle(
+	query *DeviceBrowserExtension2FaRequestQuery) ([]*DeviceBrowserExtension2FaRequestPresenter, error) {
 	var presenter []*DeviceBrowserExtension2FaRequestPresenter
 
 	sourceT := goqu.T("browser_extensions_2fa_requests")

@@ -32,7 +32,8 @@ func NewMobileDeviceExtensionsGormRepository(db *gorm.DB, qb *goqu.Database) *Mo
 	}
 }
 
-func (r *MobileDeviceExtensionsGormRepository) FindById(deviceId, extensionId uuid.UUID) (*domain.MobileDeviceExtension, error) {
+func (r *MobileDeviceExtensionsGormRepository) FindById(
+	deviceId, extensionId uuid.UUID) (*domain.MobileDeviceExtension, error) {
 	var pairedExtension *domain.MobileDeviceExtension
 
 	result := r.db.First(&pairedExtension, "device_id = ? and extension_id = ?", deviceId.String(), extensionId.String())

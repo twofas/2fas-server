@@ -20,7 +20,8 @@ type PairedBrowserExtensionQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *PairedBrowserExtensionQueryHandler) Handle(q *PairedBrowserExtensionQuery) (*PairedBrowserExtensionPresenter, error) {
+func (h *PairedBrowserExtensionQueryHandler) Handle(
+	q *PairedBrowserExtensionQuery) (*PairedBrowserExtensionPresenter, error) {
 	sql, _, _ := h.Qb.From("browser_extensions").Where(goqu.Ex{
 		"id": q.ExtensionId,
 	}).ToSQL()

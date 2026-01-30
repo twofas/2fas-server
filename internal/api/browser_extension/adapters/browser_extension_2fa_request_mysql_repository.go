@@ -50,7 +50,7 @@ func (r *BrowserExtension2FaRequestsMysqlRepository) Delete(request *domain.Brow
 	return nil
 }
 
-func (r *BrowserExtension2FaRequestsMysqlRepository) FindPendingByExtensionId(extensionId uuid.UUID) []*domain.BrowserExtension2FaRequest { // nolint:lll, struct method is too long to make line shorter
+func (r *BrowserExtension2FaRequestsMysqlRepository) FindPendingByExtensionId(extensionId uuid.UUID) []*domain.BrowserExtension2FaRequest { // nolint:lll // struct name is too long to make line shorter
 	var requests []*domain.BrowserExtension2FaRequest
 
 	r.db.Find(&requests, "extension_id = ?", extensionId.String())
@@ -58,7 +58,7 @@ func (r *BrowserExtension2FaRequestsMysqlRepository) FindPendingByExtensionId(ex
 	return requests
 }
 
-func (r *BrowserExtension2FaRequestsMysqlRepository) FindById(tokenRequestId, extensionId uuid.UUID) (*domain.BrowserExtension2FaRequest, error) { // nolint:lll, struct method is too long to make line shorter
+func (r *BrowserExtension2FaRequestsMysqlRepository) FindById(tokenRequestId, extensionId uuid.UUID) (*domain.BrowserExtension2FaRequest, error) { // nolint:lll  // struct name is too long to make line shorter
 	var request *domain.BrowserExtension2FaRequest
 
 	result := r.db.First(&request, "extension_id = ? AND id = ?", extensionId.String(), tokenRequestId.String())

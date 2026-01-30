@@ -25,7 +25,11 @@ type SupportModule struct {
 	Config        config.Configuration
 }
 
-func NewSupportModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, debugLogsStorage storage.FileSystemStorage) *SupportModule {
+func NewSupportModule(config config.Configuration,
+	gorm *gorm.DB,
+	database *sql.DB,
+	validate *validator.Validate,
+	debugLogsStorage storage.FileSystemStorage) *SupportModule {
 	queryBuilder := db.NewQueryBuilder(database)
 
 	debugLogsConfig := domain.LoadDebugLogsConfig()

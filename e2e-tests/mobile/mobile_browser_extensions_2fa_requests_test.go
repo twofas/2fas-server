@@ -29,10 +29,15 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestGetPending2FaRequests() 
 
 	var tokenRequest *e2e_tests.AuthTokenRequestResponse
 	request2FaTokenPayload := []byte(`{"domain":"domain.com"}`)
-	e2e_tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
+	e2e_tests.DoAPISuccessPost(s.T(),
+		"browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token",
+		request2FaTokenPayload,
+		&tokenRequest)
 
 	var tokenRequestsCollection []*e2e_tests.AuthTokenRequestResponse
-	e2e_tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
+	e2e_tests.DoAPISuccessGet(s.T(),
+		"mobile/devices/"+device.Id+"/browser_extensions/2fa_requests",
+		&tokenRequestsCollection)
 	s.Len(tokenRequestsCollection, 1)
 }
 
@@ -43,12 +48,20 @@ func (s *MobileDeviceExtensionIntegrationTestSuite) TestDoNotReturnCompleted2FaR
 
 	var tokenRequest *e2e_tests.AuthTokenRequestResponse
 	request2FaTokenPayload := []byte(`{"domain":"domain.com"}`)
-	e2e_tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token", request2FaTokenPayload, &tokenRequest)
+	e2e_tests.DoAPISuccessPost(s.T(),
+		"browser_extensions/"+browserExtension.Id+"/commands/request_2fa_token",
+		request2FaTokenPayload,
+		&tokenRequest)
 
 	closeTokenRequestPayload := []byte(`{"status":"completed"}`)
-	e2e_tests.DoAPISuccessPost(s.T(), "browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id+"/commands/close_2fa_request", closeTokenRequestPayload, nil)
+	e2e_tests.DoAPISuccessPost(s.T(),
+		"browser_extensions/"+browserExtension.Id+"/2fa_requests/"+tokenRequest.Id+"/commands/close_2fa_request",
+		closeTokenRequestPayload,
+		nil)
 
 	var tokenRequestsCollection []*e2e_tests.AuthTokenRequestResponse
-	e2e_tests.DoAPISuccessGet(s.T(), "mobile/devices/"+device.Id+"/browser_extensions/2fa_requests", &tokenRequestsCollection)
+	e2e_tests.DoAPISuccessGet(s.T(),
+		"mobile/devices/"+device.Id+"/browser_extensions/2fa_requests",
+		&tokenRequestsCollection)
 	s.Empty(tokenRequestsCollection)
 }

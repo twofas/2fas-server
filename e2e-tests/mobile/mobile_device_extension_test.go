@@ -38,7 +38,9 @@ func (s *MobileDeviceExtensionTestSuite) TestDoNotFindNotExistingMobileDeviceExt
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
 	notExistingExtensionId := uuid.New()
-	response := e2e_tests.DoAPIGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+notExistingExtensionId.String(), nil)
+	response := e2e_tests.DoAPIGet(s.T(),
+		"/mobile/devices/"+device.Id+"/browser_extensions/"+notExistingExtensionId.String(),
+		nil)
 
 	s.Equal(404, response.StatusCode)
 }
@@ -49,7 +51,9 @@ func (s *MobileDeviceExtensionTestSuite) Test_FindExtensionForDevice() {
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
 	var deviceBrowserExtension *e2e_tests.BrowserExtensionResponse
-	e2e_tests.DoAPISuccessGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt.Id, &deviceBrowserExtension)
+	e2e_tests.DoAPISuccessGet(s.T(),
+		"/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt.Id,
+		&deviceBrowserExtension)
 
 	s.Equal(browserExt.Id, deviceBrowserExtension.Id)
 }
@@ -78,11 +82,15 @@ func (s *MobileDeviceExtensionTestSuite) Test_DisconnectExtensionFromDevice() {
 	e2e_tests.DoAPISuccessDelete(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt1.Id)
 
 	var deviceBrowserExtension1 *e2e_tests.BrowserExtensionResponse
-	response := e2e_tests.DoAPIGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt1.Id, &deviceBrowserExtension1)
+	response := e2e_tests.DoAPIGet(s.T(),
+		"/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt1.Id,
+		&deviceBrowserExtension1)
 	s.Equal(404, response.StatusCode)
 
 	var deviceBrowserExtension2 *e2e_tests.BrowserExtensionResponse
-	e2e_tests.DoAPISuccessGet(s.T(), "/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt2.Id, &deviceBrowserExtension2)
+	e2e_tests.DoAPISuccessGet(s.T(),
+		"/mobile/devices/"+device.Id+"/browser_extensions/"+browserExt2.Id,
+		&deviceBrowserExtension2)
 	s.Equal(browserExt2.Id, deviceBrowserExtension2.Id)
 }
 
@@ -91,7 +99,14 @@ func (s *MobileDeviceExtensionTestSuite) TestExtensionHasAlreadyBeenConnected() 
 	device, devicePubKey := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, extension, device)
 
-	payload := []byte(fmt.Sprintf(`{"extension_id":"%s","device_name":"%s","device_public_key":"%s"}`, extension.Id, device.Name, devicePubKey))
+	payload := []byte(fmt.Sprintf(`{"extension_id":"%s","device_name":"%s","device_public_key":"%s"}`,
+		extension.Id,
+		device.Name,
+		devicePubKey))
 
-	e2e_tests.DoAPIPostAndAssertCode(s.T(), 409, "/mobile/devices/"+device.Id+"/browser_extensions", payload, nil)
+	e2e_tests.DoAPIPostAndAssertCode(s.T(),
+		409,
+		"/mobile/devices/"+device.Id+"/browser_extensions",
+		payload,
+		nil)
 }

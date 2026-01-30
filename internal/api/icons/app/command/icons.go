@@ -68,7 +68,9 @@ func validateImage(img image.Image) error {
 		}
 	}
 
-	errMsg := fmt.Sprintf("Invalid image dimensions [%d %d]: allowed options are 120x120, 80x80, 40x40", imageWidth, imageHeight)
+	errMsg := fmt.Sprintf("Invalid image dimensions [%d %d]: allowed options are 120x120, 80x80, 40x40",
+		imageWidth,
+		imageHeight)
 
 	return errors.New(errMsg)
 }

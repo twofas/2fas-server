@@ -26,7 +26,8 @@ type BrowserExtension2FaRequestQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *BrowserExtension2FaRequestQueryHandler) Handle(query *BrowserExtension2FaRequestQuery) ([]*BrowserExtension2FaRequestPresenter, error) {
+func (h *BrowserExtension2FaRequestQueryHandler) Handle(
+	query *BrowserExtension2FaRequestQuery) ([]*BrowserExtension2FaRequestPresenter, error) {
 	var presenter []*BrowserExtension2FaRequestPresenter
 
 	ds := h.Qb.From("browser_extensions_2fa_requests")

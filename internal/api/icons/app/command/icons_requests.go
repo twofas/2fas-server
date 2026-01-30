@@ -169,7 +169,9 @@ func (h *UpdateWebServiceFromIconRequestHandler) Handle(cmd *UpdateWebServiceFro
 			return fmt.Errorf("failed to update icons collection %q: %w", webServiceIconsCollectionsIds[0], err)
 		}
 	} else {
-		webService.IconsCollections, err = h.replaceIconsCollections(webServiceIconsCollectionsIds, iconRequest.ServiceName, iconsJson)
+		webService.IconsCollections, err = h.replaceIconsCollections(webServiceIconsCollectionsIds,
+			iconRequest.ServiceName,
+			iconsJson)
 		if err != nil {
 			return fmt.Errorf("failed to replace icons collections: %w", err)
 		}
@@ -186,8 +188,11 @@ func (h *UpdateWebServiceFromIconRequestHandler) Handle(cmd *UpdateWebServiceFro
 	return nil
 }
 
-func saveIcons(iconRequest *domain.IconRequest, iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) ([]string, error) {
-	lightIconID, err := saveIcon(iconRequest.LightIconUrl, iconRequest.ServiceName, domain.Light, iconsStorage, iconsRepository)
+func saveIcons(iconRequest *domain.IconRequest,
+	iconsStorage storage.FileSystemStorage,
+	iconsRepository domain.IconsRepository) ([]string, error) {
+	lightIconID, err := saveIcon(iconRequest.LightIconUrl,
+		iconRequest.ServiceName, domain.Light, iconsStorage, iconsRepository)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save light icon: %w", err)
 	}
@@ -197,7 +202,8 @@ func saveIcons(iconRequest *domain.IconRequest, iconsStorage storage.FileSystemS
 	}
 
 	if iconRequest.DarkIconUrl != "" { //nolint:dupl
-		darkIconId, err := saveIcon(iconRequest.DarkIconUrl, iconRequest.ServiceName, domain.Dark, iconsStorage, iconsRepository)
+		darkIconId, err := saveIcon(
+			iconRequest.DarkIconUrl, iconRequest.ServiceName, domain.Dark, iconsStorage, iconsRepository)
 		if err != nil {
 			return nil, fmt.Errorf("failed to save dark icon: %w", err)
 		}
@@ -207,7 +213,8 @@ func saveIcons(iconRequest *domain.IconRequest, iconsStorage storage.FileSystemS
 	return iconsIds, nil
 }
 
-func saveIcon(iconURL, serviceName, iconType string, iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) (uuid.UUID, error) {
+func saveIcon(iconURL, serviceName, iconType string,
+	iconsStorage storage.FileSystemStorage, iconsRepository domain.IconsRepository) (uuid.UUID, error) {
 	iconFileName := filepath.Base(iconURL)
 	storagePath := filepath.Join(iconsStoragePath, iconFileName)
 
@@ -244,7 +251,9 @@ func saveIcon(iconURL, serviceName, iconType string, iconsStorage storage.FileSy
 	return iconID, nil
 }
 
-func (h *UpdateWebServiceFromIconRequestHandler) updateIconsCollection(iconsCollectionID string, name string, iconsJson []byte) error {
+func (h *UpdateWebServiceFromIconRequestHandler) updateIconsCollection(iconsCollectionID string,
+	name string,
+	iconsJson []byte) error {
 	id, err := uuid.Parse(iconsCollectionID)
 	if err != nil {
 		return fmt.Errorf("invalid icons collection id: %w", err)
@@ -257,7 +266,9 @@ func (h *UpdateWebServiceFromIconRequestHandler) updateIconsCollection(iconsColl
 	})
 }
 
-func (h *UpdateWebServiceFromIconRequestHandler) replaceIconsCollections(oldCollectionIds []string, serviceName string, iconsJson []byte) (datatypes.JSON, error) {
+func (h *UpdateWebServiceFromIconRequestHandler) replaceIconsCollections(oldCollectionIds []string,
+	serviceName string,
+	iconsJson []byte) (datatypes.JSON, error) {
 	for _, outdatedIconsCollectionId := range oldCollectionIds {
 		if err := h.deleteIconsCollection(outdatedIconsCollectionId); err != nil {
 			return nil, fmt.Errorf("failed to delete icons collection %q: %w", outdatedIconsCollectionId, err)

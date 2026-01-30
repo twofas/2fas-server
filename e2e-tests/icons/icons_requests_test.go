@@ -106,7 +106,10 @@ func (s *IconsRequestsTestSuite) TestTransformSingleIconRequestsIntoWebServiceFr
 	createIconRequest(s.T(), "service")
 
 	var result *queries.WebServicePresenter
-	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	e2e_tests.DoAdminAPISuccessPost(s.T(),
+		"mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service",
+		nil,
+		&result)
 
 	var icons []*queries.IconPresenter
 	e2e_tests.DoAPIGet(s.T(), "mobile/icons", &icons)
@@ -119,7 +122,11 @@ func (s *IconsRequestsTestSuite) TestTransformIconRequestWithAlreadyExistingWebS
 	iconRequest := createIconRequest(s.T(), webService.Name)
 
 	var result *queries.WebServicePresenter
-	e2e_tests.DoAdminPostAndAssertCode(s.T(), 409, "mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service", nil, &result)
+	e2e_tests.DoAdminPostAndAssertCode(s.T(),
+		409,
+		"mobile/icons/requests/"+iconRequest.Id+"/commands/transform_to_web_service",
+		nil,
+		&result)
 }
 
 func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
@@ -128,7 +135,10 @@ func (s *IconsRequestsTestSuite) TestUpdateWebServiceFromIconRequest() {
 
 	var result *queries.WebServicePresenter
 	payload := []byte(`{"web_service_id":"` + webService.Id + `"}`)
-	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service", payload, &result)
+	e2e_tests.DoAdminAPISuccessPost(s.T(),
+		"mobile/icons/requests/"+iconRequest.Id+"/commands/update_web_service",
+		payload,
+		&result)
 
 	s.Equal(webService.Name, result.Name)
 

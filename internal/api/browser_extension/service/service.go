@@ -126,17 +126,26 @@ func (m *BrowserExtensionModule) RegisterPublicRoutes(router *gin.Engine) {
 	publicRouter.GET("/browser_extensions/:extension_id", m.RoutesHandler.FindBrowserExtension)
 	publicRouter.PUT("/browser_extensions/:extension_id", m.RoutesHandler.UpdateBrowserExtension)
 
-	publicRouter.GET("/browser_extensions/:extension_id/devices", m.RoutesHandler.FindBrowserExtensionPairedMobileDevices)
-	publicRouter.GET("/browser_extensions/:extension_id/devices/:device_id", m.RoutesHandler.GetBrowserExtensionPairedMobileDevice)
-	publicRouter.DELETE("/browser_extensions/:extension_id/devices", m.RoutesHandler.RemoveAllExtensionPairedDevices)
-	publicRouter.DELETE("/browser_extensions/:extension_id/devices/:device_id", m.RoutesHandler.RemovePairedDeviceFromExtension)
+	publicRouter.GET("/browser_extensions/:extension_id/devices",
+		m.RoutesHandler.FindBrowserExtensionPairedMobileDevices)
+	publicRouter.GET("/browser_extensions/:extension_id/devices/:device_id",
+		m.RoutesHandler.GetBrowserExtensionPairedMobileDevice)
+	publicRouter.DELETE("/browser_extensions/:extension_id/devices",
+		m.RoutesHandler.RemoveAllExtensionPairedDevices)
+	publicRouter.DELETE("/browser_extensions/:extension_id/devices/:device_id",
+		m.RoutesHandler.RemovePairedDeviceFromExtension)
 
-	publicRouter.POST("/browser_extensions/:extension_id/commands/request_2fa_token", m.RoutesHandler.Request2FaToken)
-	publicRouter.POST("/browser_extensions/:extension_id/commands/store_log", m.RoutesHandler.Log)
+	publicRouter.POST("/browser_extensions/:extension_id/commands/request_2fa_token",
+		m.RoutesHandler.Request2FaToken)
+	publicRouter.POST("/browser_extensions/:extension_id/commands/store_log",
+		m.RoutesHandler.Log)
 
-	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests", m.RoutesHandler.GetAllBrowserExtension2FaTokenRequests)
-	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests/:token_request_id", m.RoutesHandler.GetBrowserExtension2FaTokenRequest)
-	publicRouter.POST("/browser_extensions/:extension_id/2fa_requests/:token_request_id/commands/close_2fa_request", m.RoutesHandler.Close2FaRequest)
+	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests",
+		m.RoutesHandler.GetAllBrowserExtension2FaTokenRequests)
+	publicRouter.GET("/browser_extensions/:extension_id/2fa_requests/:token_request_id",
+		m.RoutesHandler.GetBrowserExtension2FaTokenRequest)
+	publicRouter.POST("/browser_extensions/:extension_id/2fa_requests/:token_request_id/commands/close_2fa_request",
+		m.RoutesHandler.Close2FaRequest)
 }
 func (m *BrowserExtensionModule) RegisterAdminRoutes(g *gin.RouterGroup) {
 	if m.Config.IsTestingEnv() {

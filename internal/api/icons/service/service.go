@@ -166,7 +166,9 @@ func (m *IconsModule) RegisterAdminRoutes(g *gin.RouterGroup) {
 	g.DELETE("/mobile/icons/:icon_id", m.RoutesHandler.RemoveIcon)
 
 	g.DELETE("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.RemoveIconRequest)
-	g.POST("/mobile/icons/requests/:icon_request_id/commands/update_web_service", m.RoutesHandler.UpdateWebServiceFromIconRequest)
-	g.POST("/mobile/icons/requests/:icon_request_id/commands/transform_to_web_service", m.RoutesHandler.TransformToWebService)
+	g.POST("/mobile/icons/requests/:icon_request_id/commands/update_web_service",
+		m.RoutesHandler.UpdateWebServiceFromIconRequest)
+	g.POST("/mobile/icons/requests/:icon_request_id/commands/transform_to_web_service",
+		m.RoutesHandler.TransformToWebService)
 	g.GET("/mobile/icons/requests/:icon_request_id", m.RoutesHandler.FindIconRequest)
 }

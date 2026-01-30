@@ -67,7 +67,11 @@ func (s *MobileNotificationsTestSuite) TestDeleteMobileNotification() {
 func (s *MobileNotificationsTestSuite) TestDeleteNotExistingMobileNotification() {
 	id := uuid.New()
 
-	response := e2e_tests.DoAPIRequest(s.T(), "mobile/notifications/"+id.String(), http.MethodDelete, nil /*payload*/, nil /*resp*/)
+	response := e2e_tests.DoAPIRequest(s.T(),
+		"mobile/notifications/"+id.String(),
+		http.MethodDelete,
+		nil, /*payload*/
+		nil /*resp*/)
 
 	s.Equal(404, response.StatusCode)
 }
@@ -101,7 +105,10 @@ func (s *MobileNotificationsTestSuite) TestPublishNotification() {
 	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/notifications", payload, &notification)
 
 	var publishedNotification *query.MobileNotificationPresenter
-	e2e_tests.DoAdminAPISuccessPost(s.T(), "mobile/notifications/"+notification.Id+"/commands/publish", payload, &publishedNotification)
+	e2e_tests.DoAdminAPISuccessPost(s.T(),
+		"mobile/notifications/"+notification.Id+"/commands/publish",
+		payload,
+		&publishedNotification)
 
 	s.NotEmpty(publishedNotification.PublishedAt, "published_at")
 }
