@@ -16,7 +16,7 @@ func Test_Default404Response(t *testing.T) {
 	rawBody, err := io.ReadAll(response.Body)
 	require.NoError(t, err)
 
-	expected := `{"Code":404,"Type":"NotFound","Description":"Requested resource can not be found","Reason":"URI not found"}` // nolint:lll
+	expected := `{"Code":404,"Type":"NotFound","Description":"Requested resource can not be found","Reason":"URI not found"}`
 
 	assert.Equal(t, 404, response.StatusCode)
 	assert.JSONEq(t, expected, string(rawBody))

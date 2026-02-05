@@ -68,7 +68,7 @@ func (r *BrowserExtensionDevicesMysqlRepository) Delete(pairedDevice *domain.Ext
 	return nil
 }
 
-func (r *BrowserExtensionDevicesMysqlRepository) GetById(extensionId, deviceId uuid.UUID) (*domain.ExtensionDevice, error) { // nolint:lll // struct method is too long to make line shorter
+func (r *BrowserExtensionDevicesMysqlRepository) GetById(extensionId, deviceId uuid.UUID) (*domain.ExtensionDevice, error) {
 	var device *domain.ExtensionDevice
 
 	mdbeT := goqu.T("mobile_device_browser_extension")
