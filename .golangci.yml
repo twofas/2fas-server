@@ -29,27 +29,27 @@ linters:
     - gocheckcompilerdirectives
     - gochecknoinits
     - gochecksumtype
-#    - gocognit
-#    - goconst
-#    - gocritic
-#    - gocyclo
-#    - godot
-#    - gomoddirectives
-#    - gomodguard
-#    - goprintffuncname
-#    - gosec
-#    - gosmopolitan
-#    - govet
-#    - grouper
-#    - importas
-#    - inamedparam
-#    - ineffassign
-#    - interfacebloat
-#    - lll
-#    - loggercheck
-#    - maintidx
-#    - makezero
-#    - mirror
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - govet
+    - grouper
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - lll
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
 #    - misspell
 #    - musttag
 #    - nakedret
@@ -85,6 +85,8 @@ linters:
 #    - wrapcheck
     - zerologlint
   settings:
+    lll:
+      line-length: 160
     errcheck:
       check-type-assertions: true
       verbose: true

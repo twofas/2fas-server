@@ -16,10 +16,10 @@ func NewIconsCollectionsRelationsMysqlRepository(db *gorm.DB) *IconsCollectionsR
 	return &IconsCollectionsRelationsMysqlRepository{db: db}
 }
 
-func (r *IconsCollectionsRelationsMysqlRepository) DeleteAll(IconCollection *domain.IconsCollection) error {
+func (r *IconsCollectionsRelationsMysqlRepository) DeleteAll(iconCollection *domain.IconsCollection) error {
 	sql := fmt.Sprintf("UPDATE web_services SET icons_collections = %s WHERE \"%s\" MEMBER OF (icons_collections)",
-		"JSON_REMOVE(`icons_collections`, JSON_UNQUOTE(JSON_SEARCH(`icons_collections`, 'one', '"+IconCollection.Id.String()+"')))",
-		IconCollection.Id.String(),
+		"JSON_REMOVE(`icons_collections`, JSON_UNQUOTE(JSON_SEARCH(`icons_collections`, 'one', '"+iconCollection.Id.String()+"')))",
+		iconCollection.Id.String(),
 	)
 
 	res := r.db.Exec(sql)

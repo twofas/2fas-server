@@ -30,7 +30,10 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 
 	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
 
-	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, pubKey))
+	payload := []byte(
+		fmt.Sprintf(
+			`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
+			name, pubKey))
 
 	browserExt := new(BrowserExtensionResponse)
 
@@ -42,7 +45,9 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *BrowserExtensionResponse {
 	t.Helper()
 
-	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, publicKey))
+	payload := []byte(
+		fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
+			name, publicKey))
 
 	browserExt := new(BrowserExtensionResponse)
 
@@ -51,7 +56,11 @@ func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *
 	return browserExt
 }
 
-func PairDeviceWithBrowserExtension(t *testing.T, devicePubKey string, browserExtension *BrowserExtensionResponse, device *DeviceResponse) *PairingResultResponse {
+func PairDeviceWithBrowserExtension(
+	t *testing.T,
+	devicePubKey string,
+	browserExtension *BrowserExtensionResponse,
+	device *DeviceResponse) *PairingResultResponse {
 	t.Helper()
 
 	payload := struct {

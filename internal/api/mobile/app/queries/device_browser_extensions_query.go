@@ -25,7 +25,8 @@ type DeviceBrowserExtensionsQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *DeviceBrowserExtensionsQueryHandler) Handle(query *DeviceBrowserExtensionsQuery) ([]*DeviceBrowserExtensionPresenter, error) {
+func (h *DeviceBrowserExtensionsQueryHandler) Handle(
+	query *DeviceBrowserExtensionsQuery) ([]*DeviceBrowserExtensionPresenter, error) {
 	var presenter []*DeviceBrowserExtensionPresenter
 
 	relationTable := goqu.T("mobile_device_browser_extension")

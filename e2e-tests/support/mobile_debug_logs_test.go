@@ -45,7 +45,10 @@ func (s *DebugLogsAuditTestSuite) TestUpdateDebugLogsAuditClaim() {
 
 	var updatedAuditClaim *query.DebugLogsAuditPresenter
 	updatePayload := []byte(`{"username": "app-user-1", "description": "another description"}`)
-	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/support/debug_logs/audit/claim/"+auditClaim.Id, updatePayload, &updatedAuditClaim)
+	e2e_tests.DoAdminSuccessPut(s.T(),
+		"mobile/support/debug_logs/audit/claim/"+auditClaim.Id,
+		updatePayload,
+		&updatedAuditClaim)
 
 	s.Equal("app-user-1", updatedAuditClaim.Username)
 	s.Equal("another description", updatedAuditClaim.Description)
@@ -62,7 +65,9 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 
 	writer.Close()
 
-	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	request, _ := http.NewRequest(http.MethodPost,
+		"http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id,
+		body)
 	request.Header.Add("Content-Type", writer.FormDataContentType())
 
 	response, err := http.DefaultClient.Do(request)
@@ -110,7 +115,9 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillDebugLogsAuditClaimTwice() {
 
 	body, formDataContentType, err = mkFormFileBody()
 	s.Require().NoError(err)
-	secondRequest, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id, body)
+	secondRequest, _ := http.NewRequest(http.MethodPost,
+		"http://localhost/mobile/support/debug_logs/audit/"+auditClaim.Id,
+		body)
 	secondRequest.Header.Add("Content-Type", formDataContentType)
 	secondResponse, err := http.DefaultClient.Do(secondRequest)
 	s.Require().NoError(err)
@@ -127,7 +134,9 @@ func (s *DebugLogsAuditTestSuite) TestTryToFulfillNotExistingDebugLogsAuditClaim
 	body, formDataContentType, err := mkFormFileBody()
 	s.Require().NoError(err)
 
-	request, _ := http.NewRequest(http.MethodPost, "http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId, body)
+	request, _ := http.NewRequest(http.MethodPost,
+		"http://localhost/mobile/support/debug_logs/audit/"+notExistingAuditClaimId,
+		body)
 	request.Header.Add("Content-Type", formDataContentType)
 	response, err := http.DefaultClient.Do(request)
 	s.Require().NoError(err)

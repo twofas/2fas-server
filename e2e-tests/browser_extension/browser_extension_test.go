@@ -91,7 +91,10 @@ func createBrowserExtension(t *testing.T, name string) *http.Response {
 
 	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
 
-	payload := []byte(fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`, name, pubKey))
+	payload := []byte(fmt.Sprintf(
+		`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
+		name,
+		pubKey))
 
 	return e2e_tests.DoAPIRequest(t, "/browser_extensions", http.MethodPost, payload, nil)
 }

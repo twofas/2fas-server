@@ -31,7 +31,8 @@ type MobileNotificationsQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *MobileNotificationsQueryHandler) FindOne(query *MobileNotificationsQuery) (*MobileNotificationPresenter, error) {
+func (h *MobileNotificationsQueryHandler) FindOne(
+	query *MobileNotificationsQuery) (*MobileNotificationPresenter, error) {
 	ds := h.Qb.From("mobile_notifications").Where(goqu.And(
 		goqu.C("id").Eq(query.Id),
 		goqu.C("deleted_at").IsNull(),
@@ -50,7 +51,8 @@ func (h *MobileNotificationsQueryHandler) FindOne(query *MobileNotificationsQuer
 	return presenter, nil
 }
 
-func (h *MobileNotificationsQueryHandler) FindAll(query *MobileNotificationsQuery) ([]*MobileNotificationPresenter, error) {
+func (h *MobileNotificationsQueryHandler) FindAll(
+	query *MobileNotificationsQuery) ([]*MobileNotificationPresenter, error) {
 	var presenter []*MobileNotificationPresenter
 
 	ds := h.Qb.From("mobile_notifications").Where(goqu.And(

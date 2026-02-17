@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// RemoveAllBrowserExtensions command for tests
+// RemoveAllBrowserExtensions command for tests.
 type RemoveAllBrowserExtensions struct{}
 
 type RemoveAllBrowserExtensionsHandler struct {

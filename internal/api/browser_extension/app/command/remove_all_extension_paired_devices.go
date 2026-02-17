@@ -39,7 +39,7 @@ func (h *RemoveALlExtensionPairedDevicesHandler) Handle(cmd *RemoveAllExtensionP
 	return nil
 }
 
-// RemoveAllBrowserExtensionsDevices command for tests
+// RemoveAllBrowserExtensionsDevices command for tests.
 type RemoveAllBrowserExtensionsDevices struct{}
 
 type RemoveAllBrowserExtensionsDevicesHandler struct {

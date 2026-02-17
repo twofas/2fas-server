@@ -27,24 +27,24 @@ func NewIconMysqlRepository(db *gorm.DB) *IconMysqlRepository {
 	return &IconMysqlRepository{db: db}
 }
 
-func (r *IconMysqlRepository) Save(Icon *domain.Icon) error {
-	if err := r.db.Create(Icon).Error; err != nil {
+func (r *IconMysqlRepository) Save(icon *domain.Icon) error {
+	if err := r.db.Create(icon).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *IconMysqlRepository) Update(Icon *domain.Icon) error {
-	if err := r.db.Updates(Icon).Error; err != nil {
+func (r *IconMysqlRepository) Update(icon *domain.Icon) error {
+	if err := r.db.Updates(icon).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *IconMysqlRepository) Delete(Icon *domain.Icon) error {
-	if err := r.db.Delete(Icon).Error; err != nil {
+func (r *IconMysqlRepository) Delete(icon *domain.Icon) error {
+	if err := r.db.Delete(icon).Error; err != nil {
 		return err
 	}
 

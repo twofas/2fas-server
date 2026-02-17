@@ -65,7 +65,10 @@ func (s *IconsCollectionsTestSuite) TestUpdateIconsCollection() {
 	`)
 
 	var updatedIconsCollection *iconsCollectionResponse
-	e2e_tests.DoAdminSuccessPut(s.T(), "mobile/icons/collections/"+iconsCollection.Id, updatePayload, &updatedIconsCollection)
+	e2e_tests.DoAdminSuccessPut(s.T(),
+		"mobile/icons/collections/"+iconsCollection.Id,
+		updatePayload,
+		&updatedIconsCollection)
 
 	s.Equal("meta", updatedIconsCollection.Name)
 	s.Equal([]string{"icon-1", "icon-2"}, updatedIconsCollection.Icons)

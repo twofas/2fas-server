@@ -26,24 +26,24 @@ func NewIconsCollectionMysqlRepository(db *gorm.DB) *IconsCollectionMysqlReposit
 	return &IconsCollectionMysqlRepository{db: db}
 }
 
-func (r *IconsCollectionMysqlRepository) Save(IconsCollection *domain.IconsCollection) error {
-	if err := r.db.Create(IconsCollection).Error; err != nil {
+func (r *IconsCollectionMysqlRepository) Save(iconsCollection *domain.IconsCollection) error {
+	if err := r.db.Create(iconsCollection).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *IconsCollectionMysqlRepository) Update(IconsCollection *domain.IconsCollection) error {
-	if err := r.db.Updates(IconsCollection).Error; err != nil {
+func (r *IconsCollectionMysqlRepository) Update(iconsCollection *domain.IconsCollection) error {
+	if err := r.db.Updates(iconsCollection).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *IconsCollectionMysqlRepository) Delete(IconsCollection *domain.IconsCollection) error {
-	if err := r.db.Delete(IconsCollection).Error; err != nil {
+func (r *IconsCollectionMysqlRepository) Delete(iconsCollection *domain.IconsCollection) error {
+	if err := r.db.Delete(iconsCollection).Error; err != nil {
 		return err
 	}
 

@@ -26,7 +26,8 @@ type BrowserExtensionPairedMobileDevicesQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *BrowserExtensionPairedMobileDevicesQueryHandler) Handle(query *BrowserExtensionPairedDevicesQuery) []BrowserPairedDevicePresenter {
+func (h *BrowserExtensionPairedMobileDevicesQueryHandler) Handle(
+	query *BrowserExtensionPairedDevicesQuery) []BrowserPairedDevicePresenter {
 	var presenter []BrowserPairedDevicePresenter
 
 	relationTable := goqu.T("mobile_device_browser_extension")
@@ -52,7 +53,8 @@ type BrowserExtensionPairedMobileDeviceQueryHandler struct {
 	Qb       *goqu.Database
 }
 
-func (h *BrowserExtensionPairedMobileDeviceQueryHandler) Handle(query *BrowserExtensionPairedDeviceQuery) (*BrowserPairedDevicePresenter, error) {
+func (h *BrowserExtensionPairedMobileDeviceQueryHandler) Handle(
+	query *BrowserExtensionPairedDeviceQuery) (*BrowserPairedDevicePresenter, error) {
 	var presenter *BrowserPairedDevicePresenter
 
 	relationTable := goqu.T("mobile_device_browser_extension")

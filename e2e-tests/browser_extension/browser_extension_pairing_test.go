@@ -95,7 +95,11 @@ func (s *BrowserExtensionPairingTestSuite) TestRemoveBrowserExtensionPairedDevic
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, browserExt, device)
 
 	e2e_tests.DoAPISuccessDelete(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id)
-	response := e2e_tests.DoAPIRequest(s.T(), "/browser_extensions/"+browserExt.Id+"/devices/"+device.Id, http.MethodDelete, nil /*payload*/, nil /*resp*/)
+	response := e2e_tests.DoAPIRequest(s.T(),
+		"/browser_extensions/"+browserExt.Id+"/devices/"+device.Id,
+		http.MethodDelete,
+		nil, /*payload*/
+		nil /*resp*/)
 
 	s.Equal(404, response.StatusCode)
 }
@@ -160,7 +164,9 @@ func (s *BrowserExtensionPairingTestSuite) TestGetPairedDevicesByNotExistingExte
 
 	notExistingExtensionId := uuid.New()
 	var firstExtensionDevices []*e2e_tests.ExtensionPairedDeviceResponse
-	e2e_tests.DoAPISuccessGet(s.T(), "/browser_extensions/"+notExistingExtensionId.String()+"/devices/", &firstExtensionDevices)
+	e2e_tests.DoAPISuccessGet(s.T(),
+		"/browser_extensions/"+notExistingExtensionId.String()+"/devices/",
+		&firstExtensionDevices)
 	s.Empty(firstExtensionDevices)
 }
 
@@ -197,10 +203,16 @@ func (s *BrowserExtensionPairingTestSuite) TestCannotPairSameDeviceAndExtensionT
 	payloadJson, err := json.Marshal(payload)
 	s.Require().NoError(err)
 
-	e2e_tests.DoAPIPostAndAssertCode(s.T(), 409, "/mobile/devices/"+device.Id+"/browser_extensions", payloadJson, pairingResult)
+	e2e_tests.DoAPIPostAndAssertCode(s.T(),
+		409,
+		"/mobile/devices/"+device.Id+"/browser_extensions",
+		payloadJson,
+		pairingResult)
 }
 
-func getExtensionPairedDevices(t *testing.T, browserExt *e2e_tests.BrowserExtensionResponse) []*e2e_tests.ExtensionPairedDeviceResponse {
+func getExtensionPairedDevices(
+	t *testing.T,
+	browserExt *e2e_tests.BrowserExtensionResponse) []*e2e_tests.ExtensionPairedDeviceResponse {
 	t.Helper()
 	var extensionDevices []*e2e_tests.ExtensionPairedDeviceResponse
 	e2e_tests.DoAPISuccessGet(t, "/browser_extensions/"+browserExt.Id+"/devices/", &extensionDevices)

@@ -27,7 +27,8 @@ type BrowserExtensionHasNotBeenPairedWithDevice struct {
 	Reason             string `json:"reason"`
 }
 
-func NewBrowserExtensionHasBeenPairedWithDevice(deviceId, devicePublicKey string, extId uuid.UUID) *BrowserExtensionHasBeenPairedWithDevice {
+func NewBrowserExtensionHasBeenPairedWithDevice(deviceId, devicePublicKey string,
+	extId uuid.UUID) *BrowserExtensionHasBeenPairedWithDevice {
 	return &BrowserExtensionHasBeenPairedWithDevice{
 		Event:              "browser_extensions.pairing.success",
 		BrowserExtensionId: extId.String(),
@@ -36,7 +37,9 @@ func NewBrowserExtensionHasBeenPairedWithDevice(deviceId, devicePublicKey string
 	}
 }
 
-func NewBrowserExtensionHasNotBeenPairedWithDevice(err error, deviceId string, extId uuid.UUID) *BrowserExtensionHasNotBeenPairedWithDevice {
+func NewBrowserExtensionHasNotBeenPairedWithDevice(err error,
+	deviceId string,
+	extId uuid.UUID) *BrowserExtensionHasNotBeenPairedWithDevice {
 	return &BrowserExtensionHasNotBeenPairedWithDevice{
 		Event:              "browser_extensions.pairing.failure",
 		BrowserExtensionId: extId.String(),

@@ -30,7 +30,7 @@ type MobileModule struct {
 	Redis         *redis.Client
 }
 
-func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, redisClient *redis.Client) *MobileModule { //nolint:funlen // This is an initialization function.
+func NewMobileModule(config config.Configuration, gorm *gorm.DB, database *sql.DB, validate *validator.Validate, redisClient *redis.Client) *MobileModule { //nolint:funlen,lll // This is an initialization function.
 	queryBuilder := db.NewQueryBuilder(database)
 
 	mobileDeviceRepository := adapters.NewMobileDeviceMysqlRepository(gorm)
@@ -135,12 +135,18 @@ func (m *MobileModule) RegisterPublicRoutes(router *gin.Engine) {
 	publicRouter.GET("/mobile/notifications", m.RoutesHandler.FindAllMobileNotifications)
 	publicRouter.GET("/mobile/notifications/:notification_id", m.RoutesHandler.FindMobileNotification)
 
-	publicRouter.POST("/mobile/devices/:device_id/commands/send_2fa_token", m.RoutesHandler.Send2FaToken)
-	publicRouter.GET("/mobile/devices/:device_id/browser_extensions/2fa_requests", m.RoutesHandler.GetAll2FaTokenRequests)
-	publicRouter.POST("/mobile/devices/:device_id/browser_extensions", m.RoutesHandler.PairMobileWithExtension)
-	publicRouter.DELETE("/mobile/devices/:device_id/browser_extensions/:extension_id", m.RoutesHandler.RemovePairingWithExtension)
-	publicRouter.GET("/mobile/devices/:device_id/browser_extensions", m.RoutesHandler.FindAllMobileAppExtensions)
-	publicRouter.GET("/mobile/devices/:device_id/browser_extensions/:extension_id", m.RoutesHandler.FindMobileAppExtensionById)
+	publicRouter.POST("/mobile/devices/:device_id/commands/send_2fa_token",
+		m.RoutesHandler.Send2FaToken)
+	publicRouter.GET("/mobile/devices/:device_id/browser_extensions/2fa_requests",
+		m.RoutesHandler.GetAll2FaTokenRequests)
+	publicRouter.POST("/mobile/devices/:device_id/browser_extensions",
+		m.RoutesHandler.PairMobileWithExtension)
+	publicRouter.DELETE("/mobile/devices/:device_id/browser_extensions/:extension_id",
+		m.RoutesHandler.RemovePairingWithExtension)
+	publicRouter.GET("/mobile/devices/:device_id/browser_extensions",
+		m.RoutesHandler.FindAllMobileAppExtensions)
+	publicRouter.GET("/mobile/devices/:device_id/browser_extensions/:extension_id",
+		m.RoutesHandler.FindMobileAppExtensionById)
 }
 
 func (m *MobileModule) RegisterAdminRoutes(g *gin.RouterGroup) {
