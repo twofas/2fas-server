@@ -84,7 +84,7 @@ func (h *Request2FaTokenHandler) Handle(
 		return nil, err
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"extension_id": extId.String(),
 		"request_id":   cmd.Id,
 		"domain":       cmd.Domain,
@@ -113,7 +113,7 @@ func (h *Request2FaTokenHandler) sendPush(
 	ctx context.Context,
 	log logging.FieldLogger,
 	device *domain.ExtensionDevice,
-	data map[string]interface{}) PushNotificationStatus {
+	data map[string]any) PushNotificationStatus {
 	if device.FcmToken == "" {
 		log.Info("Cannot send push notification, missing FCM token")
 		return PushNotificationStatusNoFCM
@@ -157,7 +157,7 @@ func (h *Request2FaTokenHandler) findPairedDevices(
 
 func (h *Request2FaTokenHandler) sendNotification(ctx context.Context,
 	device *domain.ExtensionDevice,
-	data map[string]interface{}) error {
+	data map[string]any) error {
 	var notification *messaging.Message
 
 	switch device.Platform {
@@ -176,7 +176,7 @@ func (h *Request2FaTokenHandler) sendNotification(ctx context.Context,
 	)
 }
 
-func createPushNotificationForIos(token string, data map[string]interface{}) *messaging.Message {
+func createPushNotificationForIos(token string, data map[string]any) *messaging.Message {
 	ttl := time.Now().Add(tokenPushNotificationTtl)
 
 	return &messaging.Message{
@@ -200,7 +200,7 @@ func createPushNotificationForIos(token string, data map[string]interface{}) *me
 	}
 }
 
-func createPushNotificationForAndroid(token string, data map[string]interface{}) *messaging.Message {
+func createPushNotificationForAndroid(token string, data map[string]any) *messaging.Message {
 	androidData := make(map[string]string, len(data))
 
 	for key, value := range data {

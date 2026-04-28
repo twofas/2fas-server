@@ -3,7 +3,8 @@ package command
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
+
 	"mime/multipart"
 	"path/filepath"
 
@@ -58,7 +59,7 @@ func (h *CreateDebugLogsAuditHandler) Handle(command *CreateDebugLogsAudit) erro
 		return err
 	}
 
-	file, _ := ioutil.ReadAll(logsFile)
+	file, _ := io.ReadAll(logsFile)
 
 	logsFileReader := bytes.NewReader(file)
 

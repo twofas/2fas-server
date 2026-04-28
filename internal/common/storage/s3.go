@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -36,8 +35,8 @@ func (s *S3) Get(path string) (file *os.File, err error) {
 	}
 
 	_, err = downloader.Download(f, &s3.GetObjectInput{
-		Bucket: aws.String(directory),
-		Key:    aws.String(name),
+		Bucket: new(directory),
+		Key:    new(name),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to download the object from s3: %w", err)
@@ -53,8 +52,8 @@ func (s *S3) Save(path string, data io.Reader) (location string, err error) {
 	uploader := s3manager.NewUploader(s.sess)
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(directory),
-		Key:    aws.String(name),
+		Bucket: new(directory),
+		Key:    new(name),
 		Body:   data,
 	})
 
@@ -90,8 +89,8 @@ func (s *S3) Move(oldPath, newPath string) (location string, err error) {
 	}
 
 	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(sourceDirectory),
-		Key:    aws.String(sourceName)},
+		Bucket: new(sourceDirectory),
+		Key:    new(sourceName)},
 	)
 
 	if err != nil {

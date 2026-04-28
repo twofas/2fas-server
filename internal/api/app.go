@@ -58,7 +58,7 @@ func NewApplication(applicationName string, config config.Configuration) (*Appli
 		pushClient = push.NewFakePushClient()
 	} else {
 		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String(config.Aws.Region),
+			Region: new(config.Aws.Region),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to create aws session: %w", err)

@@ -23,7 +23,7 @@ func NewWebsocketApiClient(websocketApiUrl string) *WebsocketApiClient {
 	}
 }
 
-func (ws *WebsocketApiClient) SendMessage(uri string, message interface{}) error {
+func (ws *WebsocketApiClient) SendMessage(uri string, message any) error {
 	u, err := url.Parse(ws.wsAddr)
 	if err != nil {
 		return fmt.Errorf("failed to parse %q: %w", ws.wsAddr, err)

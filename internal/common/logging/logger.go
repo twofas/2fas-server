@@ -66,35 +66,35 @@ func WithField(key string, value any) FieldLogger {
 	return log.WithField(key, value)
 }
 
-func Info(args ...interface{}) {
+func Info(args ...any) {
 	log.Info(args...)
 }
 
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	log.Infof(format, args...)
 }
 
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	log.Error(args...)
 }
 
-func Errorf(format string, args ...interface{}) {
+func Errorf(format string, args ...any) {
 	log.Errorf(format, args...)
 }
 
-func Warning(args ...interface{}) {
+func Warning(args ...any) {
 	log.Warning(args...)
 }
 
-func Fatal(args ...interface{}) {
+func Fatal(args ...any) {
 	log.Fatal(args...)
 }
 
-func Fatalf(format string, args ...interface{}) {
+func Fatalf(format string, args ...any) {
 	log.Fatalf(format, args...)
 }
 
-func LogCommand(command interface{}) {
+func LogCommand(command any) {
 	context, err := json.Marshal(command)
 	if err != nil {
 		log.Errorf("Failed to marshal command for logging: %v", err)
@@ -116,7 +116,7 @@ func LogCommand(command interface{}) {
 		}).Info("Start command " + commandName)
 }
 
-func LogCommandFailed(command interface{}, err error) {
+func LogCommandFailed(command any, err error) {
 	commandName := reflect.TypeOf(command).Elem().Name()
 	log.
 		WithFields(logrus.Fields{

@@ -20,7 +20,7 @@ func Test_MobileApiBandwidthAbuse(t *testing.T) {
 
 	eg := errgroup.Group{}
 	eg.SetLimit(noOfWorkers)
-	for i := 0; i < noOfRequest; i++ {
+	for range noOfRequest {
 		eg.Go(func() error {
 			resp := e2e_tests.DoAPIGet(t, "/mobile/devices/"+someId.String()+"/browser_extensions", nil)
 
@@ -58,7 +58,7 @@ func Test_BrowserExtensionApiBandwidthAbuse(t *testing.T) {
 
 	eg := errgroup.Group{}
 	eg.SetLimit(noOfWorkers)
-	for i := 0; i < noOfRequest; i++ {
+	for range noOfRequest {
 		eg.Go(func() error {
 			resp := e2e_tests.DoAPIGet(t, "/browser_extensions/"+someId.String(), nil)
 

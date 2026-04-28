@@ -63,21 +63,21 @@ func TestCreateRemoveConcurrently(t *testing.T) {
 	// wait for it to finish.
 	wg.Add(channelsNo * clientsPerChannel)
 
-	for i := 0; i < channelsNo; i++ {
+	for i := range channelsNo {
 		channelID := fmt.Sprintf("channel-%d", i)
 
 		c, h := hp.registerClient(channelID, &websocket.Conn{})
 		hubs.Store(h, struct{}{})
 		go fakeReadPump(c.send, &wg)
 		go func() {
-			for i := 0; i < messagesSentToEachHub; i++ {
+			for range messagesSentToEachHub {
 				h.broadcastMsg([]byte("test"))
 			}
 		}()
 
 		go func() {
 			defer wg.Done()
-			for j := 0; j < clientsPerChannel; j++ {
+			for range clientsPerChannel {
 				c, h := hp.registerClient(channelID, &websocket.Conn{})
 				go fakeReadPump(c.send, &wg)
 

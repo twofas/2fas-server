@@ -114,7 +114,7 @@ func (r *RoutesHandler) RedisInfo(c *gin.Context) {
 
 func (r *RoutesHandler) GetApplicationConfiguration(c *gin.Context) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(config.Config.Aws.Region),
+		Region: new(config.Config.Aws.Region),
 	})
 	if err != nil {
 		// This is an internal endpoint, so we can return the error as is.

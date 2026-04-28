@@ -38,7 +38,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 	iconsCollection := createIconsCollection(t)
 
 	id := fmt.Sprintf("service-%d", rand.Int()) // nolint:gosec // only for tests
-	payload := []byte(fmt.Sprintf(`
+	payload := fmt.Appendf(nil, `
 		{
 			"name":"%s", 
 			"description":"another",
@@ -46,7 +46,7 @@ func createWebService(t *testing.T) *webServiceResponse {
 			"tags":["shitbook"],
 			"icons_collections":["%s"]
 		}
-	`, id, iconsCollection.Id))
+	`, id, iconsCollection.Id)
 
 	var webService *webServiceResponse
 
