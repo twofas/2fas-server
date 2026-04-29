@@ -3,7 +3,7 @@ package tests
 import (
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/jaswdr/faker"
@@ -38,7 +38,7 @@ func (s *IconsRequestsTestSuite) TestCreateIconRequest() {
 func (s *IconsRequestsTestSuite) TestCreateIconRequestWithNotAllowedIconDimensions() {
 	img := faker.New().Image().Image(120, 60)
 
-	pngImg, err := ioutil.ReadFile(img.Name())
+	pngImg, err := os.ReadFile(img.Name())
 
 	if err != nil {
 		s.T().Error(err)
@@ -157,7 +157,7 @@ func createIconRequest(t *testing.T, serviceName string) *queries.IconRequestPre
 
 	img := faker.New().Image().Image(120, 120)
 
-	pngImg, err := ioutil.ReadFile(img.Name())
+	pngImg, err := os.ReadFile(img.Name())
 
 	if err != nil {
 		t.Error(err)

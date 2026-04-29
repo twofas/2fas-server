@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +45,7 @@ func (fs *TmpFileSystem) Save(path string, data io.Reader) (location string, err
 		return "", err
 	}
 
-	content, err := ioutil.ReadAll(data)
+	content, err := io.ReadAll(data)
 
 	if err != nil {
 		return "", err

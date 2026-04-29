@@ -2,7 +2,8 @@ package tests
 
 import (
 	"encoding/base64"
-	"io/ioutil"
+	"os"
+
 	"testing"
 
 	"github.com/jaswdr/faker"
@@ -16,7 +17,7 @@ func createIcon(t *testing.T) *query.IconPresenter {
 	t.Helper()
 	img := faker.New().Image().Image(120, 120)
 
-	pngImg, err := ioutil.ReadFile(img.Name())
+	pngImg, err := os.ReadFile(img.Name())
 
 	if err != nil {
 		t.Error(err)

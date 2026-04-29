@@ -99,10 +99,10 @@ func (s *MobileDeviceExtensionTestSuite) TestExtensionHasAlreadyBeenConnected() 
 	device, devicePubKey := e2e_tests.CreateDevice(s.T(), "go-test-device", "some-device-id")
 	e2e_tests.PairDeviceWithBrowserExtension(s.T(), devicePubKey, extension, device)
 
-	payload := []byte(fmt.Sprintf(`{"extension_id":"%s","device_name":"%s","device_public_key":"%s"}`,
+	payload := fmt.Appendf(nil, `{"extension_id":"%s","device_name":"%s","device_public_key":"%s"}`,
 		extension.Id,
 		device.Name,
-		devicePubKey))
+		devicePubKey)
 
 	e2e_tests.DoAPIPostAndAssertCode(s.T(),
 		409,

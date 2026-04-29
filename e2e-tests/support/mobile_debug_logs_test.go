@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -74,10 +73,10 @@ func (s *DebugLogsAuditTestSuite) TestFulfillDebugLogsAuditClaim() {
 	s.Require().NoError(err)
 	s.Equal(200, response.StatusCode)
 
-	reqB, _ := ioutil.ReadAll(body)
+	reqB, _ := io.ReadAll(body)
 	s.T().Log(string(reqB))
 
-	rawBody, _ := ioutil.ReadAll(response.Body)
+	rawBody, _ := io.ReadAll(response.Body)
 
 	s.T().Log(string(rawBody))
 }

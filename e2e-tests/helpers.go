@@ -14,7 +14,7 @@ func CreateDevice(t *testing.T, name, fcmToken string) (*DeviceResponse, string)
 	keyPair := crypto.GenerateKeyPair(2048)
 	devicePubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
 
-	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
+	payload := fmt.Appendf(nil, `{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken)
 
 	device := new(DeviceResponse)
 
@@ -30,10 +30,10 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 
 	pubKey := crypto.PublicKeyToBase64(keyPair.PublicKey)
 
-	payload := []byte(
-		fmt.Sprintf(
+	payload :=
+		fmt.Appendf(nil,
 			`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
-			name, pubKey))
+			name, pubKey)
 
 	browserExt := new(BrowserExtensionResponse)
 
@@ -45,9 +45,9 @@ func CreateBrowserExtension(t *testing.T, name string) *BrowserExtensionResponse
 func CreateBrowserExtensionWithPublicKey(t *testing.T, name, publicKey string) *BrowserExtensionResponse {
 	t.Helper()
 
-	payload := []byte(
-		fmt.Sprintf(`{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
-			name, publicKey))
+	payload :=
+		fmt.Appendf(nil, `{"name":"%s","browser_name":"go-browser","browser_version":"0.1","public_key":"%s"}`,
+			name, publicKey)
 
 	browserExt := new(BrowserExtensionResponse)
 
@@ -100,7 +100,7 @@ func Request2FaToken(t *testing.T, domain, extensionId string) *AuthTokenRequest
 
 	var response *AuthTokenRequestResponse
 
-	payload := []byte(fmt.Sprintf(`{"domain":"%s"}`, domain))
+	payload := fmt.Appendf(nil, `{"domain":"%s"}`, domain)
 
 	DoAPISuccessPost(t, "browser_extensions/"+extensionId+"/commands/request_2fa_token", payload, &response)
 

@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
+
 	"time"
 
 	firebase "firebase.google.com/go/v4"
@@ -24,7 +25,7 @@ type FcmPushClient struct {
 }
 
 func NewFcmPushClient(config *domain.FcmPushConfig) *FcmPushClient {
-	fileContent, err := ioutil.ReadAll(config.FcmApiServiceAccountFile)
+	fileContent, err := io.ReadAll(config.FcmApiServiceAccountFile)
 
 	if err != nil {
 		logging.Fatal(err)

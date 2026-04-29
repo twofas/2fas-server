@@ -49,6 +49,6 @@ func (s *MobileDeviceTestSuite) TestCreateMobileDevice() {
 
 func createDevice(t *testing.T, name, fcmToken string) *http.Response {
 	t.Helper()
-	payload := []byte(fmt.Sprintf(`{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken))
+	payload := fmt.Appendf(nil, `{"name":"%s","platform":"android","fcm_token":"%s"}`, name, fcmToken)
 	return e2e_tests.DoAPIRequest(t, "mobile/devices", http.MethodPost, payload, nil)
 }

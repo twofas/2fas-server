@@ -30,13 +30,13 @@ func (a *BasicAuth) Header() string {
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(base))
 }
 
-func DoAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+func DoAPISuccessPost(t *testing.T, uri string, payload []byte, resp any) {
 	t.Helper()
 	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interface{}) {
+func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp any) {
 	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
 	bb, err := io.ReadAll(response.Body)
@@ -45,29 +45,29 @@ func DoAdminAPISuccessPost(t *testing.T, uri string, payload []byte, resp interf
 	require.Equal(t, http.StatusOK, response.StatusCode, "invalid status code, response payload is: %q", string(bb))
 }
 
-func DoAdminPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+func DoAdminPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp any) {
 	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, expCode, response.StatusCode)
 }
 
-func DoAPIPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp interface{}) {
+func DoAPIPostAndAssertCode(t *testing.T, expCode int, uri string, payload []byte, resp any) {
 	t.Helper()
 	response := doRequest(t, apiRawURL, uri, http.MethodPost, payload, resp)
 	require.Equal(t, expCode, response.StatusCode)
 }
 
-func DoAPIRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+func DoAPIRequest(t *testing.T, uri, method string, payload []byte, resp any) *http.Response {
 	t.Helper()
 	return doRequest(t, apiRawURL, uri, method, payload, resp)
 }
 
-func DoAdminRequest(t *testing.T, uri, method string, payload []byte, resp interface{}) *http.Response {
+func DoAdminRequest(t *testing.T, uri, method string, payload []byte, resp any) *http.Response {
 	t.Helper()
 	return doRequest(t, apiRawURL, uri, method, payload, resp)
 }
 
-func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp any) {
 	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodPut, payload, resp)
 	bb, err := io.ReadAll(response.Body)
@@ -76,26 +76,26 @@ func DoAdminSuccessPut(t *testing.T, uri string, payload []byte, resp interface{
 	require.Equal(t, http.StatusOK, response.StatusCode, "invalid status code, response payload is: %q", string(bb))
 }
 
-func DoAPISuccessPut(t *testing.T, uri string, payload []byte, resp interface{}) {
+func DoAPISuccessPut(t *testing.T, uri string, payload []byte, resp any) {
 	t.Helper()
 
 	response := doRequest(t, apiRawURL, uri, http.MethodPut, payload, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func DoAPISuccessGet(t *testing.T, uri string, resp interface{}) {
+func DoAPISuccessGet(t *testing.T, uri string, resp any) {
 	t.Helper()
 
 	response := doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func DoAPIGet(t *testing.T, uri string, resp interface{}) *http.Response {
+func DoAPIGet(t *testing.T, uri string, resp any) *http.Response {
 	t.Helper()
 	return doRequest(t, apiRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 }
 
-func DoAdminSuccessGet(t *testing.T, uri string, resp interface{}) {
+func DoAdminSuccessGet(t *testing.T, uri string, resp any) {
 	t.Helper()
 	response := doRequest(t, adminRawURL, uri, http.MethodGet, nil /*payload*/, resp)
 	require.Equal(t, http.StatusOK, response.StatusCode)
@@ -113,7 +113,7 @@ func DoAPISuccessDelete(t *testing.T, uri string) {
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func doRequest(t *testing.T, base, uri, method string, payload []byte, resp interface{}) *http.Response {
+func doRequest(t *testing.T, base, uri, method string, payload []byte, resp any) *http.Response {
 	t.Helper()
 	baseURL, err := url.Parse(base)
 	require.NoError(t, err)
