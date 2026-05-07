@@ -45,3 +45,4 @@ tests-e2e: ## run end to end tests
 
 vendor-licenses: ## report vendor licenses
 	go-licenses report ./cmd/api --template licenses.tpl > licenses.json 2> licenses-errors
+	cat licenses.json | jq 'sort_by(.package)' > tmp.json && mv tmp.json licenses.json;
